@@ -47,7 +47,12 @@ class Hero extends Model
                 "bg_color": "#3B82F6",
                 "style": "filled"
             },
-            "content_alignment": "left"
+            "content_alignment": "left",
+            "overlay": {
+                "enabled": true,
+                "color": "#000000",
+                "opacity": 60
+            }
         }',
     ];
 

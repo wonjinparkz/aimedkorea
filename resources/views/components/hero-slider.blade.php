@@ -10,6 +10,7 @@
             @php
                 $settings = $hero->hero_settings ?? [];
                 $contentAlignment = $settings['content_alignment'] ?? 'left';
+                $overlaySettings = $settings['overlay'] ?? ['enabled' => true, 'color' => '#000000', 'opacity' => 60];
                 
                 // 텍스트 사이즈 매핑
                 $titleSizeMap = [
@@ -36,6 +37,10 @@
                 $titleSize = $titleSizeMap[$settings['title']['size'] ?? 'text-5xl'] ?? 'text-4xl md:text-5xl lg:text-6xl';
                 $subtitleSize = $subtitleSizeMap[$settings['subtitle']['size'] ?? 'text-sm'] ?? 'text-sm';
                 $descriptionSize = $descriptionSizeMap[$settings['description']['size'] ?? 'text-lg'] ?? 'text-lg';
+                
+                // 오버레이 계산
+                $overlayOpacity = $overlaySettings['opacity'] / 100;
+                $overlayColor = $overlaySettings['color'];
             @endphp
             
             <div class="absolute inset-0 transition-opacity duration-1000"
@@ -52,13 +57,28 @@
                              alt="{{ $hero->title }}"
                              class="w-full h-full object-cover">
                     @endif
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+                    
+                    {{-- 오버레이 --}}
+                    @if($overlaySettings['enabled'])
+                        @php
+                            $opacity1 = dechex(min(255, round($overlayOpacity * 255 * 0.8)));
+                            $opacity2 = dechex(min(255, round($overlayOpacity * 255 * 0.5)));
+                            $opacity1 = str_pad($opacity1, 2, '0', STR_PAD_LEFT);
+                            $opacity2 = str_pad($opacity2, 2, '0', STR_PAD_LEFT);
+                        @endphp
+                        <div class="absolute inset-0" 
+                             style="background: linear-gradient(to right, 
+                                    {{ $overlayColor }}{{ $opacity1 }}, 
+                                    {{ $overlayColor }}{{ $opacity2 }}, 
+                                    transparent);">
+                        </div>
+                    @endif
                 </div>
                 
                 {{-- Content --}}
                 <div class="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center h-full {{ $contentAlignment === 'center' ? 'justify-center text-center' : ($contentAlignment === 'right' ? 'justify-end text-right' : 'justify-start text-left') }}">
-                        <div class="w-full md:w-2/3 lg:w-1/2">
+                    <div class="flex items-center h-full {{ $contentAlignment === 'center' ? 'justify-center' : ($contentAlignment === 'right' ? 'justify-end' : 'justify-start') }}">
+                        <div class="w-full md:w-2/3 lg:w-1/2 {{ $contentAlignment === 'center' ? 'text-center' : 'text-left' }}">
                             @if($hero->subtitle)
                                 <p class="uppercase tracking-wider mb-2 {{ $subtitleSize }}"
                                    style="color: {{ $settings['subtitle']['color'] ?? '#E5E7EB' }}">

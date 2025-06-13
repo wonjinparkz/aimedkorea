@@ -1,39 +1,53 @@
-<div x-data="heroPreview()" x-init="init()" style="position: relative;">
-    <div style="position: relative; height: 300px; background-color: #000; overflow: hidden; border-radius: 8px;">
-        <!-- 배경 그라데이션 -->
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.5), transparent);"></div>
+{{-- Tailwind CSS CDN --}}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div x-data="heroPreview()" x-init="init()">
+    <div class="relative h-[300px] bg-black overflow-hidden rounded-lg">
+        {{-- 배경 오버레이 --}}
+        <div x-show="overlayEnabled" 
+             class="absolute inset-0 z-10"
+             :style="`background: linear-gradient(to right, ${overlayColor}${Math.round(overlayOpacity * 2.55).toString(16).padStart(2, '0')}, ${overlayColor}${Math.round(overlayOpacity * 1.275).toString(16).padStart(2, '0')}, transparent);`">
+        </div>
         
-        <!-- 콘텐츠 -->
-        <div x-bind:style="getContainerStyle()" style="position: relative; height: 100%; padding: 32px;">
-            <div style="max-width: 600px;">
-                <!-- 부제목 -->
-                <p x-show="subtitle" 
-                   x-text="subtitle" 
-                   x-bind:style="getSubtitleStyle()">
-                </p>
-                
-                <!-- 제목 -->
-                <h1 x-show="title" 
-                    x-text="title" 
-                    x-bind:style="getTitleStyle()">
-                </h1>
-                
-                <!-- 설명 -->
-                <p x-show="description" 
-                   x-text="description" 
-                   x-bind:style="getDescriptionStyle()">
-                </p>
-                
-                <!-- 버튼 -->
-                <button x-show="buttonText" 
-                        x-text="buttonText"
-                        x-bind:style="getButtonStyle()">
-                </button>
+        {{-- 콘텐츠 --}}
+        <div class="relative h-full z-20" :class="getContainerClasses()">
+            <div class="h-full max-w-7xl mx-auto px-8">
+                <div class="flex h-full" :class="getAlignmentClasses()">
+                    <div class="max-w-xl">
+                        {{-- 부제목 --}}
+                        <p x-show="subtitle" 
+                           x-text="subtitle" 
+                           :style="{ color: subtitleColor }"
+                           :class="subtitleSize + ' uppercase tracking-wider mb-2'">
+                        </p>
+                        
+                        {{-- 제목 --}}
+                        <h1 x-show="title" 
+                            x-text="title" 
+                            :style="{ color: titleColor }"
+                            :class="titleSize + ' font-bold mb-4'">
+                        </h1>
+                        
+                        {{-- 설명 --}}
+                        <p x-show="description" 
+                           x-text="description" 
+                           :style="{ color: descriptionColor }"
+                           :class="descriptionSize + ' mb-6 leading-relaxed'">
+                        </p>
+                        
+                        {{-- 버튼 --}}
+                        <button x-show="buttonText" 
+                                x-text="buttonText"
+                                :style="getButtonStyle()"
+                                class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300">
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
-    <div style="margin-top: 8px; padding: 8px; background-color: #f3f4f6; border-radius: 4px; font-size: 12px; color: #6b7280;">
+    <div class="mt-2 p-2 bg-gray-100 rounded text-xs text-gray-600">
         💡 팁: 각 섹션의 설정을 변경하면 위 미리보기에 실시간으로 반영됩니다
     </div>
 </div>
@@ -59,6 +73,11 @@ function heroPreview() {
         buttonStyle: 'filled',
         contentAlignment: 'left',
         
+        // 오버레이 설정
+        overlayEnabled: true,
+        overlayColor: '#000000',
+        overlayOpacity: 60,
+        
         init() {
             // 폼 필드 변경 감지
             this.$watch('$wire.data.title', value => this.title = value || '');
@@ -78,6 +97,11 @@ function heroPreview() {
                 this.$watch('$wire.data.hero_settings.button.bg_color', value => this.buttonBgColor = value || '#3B82F6');
                 this.$watch('$wire.data.hero_settings.button.style', value => this.buttonStyle = value || 'filled');
                 this.$watch('$wire.data.hero_settings.content_alignment', value => this.contentAlignment = value || 'left');
+                
+                // 오버레이 설정 감지
+                this.$watch('$wire.data.hero_settings.overlay.enabled', value => this.overlayEnabled = value !== false);
+                this.$watch('$wire.data.hero_settings.overlay.color', value => this.overlayColor = value || '#000000');
+                this.$watch('$wire.data.hero_settings.overlay.opacity', value => this.overlayOpacity = value || 60);
             }
             
             // 초기값 설정
@@ -103,56 +127,36 @@ function heroPreview() {
                     this.buttonBgColor = settings.button?.bg_color || '#3B82F6';
                     this.buttonStyle = settings.button?.style || 'filled';
                     this.contentAlignment = settings.content_alignment || 'left';
+                    
+                    // 오버레이 설정
+                    this.overlayEnabled = settings.overlay?.enabled !== false;
+                    this.overlayColor = settings.overlay?.color || '#000000';
+                    this.overlayOpacity = settings.overlay?.opacity || 60;
                 }
             }
         },
         
-        getContainerStyle() {
+        getContainerClasses() {
+            if (this.contentAlignment === 'right') {
+                return 'text-left'; // 오른쪽 위치, 왼쪽 정렬
+            }
+            return this.contentAlignment === 'center' ? 'text-center' : 'text-left';
+        },
+        
+        getAlignmentClasses() {
             const alignments = {
-                'left': 'display: flex; align-items: center; justify-content: flex-start; text-align: left;',
-                'center': 'display: flex; align-items: center; justify-content: center; text-align: center;',
-                'right': 'display: flex; align-items: center; justify-content: flex-end; text-align: right;'
+                'left': 'items-center justify-start',
+                'center': 'items-center justify-center',
+                'right': 'items-center justify-end'
             };
-            return alignments[this.contentAlignment] || alignments['left'];
-        },
-        
-        getTitleStyle() {
-            const sizes = {
-                'text-3xl': 'font-size: 1.875rem;',
-                'text-4xl': 'font-size: 2.25rem;',
-                'text-5xl': 'font-size: 3rem;',
-                'text-6xl': 'font-size: 3.75rem;'
-            };
-            return `color: ${this.titleColor}; ${sizes[this.titleSize] || sizes['text-5xl']} font-weight: bold; margin-bottom: 16px; line-height: 1.2;`;
-        },
-        
-        getSubtitleStyle() {
-            const sizes = {
-                'text-xs': 'font-size: 0.75rem;',
-                'text-sm': 'font-size: 0.875rem;',
-                'text-base': 'font-size: 1rem;',
-                'text-lg': 'font-size: 1.125rem;'
-            };
-            return `color: ${this.subtitleColor}; ${sizes[this.subtitleSize] || sizes['text-sm']} text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;`;
-        },
-        
-        getDescriptionStyle() {
-            const sizes = {
-                'text-sm': 'font-size: 0.875rem;',
-                'text-base': 'font-size: 1rem;',
-                'text-lg': 'font-size: 1.125rem;',
-                'text-xl': 'font-size: 1.25rem;'
-            };
-            return `color: ${this.descriptionColor}; ${sizes[this.descriptionSize] || sizes['text-lg']} margin-bottom: 24px; line-height: 1.6;`;
+            return alignments[this.contentAlignment] || 'items-center justify-start';
         },
         
         getButtonStyle() {
-            let baseStyle = 'display: inline-flex; align-items: center; padding: 12px 32px; font-size: 1rem; font-weight: 500; border-radius: 9999px; transition: all 0.3s; cursor: pointer;';
-            
             if (this.buttonStyle === 'filled') {
-                return `${baseStyle} color: ${this.buttonTextColor}; background-color: ${this.buttonBgColor}; border: 2px solid ${this.buttonBgColor};`;
+                return `color: ${this.buttonTextColor}; background-color: ${this.buttonBgColor}; border: 2px solid ${this.buttonBgColor};`;
             } else {
-                return `${baseStyle} color: ${this.buttonTextColor}; background-color: transparent; border: 2px solid ${this.buttonTextColor};`;
+                return `color: ${this.buttonTextColor}; background-color: transparent; border: 2px solid ${this.buttonTextColor};`;
             }
         }
     }

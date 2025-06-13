@@ -172,7 +172,7 @@ class HeroResource extends Resource
                             ->options([
                                 'left' => '왼쪽',
                                 'center' => '가운데',
-                                'right' => '오른쪽',
+                                'right' => '오른쪽 (텍스트는 왼쪽 정렬)',
                             ])
                             ->default('left')
                             ->reactive()
@@ -181,7 +181,7 @@ class HeroResource extends Resource
                 
                 // 배경 설정
                 Forms\Components\Section::make('배경 설정')
-                    ->description('슬라이드의 배경 이미지 또는 영상')
+                    ->description('슬라이드의 배경 이미지, 영상 및 오버레이 설정')
                     ->schema([
                         Forms\Components\Radio::make('background_type')
                             ->label('배경 타입')
@@ -206,6 +206,29 @@ class HeroResource extends Resource
                             ->directory('heroes/videos')
                             ->maxSize(51200) // 50MB
                             ->visible(fn (Get $get) => $get('background_type') === 'video'),
+                        
+                        // 오버레이 설정
+                        Forms\Components\Fieldset::make('오버레이 설정')
+                            ->schema([
+                                Forms\Components\Toggle::make('hero_settings.overlay.enabled')
+                                    ->label('오버레이 사용')
+                                    ->helperText('배경을 어둡게 하여 텍스트를 더 잘 보이게 합니다')
+                                    ->default(true)
+                                    ->reactive(),
+                                Forms\Components\ColorPicker::make('hero_settings.overlay.color')
+                                    ->label('오버레이 색상')
+                                    ->default('#000000')
+                                    ->reactive()
+                                    ->visible(fn (Get $get) => $get('hero_settings.overlay.enabled')),
+                                Forms\Components\Slider::make('hero_settings.overlay.opacity')
+                                    ->label('오버레이 투명도')
+                                    ->helperText('0은 투명, 100은 완전 불투명')
+                                    ->min(0)
+                                    ->max(100)
+                                    ->default(60)
+                                    ->reactive()
+                                    ->visible(fn (Get $get) => $get('hero_settings.overlay.enabled')),
+                            ]),
                     ]),
                 
                 // 기타 설정
