@@ -1,15 +1,15 @@
 <div x-data="heroPreview()" x-init="init()">
-    <iframe 
-        id="hero-preview-iframe"
-        style="width: 100%; height: 320px; border: none; border-radius: 8px; background: #000;"
-        srcdoc="">
-    </iframe>
+    <div id="hero-preview-container" style="width: 100%; height: 320px; border: none; border-radius: 8px; background: #000; position: relative; overflow: hidden;">
+        <!-- 프리뷰 내용이 여기에 동적으로 렌더링됩니다 -->
+    </div>
     
     <div style="margin-top: 8px; padding: 8px; background-color: #f3f4f6; border-radius: 4px; font-size: 12px; color: #6b7280;">
         💡 팁: 각 섹션의 설정을 변경하면 위 미리보기에 실시간으로 반영됩니다
     </div>
 </div>
 
+@pushOnce('scripts')
+<script src="https://cdn.tailwindcss.com"></script>
 <script>
 function heroPreview() {
     return {
@@ -44,22 +44,25 @@ function heroPreview() {
             this.$watch('$wire.data.button_text', value => { this.buttonText = value || ''; this.updatePreview(); });
             
             // 스타일 설정 감지
-            if (this.$wire.data.hero_settings) {
-                this.$watch('$wire.data.hero_settings.title.color', value => { this.titleColor = value || '#FFFFFF'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.title.size', value => { this.titleSize = value || 'text-5xl'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.subtitle.color', value => { this.subtitleColor = value || '#E5E7EB'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.subtitle.size', value => { this.subtitleSize = value || 'text-sm'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.description.color', value => { this.descriptionColor = value || '#D1D5DB'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.description.size', value => { this.descriptionSize = value || 'text-lg'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.button.text_color', value => { this.buttonTextColor = value || '#FFFFFF'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.button.bg_color', value => { this.buttonBgColor = value || '#3B82F6'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.button.style', value => { this.buttonStyle = value || 'filled'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.content_alignment', value => { this.contentAlignment = value || 'left'; this.updatePreview(); });
-                
-                // 오버레이 설정 감지
-                this.$watch('$wire.data.hero_settings.overlay.enabled', value => { this.overlayEnabled = value !== false; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.overlay.color', value => { this.overlayColor = value || '#000000'; this.updatePreview(); });
-                this.$watch('$wire.data.hero_settings.overlay.opacity', value => { this.overlayOpacity = value || 60; this.updatePreview(); });
+            if (window.Livewire) {
+                this.$watch('$wire.data.hero_settings', value => {
+                    if (value) {
+                        this.titleColor = value.title?.color || '#FFFFFF';
+                        this.titleSize = value.title?.size || 'text-5xl';
+                        this.subtitleColor = value.subtitle?.color || '#E5E7EB';
+                        this.subtitleSize = value.subtitle?.size || 'text-sm';
+                        this.descriptionColor = value.description?.color || '#D1D5DB';
+                        this.descriptionSize = value.description?.size || 'text-lg';
+                        this.buttonTextColor = value.button?.text_color || '#FFFFFF';
+                        this.buttonBgColor = value.button?.bg_color || '#3B82F6';
+                        this.buttonStyle = value.button?.style || 'filled';
+                        this.contentAlignment = value.content_alignment || 'left';
+                        this.overlayEnabled = value.overlay?.enabled !== false;
+                        this.overlayColor = value.overlay?.color || '#000000';
+                        this.overlayOpacity = value.overlay?.opacity || 60;
+                        this.updatePreview();
+                    }
+                }, { deep: true });
             }
             
             // 초기값 설정
@@ -68,7 +71,7 @@ function heroPreview() {
         },
         
         loadInitialValues() {
-            if (this.$wire.data) {
+            if (this.$wire && this.$wire.data) {
                 this.title = this.$wire.data.title || '';
                 this.subtitle = this.$wire.data.subtitle || '';
                 this.description = this.$wire.data.description || '';
@@ -96,8 +99,8 @@ function heroPreview() {
         },
         
         updatePreview() {
-            const iframe = document.getElementById('hero-preview-iframe');
-            if (!iframe) return;
+            const container = document.getElementById('hero-preview-container');
+            if (!container) return;
             
             const alignmentClasses = {
                 'left': 'items-center justify-start',
@@ -112,67 +115,56 @@ function heroPreview() {
             const overlayOpacityHex2 = Math.round(this.overlayOpacity * 1.275).toString(16).padStart(2, '0');
             
             const buttonClasses = this.buttonStyle === 'filled' 
-                ? 'color: ' + this.buttonTextColor + '; background-color: ' + this.buttonBgColor + '; border-color: ' + this.buttonBgColor + ';'
-                : 'color: ' + this.buttonTextColor + '; background-color: transparent; border-color: ' + this.buttonTextColor + ';';
+                ? `color: ${this.buttonTextColor}; background-color: ${this.buttonBgColor}; border-color: ${this.buttonBgColor};`
+                : `color: ${this.buttonTextColor}; background-color: transparent; border-color: ${this.buttonTextColor};`;
             
-            let overlayHtml = '';
+            let html = '';
+            
+            // 오버레이
             if (this.overlayEnabled) {
-                overlayHtml = '<div class="absolute inset-0 z-10" style="background: linear-gradient(to right, ' + 
-                             this.overlayColor + overlayOpacityHex + ', ' + 
-                             this.overlayColor + overlayOpacityHex2 + ', transparent);"></div>';
+                html += `<div class="absolute inset-0 z-10" style="background: linear-gradient(to right, ${this.overlayColor}${overlayOpacityHex}, ${this.overlayColor}${overlayOpacityHex2}, transparent);"></div>`;
             }
             
-            let subtitleHtml = '';
+            // 콘텐츠
+            html += `<div class="relative h-full z-20">
+                        <div class="h-full max-w-7xl mx-auto px-8">
+                            <div class="flex h-full ${containerAlignment}">
+                                <div class="max-w-xl ${textAlignment}">`;
+            
+            // 부제목
             if (this.subtitle) {
-                subtitleHtml = '<p class="' + this.subtitleSize + ' uppercase tracking-wider mb-2" style="color: ' + 
-                              this.subtitleColor + '">' + this.subtitle + '</p>';
+                html += `<p class="${this.subtitleSize} uppercase tracking-wider mb-2" style="color: ${this.subtitleColor}">${this.escapeHtml(this.subtitle)}</p>`;
             }
             
-            let titleHtml = '';
+            // 제목
             if (this.title) {
-                titleHtml = '<h1 class="' + this.titleSize + ' font-bold mb-4" style="color: ' + 
-                           this.titleColor + '">' + this.title + '</h1>';
+                html += `<h1 class="${this.titleSize} font-bold mb-4" style="color: ${this.titleColor}">${this.escapeHtml(this.title)}</h1>`;
             }
             
-            let descriptionHtml = '';
+            // 설명
             if (this.description) {
-                descriptionHtml = '<p class="' + this.descriptionSize + ' mb-6 leading-relaxed" style="color: ' + 
-                                 this.descriptionColor + '">' + this.description + '</p>';
+                html += `<p class="${this.descriptionSize} mb-6 leading-relaxed" style="color: ${this.descriptionColor}">${this.escapeHtml(this.description)}</p>`;
             }
             
-            let buttonHtml = '';
+            // 버튼
             if (this.buttonText) {
-                buttonHtml = '<button class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 border-2" style="' + 
-                            buttonClasses + '">' + this.buttonText + '</button>';
+                html += `<button class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 border-2" style="${buttonClasses}">${this.escapeHtml(this.buttonText)}</button>`;
             }
             
-            const content = '<!DOCTYPE html>' +
-                '<html>' +
-                '<head>' +
-                    '<script src="https://cdn.tailwindcss.com"></' + 'script>' +
-                    '<style>body { margin: 0; padding: 0; }</style>' +
-                '</head>' +
-                '<body>' +
-                    '<div class="relative h-[320px] bg-black overflow-hidden">' +
-                        overlayHtml +
-                        '<div class="relative h-full z-20">' +
-                            '<div class="h-full max-w-7xl mx-auto px-8">' +
-                                '<div class="flex h-full ' + containerAlignment + '">' +
-                                    '<div class="max-w-xl ' + textAlignment + '">' +
-                                        subtitleHtml +
-                                        titleHtml +
-                                        descriptionHtml +
-                                        buttonHtml +
-                                    '</div>' +
-                                '</div>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</body>' +
-                '</html>';
+            html += `       </div>
+                        </div>
+                    </div>
+                </div>`;
             
-            iframe.srcdoc = content;
+            container.innerHTML = html;
+        },
+        
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     }
 }
 </script>
+@endPushOnce
