@@ -14,6 +14,17 @@
                 </div>
             </div>
 
+            <!-- Featured Post Section -->
+            @if($featuredPost)
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <div class="text-center mb-16">
+                        <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">The Science of Care</h1>
+                        <p class="text-xl lg:text-2xl text-gray-600">AI로 설계하는 회복의 루틴 철학</p>
+                    </div>
+                    <x-horizontal-post-card :post="$featuredPost" />
+                </div>
+            @endif
+
             <!-- Routines Section -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="mb-8">

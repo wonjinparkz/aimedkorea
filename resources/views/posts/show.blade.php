@@ -7,12 +7,7 @@
                 <!-- Title Section -->
                 <div class="mb-8">
                     <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                        @php
-                            // 제목에서 이모지 제거
-                            $cleanTitle = preg_replace('/[\p{Emoji_Presentation}\p{Emoji}\x{1F300}-\x{1F9FF}]/u', '', $post->title);
-                            $cleanTitle = trim($cleanTitle);
-                        @endphp
-                        {{ $cleanTitle }}
+                        {{ $post->title }}
                     </h1>
                     
                     <div class="flex items-center justify-between">

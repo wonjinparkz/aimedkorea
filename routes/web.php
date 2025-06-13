@@ -4,6 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Post;
 
 Route::get('/', function () {
+    // 특징 게시물 - featured 타입의 가장 최신 게시물 1개
+    $featuredPost = Post::where('type', 'featured')
+        ->where('is_published', true)
+        ->latest()
+        ->first();
+    
     $routinePosts = Post::where('type', 'routine')
         ->latest()
         ->take(3)
@@ -19,7 +25,7 @@ Route::get('/', function () {
         ->orderBy('created_at', 'desc')
         ->get();
     
-    return view('welcome', compact('routinePosts', 'blogPosts', 'tabPosts'));
+    return view('welcome', compact('featuredPost', 'routinePosts', 'blogPosts', 'tabPosts'));
 });
 
 Route::get('/posts/{post}', function (Post $post) {

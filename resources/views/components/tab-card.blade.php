@@ -3,7 +3,7 @@
     <div class="h-full flex flex-col items-center justify-center p-4 text-white relative">
         {{-- 아이콘 추출 및 표시 --}}
         @php
-            $iconPattern = '/[\p{Emoji_Presentation}\p{Emoji}\x{1F300}-\x{1F9FF}]/u';
+            $iconPattern = '/[\x{1F300}-\x{1F6FF}]|[\x{1F900}-\x{1F9FF}]|[\x{2600}-\x{26FF}]|[\x{2700}-\x{27BF}]/u';
             preg_match($iconPattern, $post->title, $matches);
             $icon = $matches[0] ?? '';
             $titleWithoutIcon = preg_replace($iconPattern, '', $post->title);

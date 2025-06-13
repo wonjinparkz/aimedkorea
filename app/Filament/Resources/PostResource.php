@@ -70,9 +70,6 @@ abstract class PostResource extends Resource
                     ->label('요약')
                     ->limit(50),
                 
-                Tables\Columns\ToggleColumn::make('featured')
-                    ->label('중요'),
-                
                 Tables\Columns\ImageColumn::make('image')
                     ->label('이미지'),
                 
