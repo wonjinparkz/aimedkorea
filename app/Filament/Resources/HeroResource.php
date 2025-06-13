@@ -30,7 +30,8 @@ class HeroResource extends Resource
         return $form
             ->schema([
                 // 실시간 프리뷰 섹션
-                Forms\Components\Section::make('프리뷰')
+                Forms\Components\Section::make('미리보기')
+                    ->description('아래에서 수정한 내용이 실시간으로 표시됩니다')
                     ->schema([
                         Forms\Components\ViewField::make('preview')
                             ->label('')
@@ -38,43 +39,149 @@ class HeroResource extends Resource
                     ])
                     ->collapsible(),
                 
-                // 기본 정보 섹션
-                Forms\Components\Section::make('기본 정보')
+                // 제목 섹션
+                Forms\Components\Section::make('제목 설정')
+                    ->description('슬라이드의 메인 제목을 입력하고 스타일을 설정하세요')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Forms\Components\Grid::make(4)
                             ->schema([
                                 Forms\Components\TextInput::make('title')
-                                    ->label('제목')
+                                    ->label('제목 텍스트')
                                     ->required()
                                     ->maxLength(255)
                                     ->reactive()
-                                    ->debounce(500),
+                                    ->columnSpan(2),
+                                Forms\Components\ColorPicker::make('hero_settings.title.color')
+                                    ->label('글자 색상')
+                                    ->default('#FFFFFF')
+                                    ->reactive(),
+                                Forms\Components\Select::make('hero_settings.title.size')
+                                    ->label('글자 크기')
+                                    ->options([
+                                        'text-3xl' => '작게',
+                                        'text-4xl' => '보통',
+                                        'text-5xl' => '크게',
+                                        'text-6xl' => '매우 크게',
+                                    ])
+                                    ->default('text-5xl')
+                                    ->reactive(),
+                            ]),
+                    ]),
+                
+                // 부제목 섹션
+                Forms\Components\Section::make('부제목 설정')
+                    ->description('선택사항: 제목 위나 아래에 표시될 작은 텍스트')
+                    ->schema([
+                        Forms\Components\Grid::make(4)
+                            ->schema([
                                 Forms\Components\TextInput::make('subtitle')
-                                    ->label('부제목')
+                                    ->label('부제목 텍스트')
                                     ->maxLength(255)
                                     ->reactive()
-                                    ->debounce(500),
+                                    ->columnSpan(2),
+                                Forms\Components\ColorPicker::make('hero_settings.subtitle.color')
+                                    ->label('글자 색상')
+                                    ->default('#E5E7EB')
+                                    ->reactive(),
+                                Forms\Components\Select::make('hero_settings.subtitle.size')
+                                    ->label('글자 크기')
+                                    ->options([
+                                        'text-xs' => '매우 작게',
+                                        'text-sm' => '작게',
+                                        'text-base' => '보통',
+                                        'text-lg' => '크게',
+                                    ])
+                                    ->default('text-sm')
+                                    ->reactive(),
                             ]),
+                    ])
+                    ->collapsed(),
+                
+                // 설명 섹션
+                Forms\Components\Section::make('설명 설정')
+                    ->description('선택사항: 제목 아래에 표시될 상세 설명')
+                    ->schema([
                         Forms\Components\Textarea::make('description')
-                            ->label('설명')
+                            ->label('설명 텍스트')
                             ->rows(3)
-                            ->reactive()
-                            ->debounce(500),
+                            ->reactive(),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\ColorPicker::make('hero_settings.description.color')
+                                    ->label('글자 색상')
+                                    ->default('#D1D5DB')
+                                    ->reactive(),
+                                Forms\Components\Select::make('hero_settings.description.size')
+                                    ->label('글자 크기')
+                                    ->options([
+                                        'text-sm' => '작게',
+                                        'text-base' => '보통',
+                                        'text-lg' => '크게',
+                                        'text-xl' => '매우 크게',
+                                    ])
+                                    ->default('text-lg')
+                                    ->reactive(),
+                            ]),
+                    ])
+                    ->collapsed(),
+                
+                // 버튼 섹션
+                Forms\Components\Section::make('버튼 설정')
+                    ->description('선택사항: 클릭 가능한 버튼 추가')
+                    ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('button_text')
                                     ->label('버튼 텍스트')
+                                    ->placeholder('예: 자세히 보기')
                                     ->maxLength(255)
-                                    ->reactive()
-                                    ->debounce(500),
+                                    ->reactive(),
                                 Forms\Components\TextInput::make('button_url')
-                                    ->label('버튼 URL')
+                                    ->label('버튼 링크 (URL)')
+                                    ->placeholder('예: /about')
                                     ->maxLength(255),
                             ]),
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\ColorPicker::make('hero_settings.button.text_color')
+                                    ->label('글자 색상')
+                                    ->default('#FFFFFF')
+                                    ->reactive(),
+                                Forms\Components\ColorPicker::make('hero_settings.button.bg_color')
+                                    ->label('배경 색상')
+                                    ->default('#3B82F6')
+                                    ->reactive(),
+                                Forms\Components\Select::make('hero_settings.button.style')
+                                    ->label('버튼 스타일')
+                                    ->options([
+                                        'filled' => '색 채우기',
+                                        'outline' => '테두리만',
+                                    ])
+                                    ->default('filled')
+                                    ->reactive(),
+                            ]),
+                    ])
+                    ->collapsed(),
+                
+                // 전체 레이아웃
+                Forms\Components\Section::make('전체 레이아웃')
+                    ->description('텍스트가 표시될 위치를 선택하세요')
+                    ->schema([
+                        Forms\Components\Radio::make('hero_settings.content_alignment')
+                            ->label('콘텐츠 위치')
+                            ->options([
+                                'left' => '왼쪽',
+                                'center' => '가운데',
+                                'right' => '오른쪽',
+                            ])
+                            ->default('left')
+                            ->reactive()
+                            ->inline(),
                     ]),
                 
-                // 배경 설정 섹션
+                // 배경 설정
                 Forms\Components\Section::make('배경 설정')
+                    ->description('슬라이드의 배경 이미지 또는 영상')
                     ->schema([
                         Forms\Components\Radio::make('background_type')
                             ->label('배경 타입')
@@ -83,99 +190,23 @@ class HeroResource extends Resource
                                 'video' => '영상',
                             ])
                             ->default('image')
-                            ->reactive(),
+                            ->reactive()
+                            ->inline(),
                         Forms\Components\FileUpload::make('background_image')
-                            ->label('배경 이미지')
+                            ->label('배경 이미지 업로드')
+                            ->helperText('권장 크기: 1920x500 픽셀')
                             ->image()
                             ->directory('heroes')
                             ->imageEditor()
                             ->visible(fn (Get $get) => $get('background_type') === 'image'),
                         Forms\Components\FileUpload::make('background_video')
-                            ->label('배경 영상')
-                            ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/ogg'])
+                            ->label('배경 영상 업로드')
+                            ->helperText('MP4 형식 권장, 최대 50MB')
+                            ->acceptedFileTypes(['video/mp4', 'video/webm'])
                             ->directory('heroes/videos')
+                            ->maxSize(51200) // 50MB
                             ->visible(fn (Get $get) => $get('background_type') === 'video'),
                     ]),
-                
-                // 스타일 설정 섹션
-                Forms\Components\Section::make('스타일 설정')
-                    ->schema([
-                        // 콘텐츠 정렬
-                        Forms\Components\Select::make('hero_settings.content_alignment')
-                            ->label('콘텐츠 정렬')
-                            ->options([
-                                'top-left' => '상단 왼쪽',
-                                'center-left' => '중앙 왼쪽',
-                                'bottom-left' => '하단 왼쪽',
-                                'top-center' => '상단 중앙',
-                                'center' => '중앙',
-                                'bottom-center' => '하단 중앙',
-                                'top-right' => '상단 오른쪽',
-                                'center-right' => '중앙 오른쪽',
-                                'bottom-right' => '하단 오른쪽',
-                            ])
-                            ->default('center-left')
-                            ->reactive(),
-                        
-                        // 제목 스타일
-                        Forms\Components\Fieldset::make('제목 스타일')
-                            ->schema([
-                                Forms\Components\ColorPicker::make('hero_settings.title.color')
-                                    ->label('색상')
-                                    ->default('#FFFFFF')
-                                    ->reactive(),
-                            ]),
-                        
-                        // 부제목 스타일
-                        Forms\Components\Fieldset::make('부제목 스타일')
-                            ->schema([
-                                Forms\Components\ColorPicker::make('hero_settings.subtitle.color')
-                                    ->label('색상')
-                                    ->default('#E5E7EB')
-                                    ->reactive(),
-                            ]),
-                        
-                        // 설명 스타일
-                        Forms\Components\Fieldset::make('설명 스타일')
-                            ->schema([
-                                Forms\Components\ColorPicker::make('hero_settings.description.color')
-                                    ->label('색상')
-                                    ->default('#D1D5DB')
-                                    ->reactive(),
-                            ]),
-                        
-                        // 버튼 스타일
-                        Forms\Components\Fieldset::make('버튼 스타일')
-                            ->schema([
-                                Forms\Components\Grid::make(2)
-                                    ->schema([
-                                        Forms\Components\ColorPicker::make('hero_settings.button.text_color')
-                                            ->label('텍스트 색상')
-                                            ->default('#FFFFFF')
-                                            ->reactive(),
-                                        Forms\Components\ColorPicker::make('hero_settings.button.border_color')
-                                            ->label('테두리 색상')
-                                            ->default('#FFFFFF')
-                                            ->reactive(),
-                                    ]),
-                                Forms\Components\Grid::make(2)
-                                    ->schema([
-                                        Forms\Components\ColorPicker::make('hero_settings.button.bg_color')
-                                            ->label('배경 색상')
-                                            ->default('transparent')
-                                            ->reactive(),
-                                        Forms\Components\ColorPicker::make('hero_settings.button.hover_bg_color')
-                                            ->label('호버 배경 색상')
-                                            ->default('#FFFFFF')
-                                            ->reactive(),
-                                    ]),
-                                Forms\Components\ColorPicker::make('hero_settings.button.hover_text_color')
-                                    ->label('호버 텍스트 색상')
-                                    ->default('#000000')
-                                    ->reactive(),
-                            ]),
-                    ])
-                    ->collapsed(),
                 
                 // 기타 설정
                 Forms\Components\Section::make('기타 설정')
@@ -183,10 +214,12 @@ class HeroResource extends Resource
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\Toggle::make('is_active')
-                                    ->label('활성화')
+                                    ->label('슬라이드 활성화')
+                                    ->helperText('비활성화하면 웹사이트에 표시되지 않습니다')
                                     ->default(true),
                                 Forms\Components\TextInput::make('order')
-                                    ->label('순서')
+                                    ->label('표시 순서')
+                                    ->helperText('숫자가 작을수록 먼저 표시됩니다')
                                     ->numeric()
                                     ->default(0),
                             ]),
@@ -205,10 +238,12 @@ class HeroResource extends Resource
                     ->defaultImageUrl(fn ($record) => $record->background_type === 'video' ? asset('images/video-placeholder.png') : null),
                 Tables\Columns\TextColumn::make('title')
                     ->label('제목')
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(30),
                 Tables\Columns\TextColumn::make('subtitle')
                     ->label('부제목')
-                    ->searchable(),
+                    ->searchable()
+                    ->limit(30),
                 Tables\Columns\BadgeColumn::make('background_type')
                     ->label('배경 타입')
                     ->colors([
@@ -221,21 +256,10 @@ class HeroResource extends Resource
                 Tables\Columns\TextColumn::make('order')
                     ->label('순서')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('생성일')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('활성화 상태'),
-                Tables\Filters\SelectFilter::make('background_type')
-                    ->label('배경 타입')
-                    ->options([
-                        'image' => '이미지',
-                        'video' => '영상',
-                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -3,25 +3,39 @@
     'heroes' => collect([])
 ])
 
-<div class="relative max-w-7xl m-auto h-[500px] bg-black overflow-hidden" x-data="heroSlider()">
+<div class="relative h-[500px] bg-black overflow-hidden" x-data="heroSlider()">
     {{-- Slides --}}
     <div class="relative h-full">
         @foreach($heroes as $index => $hero)
             @php
                 $settings = $hero->hero_settings ?? [];
-                $contentAlignment = $settings['content_alignment'] ?? 'center-left';
-                $alignmentClasses = match($contentAlignment) {
-                    'top-left' => 'items-start justify-start',
-                    'center-left' => 'items-center justify-start',
-                    'bottom-left' => 'items-end justify-start',
-                    'top-center' => 'items-start justify-center text-center',
-                    'center' => 'items-center justify-center text-center',
-                    'bottom-center' => 'items-end justify-center text-center',
-                    'top-right' => 'items-start justify-end text-right',
-                    'center-right' => 'items-center justify-end text-right',
-                    'bottom-right' => 'items-end justify-end text-right',
-                    default => 'items-center justify-start',
-                };
+                $contentAlignment = $settings['content_alignment'] ?? 'left';
+                
+                // 텍스트 사이즈 매핑
+                $titleSizeMap = [
+                    'text-3xl' => 'text-3xl md:text-4xl',
+                    'text-4xl' => 'text-4xl md:text-5xl',
+                    'text-5xl' => 'text-4xl md:text-5xl lg:text-6xl',
+                    'text-6xl' => 'text-5xl md:text-6xl lg:text-7xl'
+                ];
+                
+                $subtitleSizeMap = [
+                    'text-xs' => 'text-xs',
+                    'text-sm' => 'text-sm',
+                    'text-base' => 'text-base',
+                    'text-lg' => 'text-lg'
+                ];
+                
+                $descriptionSizeMap = [
+                    'text-sm' => 'text-sm',
+                    'text-base' => 'text-base',
+                    'text-lg' => 'text-lg',
+                    'text-xl' => 'text-xl'
+                ];
+                
+                $titleSize = $titleSizeMap[$settings['title']['size'] ?? 'text-5xl'] ?? 'text-4xl md:text-5xl lg:text-6xl';
+                $subtitleSize = $subtitleSizeMap[$settings['subtitle']['size'] ?? 'text-sm'] ?? 'text-sm';
+                $descriptionSize = $descriptionSizeMap[$settings['description']['size'] ?? 'text-lg'] ?? 'text-lg';
             @endphp
             
             <div class="absolute inset-0 transition-opacity duration-1000"
@@ -43,22 +57,22 @@
                 
                 {{-- Content --}}
                 <div class="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex {{ $alignmentClasses }} h-full">
+                    <div class="flex items-center h-full {{ $contentAlignment === 'center' ? 'justify-center text-center' : ($contentAlignment === 'right' ? 'justify-end text-right' : 'justify-start text-left') }}">
                         <div class="w-full md:w-2/3 lg:w-1/2">
                             @if($hero->subtitle)
-                                <p class="text-sm uppercase tracking-wider mb-2"
+                                <p class="uppercase tracking-wider mb-2 {{ $subtitleSize }}"
                                    style="color: {{ $settings['subtitle']['color'] ?? '#E5E7EB' }}">
                                     {{ $hero->subtitle }}
                                 </p>
                             @endif
                             
-                            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
+                            <h1 class="font-bold mb-4 {{ $titleSize }}"
                                 style="color: {{ $settings['title']['color'] ?? '#FFFFFF' }}">
                                 {{ $hero->title }}
                             </h1>
                             
                             @if($hero->description)
-                                <p class="text-lg mb-8 leading-relaxed"
+                                <p class="mb-8 leading-relaxed {{ $descriptionSize }}"
                                    style="color: {{ $settings['description']['color'] ?? '#D1D5DB' }}">
                                     {{ $hero->description }}
                                 </p>
@@ -68,16 +82,20 @@
                                 @php
                                     $buttonSettings = $settings['button'] ?? [];
                                     $textColor = $buttonSettings['text_color'] ?? '#FFFFFF';
-                                    $borderColor = $buttonSettings['border_color'] ?? '#FFFFFF';
-                                    $bgColor = $buttonSettings['bg_color'] ?? 'transparent';
-                                    $hoverTextColor = $buttonSettings['hover_text_color'] ?? '#000000';
-                                    $hoverBgColor = $buttonSettings['hover_bg_color'] ?? '#FFFFFF';
+                                    $bgColor = $buttonSettings['bg_color'] ?? '#3B82F6';
+                                    $buttonStyle = $buttonSettings['style'] ?? 'filled';
+                                    
+                                    if ($buttonStyle === 'filled') {
+                                        $buttonClasses = 'border-2';
+                                        $buttonStyles = "color: {$textColor}; background-color: {$bgColor}; border-color: {$bgColor};";
+                                    } else {
+                                        $buttonClasses = 'border-2';
+                                        $buttonStyles = "color: {$textColor}; background-color: transparent; border-color: {$textColor};";
+                                    }
                                 @endphp
                                 <a href="{{ $hero->button_url }}" 
-                                   class="inline-flex items-center px-8 py-3 border rounded-full transition-all duration-300"
-                                   style="color: {{ $textColor }}; border-color: {{ $borderColor }}; background-color: {{ $bgColor === 'transparent' ? 'transparent' : $bgColor }};"
-                                   onmouseover="this.style.backgroundColor='{{ $hoverBgColor }}'; this.style.color='{{ $hoverTextColor }}';"
-                                   onmouseout="this.style.backgroundColor='{{ $bgColor === 'transparent' ? 'transparent' : $bgColor }}'; this.style.color='{{ $textColor }}';">
+                                   class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 hover:opacity-80 {{ $buttonClasses }}"
+                                   style="{{ $buttonStyles }}">
                                     {{ $hero->button_text }}
                                 </a>
                             @endif

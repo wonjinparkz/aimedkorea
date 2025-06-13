@@ -31,26 +31,23 @@ class Hero extends Model
     protected $attributes = [
         'hero_settings' => '{
             "title": {
-                "position": "left",
-                "color": "#FFFFFF"
+                "color": "#FFFFFF",
+                "size": "text-5xl"
             },
             "subtitle": {
-                "position": "left",
-                "color": "#E5E7EB"
+                "color": "#E5E7EB",
+                "size": "text-sm"
             },
             "description": {
-                "position": "left",
-                "color": "#D1D5DB"
+                "color": "#D1D5DB",
+                "size": "text-lg"
             },
             "button": {
-                "position": "left",
                 "text_color": "#FFFFFF",
-                "border_color": "#FFFFFF",
-                "bg_color": "transparent",
-                "hover_text_color": "#000000",
-                "hover_bg_color": "#FFFFFF"
+                "bg_color": "#3B82F6",
+                "style": "filled"
             },
-            "content_alignment": "center-left"
+            "content_alignment": "left"
         }',
     ];
 
