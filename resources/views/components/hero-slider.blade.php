@@ -3,7 +3,7 @@
     'heroes' => collect([])
 ])
 
-<div class="relative h-[500px] bg-black overflow-hidden" x-data="heroSlider()">
+<div class="relative max-w-7xl m-auto h-[500px] bg-black overflow-hidden" x-data="heroSlider()">
     {{-- Slides --}}
     <div class="relative h-full">
         @foreach($heroes as $index => $hero)

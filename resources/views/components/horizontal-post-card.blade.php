@@ -7,7 +7,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2">
         {{-- 좌측 이미지 섹션 --}}
         <div class="flex items-center justify-center p-8 lg:p-12">
-            @if($post->featured_image)
+            @if($post->image)
                 <img src="{{ Storage::url($post->image) }}" 
                      alt="{{ $post->title }}" 
                      class="w-full h-full max-w-md object-cover">
