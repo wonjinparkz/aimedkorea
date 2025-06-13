@@ -16,4 +16,9 @@ class EditHero extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+    
+    public function getFooter(): ?string
+    {
+        return view('filament.resources.hero-resource.hero-preview-script')->render();
+    }
 }

@@ -33,11 +33,24 @@ class HeroResource extends Resource
                 Forms\Components\Section::make('미리보기')
                     ->description('아래에서 수정한 내용이 실시간으로 표시됩니다')
                     ->schema([
-                        Forms\Components\ViewField::make('preview')
+                        Forms\Components\Placeholder::make('preview')
                             ->label('')
-                            ->view('filament.forms.hero-preview'),
+                            ->content(new HtmlString('
+                                <div class="hero-preview-wrapper">
+                                    <div id="hero-preview-container" class="hero-preview-scope" style="width: 100%; height: 320px; border-radius: 8px; overflow: hidden; position: relative; background: #000;">
+                                        <!-- 프리뷰가 JavaScript로 렌더링됩니다 -->
+                                    </div>
+                                    <div style="margin-top: 8px; padding: 8px; background-color: #f3f4f6; border-radius: 4px; font-size: 12px; color: #6b7280;">
+                                        💡 팁: 각 섹션의 설정을 변경하면 위 미리보기에 실시간으로 반영됩니다
+                                    </div>
+                                </div>
+                            ')),
                     ])
-                    ->collapsible(),
+                    ->collapsible()
+                    ->extraAttributes([
+                        'x-data' => 'heroPreview',
+                        'x-init' => 'initPreview()',
+                    ]),
                 
                 // 제목 섹션
                 Forms\Components\Section::make('제목 설정')
