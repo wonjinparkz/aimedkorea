@@ -5,6 +5,7 @@ namespace App\Filament\Resources\HeroResource\Pages;
 use App\Filament\Resources\HeroResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\View\View;
 
 class EditHero extends EditRecord
 {
@@ -17,8 +18,8 @@ class EditHero extends EditRecord
         ];
     }
     
-    public function getFooter(): ?string
+    public function getFooter(): ?View
     {
-        return view('filament.resources.hero-resource.hero-preview-script')->render();
+        return view('filament.resources.hero-resource.hero-preview-script');
     }
 }
