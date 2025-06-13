@@ -112,65 +112,64 @@ function heroPreview() {
             const overlayOpacityHex2 = Math.round(this.overlayOpacity * 1.275).toString(16).padStart(2, '0');
             
             const buttonClasses = this.buttonStyle === 'filled' 
-                ? `color: ${this.buttonTextColor}; background-color: ${this.buttonBgColor}; border-color: ${this.buttonBgColor};`
-                : `color: ${this.buttonTextColor}; background-color: transparent; border-color: ${this.buttonTextColor};`;
+                ? 'color: ' + this.buttonTextColor + '; background-color: ' + this.buttonBgColor + '; border-color: ' + this.buttonBgColor + ';'
+                : 'color: ' + this.buttonTextColor + '; background-color: transparent; border-color: ' + this.buttonTextColor + ';';
             
-            const content = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <script src="https://cdn.tailwindcss.com"></script>
-                    <style>
-                        body { margin: 0; padding: 0; }
-                    </style>
-                </head>
-                <body>
-                    <div class="relative h-[320px] bg-black overflow-hidden">
-                        ${this.overlayEnabled ? `
-                        <div class="absolute inset-0 z-10" 
-                             style="background: linear-gradient(to right, ${this.overlayColor}${overlayOpacityHex}, ${this.overlayColor}${overlayOpacityHex2}, transparent);">
-                        </div>
-                        ` : ''}
-                        
-                        <div class="relative h-full z-20">
-                            <div class="h-full max-w-7xl mx-auto px-8">
-                                <div class="flex h-full ${containerAlignment}">
-                                    <div class="max-w-xl ${textAlignment}">
-                                        ${this.subtitle ? `
-                                        <p class="${this.subtitleSize} uppercase tracking-wider mb-2" 
-                                           style="color: ${this.subtitleColor}">
-                                            ${this.subtitle}
-                                        </p>
-                                        ` : ''}
-                                        
-                                        ${this.title ? `
-                                        <h1 class="${this.titleSize} font-bold mb-4" 
-                                            style="color: ${this.titleColor}">
-                                            ${this.title}
-                                        </h1>
-                                        ` : ''}
-                                        
-                                        ${this.description ? `
-                                        <p class="${this.descriptionSize} mb-6 leading-relaxed" 
-                                           style="color: ${this.descriptionColor}">
-                                            ${this.description}
-                                        </p>
-                                        ` : ''}
-                                        
-                                        ${this.buttonText ? `
-                                        <button class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 border-2"
-                                                style="${buttonClasses}">
-                                            ${this.buttonText}
-                                        </button>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `;
+            let overlayHtml = '';
+            if (this.overlayEnabled) {
+                overlayHtml = '<div class="absolute inset-0 z-10" style="background: linear-gradient(to right, ' + 
+                             this.overlayColor + overlayOpacityHex + ', ' + 
+                             this.overlayColor + overlayOpacityHex2 + ', transparent);"></div>';
+            }
+            
+            let subtitleHtml = '';
+            if (this.subtitle) {
+                subtitleHtml = '<p class="' + this.subtitleSize + ' uppercase tracking-wider mb-2" style="color: ' + 
+                              this.subtitleColor + '">' + this.subtitle + '</p>';
+            }
+            
+            let titleHtml = '';
+            if (this.title) {
+                titleHtml = '<h1 class="' + this.titleSize + ' font-bold mb-4" style="color: ' + 
+                           this.titleColor + '">' + this.title + '</h1>';
+            }
+            
+            let descriptionHtml = '';
+            if (this.description) {
+                descriptionHtml = '<p class="' + this.descriptionSize + ' mb-6 leading-relaxed" style="color: ' + 
+                                 this.descriptionColor + '">' + this.description + '</p>';
+            }
+            
+            let buttonHtml = '';
+            if (this.buttonText) {
+                buttonHtml = '<button class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 border-2" style="' + 
+                            buttonClasses + '">' + this.buttonText + '</button>';
+            }
+            
+            const content = '<!DOCTYPE html>' +
+                '<html>' +
+                '<head>' +
+                    '<script src="https://cdn.tailwindcss.com"></' + 'script>' +
+                    '<style>body { margin: 0; padding: 0; }</style>' +
+                '</head>' +
+                '<body>' +
+                    '<div class="relative h-[320px] bg-black overflow-hidden">' +
+                        overlayHtml +
+                        '<div class="relative h-full z-20">' +
+                            '<div class="h-full max-w-7xl mx-auto px-8">' +
+                                '<div class="flex h-full ' + containerAlignment + '">' +
+                                    '<div class="max-w-xl ' + textAlignment + '">' +
+                                        subtitleHtml +
+                                        titleHtml +
+                                        descriptionHtml +
+                                        buttonHtml +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</body>' +
+                '</html>';
             
             iframe.srcdoc = content;
         }
