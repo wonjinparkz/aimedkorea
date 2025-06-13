@@ -29,16 +29,6 @@ class HeroResource extends Resource
     {
         return $form
             ->schema([
-                // 실시간 프리뷰 섹션
-                Forms\Components\Section::make('미리보기')
-                    ->description('아래에서 수정한 내용이 실시간으로 표시됩니다')
-                    ->schema([
-                        Forms\Components\Placeholder::make('preview')
-                            ->label('')
-                            ->content(new HtmlString(self::getPreviewHtml())),
-                    ])
-                    ->collapsible(),
-                
                 // 제목 섹션
                 Forms\Components\Section::make('제목 설정')
                     ->description('슬라이드의 메인 제목을 입력하고 스타일을 설정하세요')
@@ -251,28 +241,6 @@ class HeroResource extends Resource
                     ])
                     ->collapsed(),
             ]);
-    }
-
-    protected static function getPreviewHtml(): string
-    {
-        $cssPath = resource_path('views/filament/resources/hero-resource/hero-preview-styles.css');
-        $jsPath = resource_path('views/filament/resources/hero-resource/hero-preview-script.js');
-        
-        $css = file_exists($cssPath) ? file_get_contents($cssPath) : '';
-        $js = file_exists($jsPath) ? file_get_contents($jsPath) : '';
-        
-        return <<<HTML
-<div class="hero-preview-wrapper" x-data="heroPreview" x-init="initPreview">
-    <style>{$css}</style>
-    <div id="hero-preview-container" class="hero-preview-scope" style="width: 100%; height: 320px; border-radius: 8px; overflow: hidden; position: relative; background: #000;">
-        <!-- 프리뷰가 JavaScript로 렌더링됩니다 -->
-    </div>
-    <div style="margin-top: 8px; padding: 8px; background-color: #f3f4f6; border-radius: 4px; font-size: 12px; color: #6b7280;">
-        💡 팁: 각 섹션의 설정을 변경하면 위 미리보기에 실시간으로 반영됩니다
-    </div>
-    <script>{$js}</script>
-</div>
-HTML;
     }
 
     public static function table(Table $table): Table
