@@ -220,11 +220,13 @@ class HeroResource extends Resource
                                     ->default('#000000')
                                     ->reactive()
                                     ->visible(fn (Get $get) => $get('hero_settings.overlay.enabled')),
-                                Forms\Components\Slider::make('hero_settings.overlay.opacity')
+                                Forms\Components\TextInput::make('hero_settings.overlay.opacity')
                                     ->label('오버레이 투명도')
                                     ->helperText('0은 투명, 100은 완전 불투명')
-                                    ->min(0)
-                                    ->max(100)
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(100)
+                                    ->suffix('%')
                                     ->default(60)
                                     ->reactive()
                                     ->visible(fn (Get $get) => $get('hero_settings.overlay.enabled')),
