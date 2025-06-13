@@ -48,10 +48,6 @@ abstract class PostResource extends Resource
                             ->required()
                             ->columnSpanFull(),
                         
-                        Forms\Components\Toggle::make('featured')
-                            ->label('중요 게시글')
-                            ->inline(false),
-                        
                         Forms\Components\FileUpload::make('image')
                             ->label('이미지')
                             ->image()
