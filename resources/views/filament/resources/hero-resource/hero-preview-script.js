@@ -1,57 +1,3 @@
-<style>
-/* 프리뷰 영역에만 Tailwind 리셋 적용 */
-.hero-preview-scope * {
-    all: revert;
-    box-sizing: border-box;
-}
-
-/* Tailwind 유틸리티 클래스를 수동으로 정의 */
-.hero-preview-scope .relative { position: relative; }
-.hero-preview-scope .absolute { position: absolute; }
-.hero-preview-scope .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-.hero-preview-scope .z-10 { z-index: 10; }
-.hero-preview-scope .z-20 { z-index: 20; }
-.hero-preview-scope .h-full { height: 100%; }
-.hero-preview-scope .max-w-7xl { max-width: 80rem; }
-.hero-preview-scope .max-w-xl { max-width: 36rem; }
-.hero-preview-scope .mx-auto { margin-left: auto; margin-right: auto; }
-.hero-preview-scope .px-8 { padding-left: 2rem; padding-right: 2rem; }
-.hero-preview-scope .flex { display: flex; }
-.hero-preview-scope .items-center { align-items: center; }
-.hero-preview-scope .justify-start { justify-content: flex-start; }
-.hero-preview-scope .justify-center { justify-content: center; }
-.hero-preview-scope .justify-end { justify-content: flex-end; }
-.hero-preview-scope .text-left { text-align: left; }
-.hero-preview-scope .text-center { text-align: center; }
-.hero-preview-scope .uppercase { text-transform: uppercase; }
-.hero-preview-scope .tracking-wider { letter-spacing: 0.05em; }
-.hero-preview-scope .mb-2 { margin-bottom: 0.5rem; }
-.hero-preview-scope .mb-4 { margin-bottom: 1rem; }
-.hero-preview-scope .mb-6 { margin-bottom: 1.5rem; }
-.hero-preview-scope .font-bold { font-weight: 700; }
-.hero-preview-scope .leading-relaxed { line-height: 1.625; }
-.hero-preview-scope .inline-flex { display: inline-flex; }
-.hero-preview-scope .items-center { align-items: center; }
-.hero-preview-scope .px-8 { padding-left: 2rem; padding-right: 2rem; }
-.hero-preview-scope .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-.hero-preview-scope .rounded-full { border-radius: 9999px; }
-.hero-preview-scope .border-2 { border-width: 2px; }
-.hero-preview-scope .transition-all { transition-property: all; }
-.hero-preview-scope .duration-300 { transition-duration: 300ms; }
-
-/* 텍스트 크기 */
-.hero-preview-scope .text-xs { font-size: 0.75rem; line-height: 1rem; }
-.hero-preview-scope .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-.hero-preview-scope .text-base { font-size: 1rem; line-height: 1.5rem; }
-.hero-preview-scope .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-.hero-preview-scope .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-.hero-preview-scope .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-.hero-preview-scope .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
-.hero-preview-scope .text-5xl { font-size: 3rem; line-height: 1; }
-.hero-preview-scope .text-6xl { font-size: 3.75rem; line-height: 1; }
-</style>
-
-<script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('heroPreview', () => ({
         // 텍스트 내용
@@ -78,33 +24,20 @@ document.addEventListener('alpine:init', () => {
         overlayOpacity: 60,
         
         initPreview() {
-            // Livewire 데이터 감지
-            if (window.Livewire) {
-                Livewire.on('form-data-updated', (data) => {
-                    this.updateFromLivewire(data);
+            // 폼 변경 감지
+            setTimeout(() => {
+                document.addEventListener('input', (e) => {
+                    setTimeout(() => this.updateFromForm(), 100);
                 });
                 
-                // 초기 데이터 로드
-                setTimeout(() => {
-                    const component = Livewire.all()[0];
-                    if (component && component.data) {
-                        this.updateFromLivewire(component.data);
-                    }
-                }, 500);
-            }
-            
-            // 폼 변경 감지
-            document.addEventListener('input', (e) => {
-                setTimeout(() => this.updateFromForm(), 100);
-            });
-            
-            document.addEventListener('change', (e) => {
-                setTimeout(() => this.updateFromForm(), 100);
-            });
-            
-            // 초기 렌더링
-            this.updateFromForm();
-            this.updatePreview();
+                document.addEventListener('change', (e) => {
+                    setTimeout(() => this.updateFromForm(), 100);
+                });
+                
+                // 초기 렌더링
+                this.updateFromForm();
+                this.updatePreview();
+            }, 500);
         },
         
         updateFromForm() {
@@ -151,44 +84,6 @@ document.addEventListener('alpine:init', () => {
             if (overlayEnabledInput) this.overlayEnabled = overlayEnabledInput.checked;
             if (overlayColorInput) this.overlayColor = overlayColorInput.value || '#000000';
             if (overlayOpacityInput) this.overlayOpacity = parseInt(overlayOpacityInput.value) || 60;
-            
-            this.updatePreview();
-        },
-        
-        updateFromLivewire(data) {
-            if (data.title !== undefined) this.title = data.title || '';
-            if (data.subtitle !== undefined) this.subtitle = data.subtitle || '';
-            if (data.description !== undefined) this.description = data.description || '';
-            if (data.button_text !== undefined) this.buttonText = data.button_text || '';
-            
-            if (data.hero_settings) {
-                const settings = data.hero_settings;
-                if (settings.title) {
-                    this.titleColor = settings.title.color || '#FFFFFF';
-                    this.titleSize = settings.title.size || 'text-5xl';
-                }
-                if (settings.subtitle) {
-                    this.subtitleColor = settings.subtitle.color || '#E5E7EB';
-                    this.subtitleSize = settings.subtitle.size || 'text-sm';
-                }
-                if (settings.description) {
-                    this.descriptionColor = settings.description.color || '#D1D5DB';
-                    this.descriptionSize = settings.description.size || 'text-lg';
-                }
-                if (settings.button) {
-                    this.buttonTextColor = settings.button.text_color || '#FFFFFF';
-                    this.buttonBgColor = settings.button.bg_color || '#3B82F6';
-                    this.buttonStyle = settings.button.style || 'filled';
-                }
-                if (settings.content_alignment !== undefined) {
-                    this.contentAlignment = settings.content_alignment || 'left';
-                }
-                if (settings.overlay) {
-                    this.overlayEnabled = settings.overlay.enabled !== false;
-                    this.overlayColor = settings.overlay.color || '#000000';
-                    this.overlayOpacity = settings.overlay.opacity || 60;
-                }
-            }
             
             this.updatePreview();
         },
@@ -261,4 +156,3 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 });
-</script>
