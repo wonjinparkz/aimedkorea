@@ -1,6 +1,6 @@
 <div x-data="heroPreview()" x-init="init()">
-    <div id="hero-preview-container" style="width: 100%; height: 320px; border: none; border-radius: 8px; background: #000; position: relative; overflow: hidden;">
-        <!-- 프리뷰 내용이 여기에 동적으로 렌더링됩니다 -->
+    <div id="hero-preview-container" class="hero-preview-scope" style="width: 100%; height: 320px; border-radius: 8px; overflow: hidden; position: relative; background: #000;">
+        <!-- 프리뷰 내용이 여기에 렌더링됩니다 -->
     </div>
     
     <div style="margin-top: 8px; padding: 8px; background-color: #f3f4f6; border-radius: 4px; font-size: 12px; color: #6b7280;">
@@ -8,8 +8,59 @@
     </div>
 </div>
 
-@pushOnce('scripts')
-<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* 프리뷰 영역에만 Tailwind 리셋 적용 */
+.hero-preview-scope * {
+    all: revert;
+    box-sizing: border-box;
+}
+
+/* Tailwind 유틸리티 클래스를 수동으로 정의 */
+.hero-preview-scope .relative { position: relative; }
+.hero-preview-scope .absolute { position: absolute; }
+.hero-preview-scope .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.hero-preview-scope .z-10 { z-index: 10; }
+.hero-preview-scope .z-20 { z-index: 20; }
+.hero-preview-scope .h-full { height: 100%; }
+.hero-preview-scope .max-w-7xl { max-width: 80rem; }
+.hero-preview-scope .max-w-xl { max-width: 36rem; }
+.hero-preview-scope .mx-auto { margin-left: auto; margin-right: auto; }
+.hero-preview-scope .px-8 { padding-left: 2rem; padding-right: 2rem; }
+.hero-preview-scope .flex { display: flex; }
+.hero-preview-scope .items-center { align-items: center; }
+.hero-preview-scope .justify-start { justify-content: flex-start; }
+.hero-preview-scope .justify-center { justify-content: center; }
+.hero-preview-scope .justify-end { justify-content: flex-end; }
+.hero-preview-scope .text-left { text-align: left; }
+.hero-preview-scope .text-center { text-align: center; }
+.hero-preview-scope .uppercase { text-transform: uppercase; }
+.hero-preview-scope .tracking-wider { letter-spacing: 0.05em; }
+.hero-preview-scope .mb-2 { margin-bottom: 0.5rem; }
+.hero-preview-scope .mb-4 { margin-bottom: 1rem; }
+.hero-preview-scope .mb-6 { margin-bottom: 1.5rem; }
+.hero-preview-scope .font-bold { font-weight: 700; }
+.hero-preview-scope .leading-relaxed { line-height: 1.625; }
+.hero-preview-scope .inline-flex { display: inline-flex; }
+.hero-preview-scope .items-center { align-items: center; }
+.hero-preview-scope .px-8 { padding-left: 2rem; padding-right: 2rem; }
+.hero-preview-scope .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.hero-preview-scope .rounded-full { border-radius: 9999px; }
+.hero-preview-scope .border-2 { border-width: 2px; }
+.hero-preview-scope .transition-all { transition-property: all; }
+.hero-preview-scope .duration-300 { transition-duration: 300ms; }
+
+/* 텍스트 크기 */
+.hero-preview-scope .text-xs { font-size: 0.75rem; line-height: 1rem; }
+.hero-preview-scope .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.hero-preview-scope .text-base { font-size: 1rem; line-height: 1.5rem; }
+.hero-preview-scope .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.hero-preview-scope .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.hero-preview-scope .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+.hero-preview-scope .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+.hero-preview-scope .text-5xl { font-size: 3rem; line-height: 1; }
+.hero-preview-scope .text-6xl { font-size: 3.75rem; line-height: 1; }
+</style>
+
 <script>
 function heroPreview() {
     return {
@@ -167,4 +218,3 @@ function heroPreview() {
     }
 }
 </script>
-@endPushOnce
