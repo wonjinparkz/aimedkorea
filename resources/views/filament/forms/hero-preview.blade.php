@@ -1,53 +1,11 @@
-{{-- Tailwind CSS CDN --}}
-<script src="https://cdn.tailwindcss.com"></script>
-
 <div x-data="heroPreview()" x-init="init()">
-    <div class="relative h-[300px] bg-black overflow-hidden rounded-lg">
-        {{-- 배경 오버레이 --}}
-        <div x-show="overlayEnabled" 
-             class="absolute inset-0 z-10"
-             :style="`background: linear-gradient(to right, ${overlayColor}${Math.round(overlayOpacity * 2.55).toString(16).padStart(2, '0')}, ${overlayColor}${Math.round(overlayOpacity * 1.275).toString(16).padStart(2, '0')}, transparent);`">
-        </div>
-        
-        {{-- 콘텐츠 --}}
-        <div class="relative h-full z-20" :class="getContainerClasses()">
-            <div class="h-full max-w-7xl mx-auto px-8">
-                <div class="flex h-full" :class="getAlignmentClasses()">
-                    <div class="max-w-xl">
-                        {{-- 부제목 --}}
-                        <p x-show="subtitle" 
-                           x-text="subtitle" 
-                           :style="{ color: subtitleColor }"
-                           :class="subtitleSize + ' uppercase tracking-wider mb-2'">
-                        </p>
-                        
-                        {{-- 제목 --}}
-                        <h1 x-show="title" 
-                            x-text="title" 
-                            :style="{ color: titleColor }"
-                            :class="titleSize + ' font-bold mb-4'">
-                        </h1>
-                        
-                        {{-- 설명 --}}
-                        <p x-show="description" 
-                           x-text="description" 
-                           :style="{ color: descriptionColor }"
-                           :class="descriptionSize + ' mb-6 leading-relaxed'">
-                        </p>
-                        
-                        {{-- 버튼 --}}
-                        <button x-show="buttonText" 
-                                x-text="buttonText"
-                                :style="getButtonStyle()"
-                                class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300">
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <iframe 
+        id="hero-preview-iframe"
+        style="width: 100%; height: 320px; border: none; border-radius: 8px; background: #000;"
+        srcdoc="">
+    </iframe>
     
-    <div class="mt-2 p-2 bg-gray-100 rounded text-xs text-gray-600">
+    <div style="margin-top: 8px; padding: 8px; background-color: #f3f4f6; border-radius: 4px; font-size: 12px; color: #6b7280;">
         💡 팁: 각 섹션의 설정을 변경하면 위 미리보기에 실시간으로 반영됩니다
     </div>
 </div>
@@ -80,32 +38,33 @@ function heroPreview() {
         
         init() {
             // 폼 필드 변경 감지
-            this.$watch('$wire.data.title', value => this.title = value || '');
-            this.$watch('$wire.data.subtitle', value => this.subtitle = value || '');
-            this.$watch('$wire.data.description', value => this.description = value || '');
-            this.$watch('$wire.data.button_text', value => this.buttonText = value || '');
+            this.$watch('$wire.data.title', value => { this.title = value || ''; this.updatePreview(); });
+            this.$watch('$wire.data.subtitle', value => { this.subtitle = value || ''; this.updatePreview(); });
+            this.$watch('$wire.data.description', value => { this.description = value || ''; this.updatePreview(); });
+            this.$watch('$wire.data.button_text', value => { this.buttonText = value || ''; this.updatePreview(); });
             
             // 스타일 설정 감지
             if (this.$wire.data.hero_settings) {
-                this.$watch('$wire.data.hero_settings.title.color', value => this.titleColor = value || '#FFFFFF');
-                this.$watch('$wire.data.hero_settings.title.size', value => this.titleSize = value || 'text-5xl');
-                this.$watch('$wire.data.hero_settings.subtitle.color', value => this.subtitleColor = value || '#E5E7EB');
-                this.$watch('$wire.data.hero_settings.subtitle.size', value => this.subtitleSize = value || 'text-sm');
-                this.$watch('$wire.data.hero_settings.description.color', value => this.descriptionColor = value || '#D1D5DB');
-                this.$watch('$wire.data.hero_settings.description.size', value => this.descriptionSize = value || 'text-lg');
-                this.$watch('$wire.data.hero_settings.button.text_color', value => this.buttonTextColor = value || '#FFFFFF');
-                this.$watch('$wire.data.hero_settings.button.bg_color', value => this.buttonBgColor = value || '#3B82F6');
-                this.$watch('$wire.data.hero_settings.button.style', value => this.buttonStyle = value || 'filled');
-                this.$watch('$wire.data.hero_settings.content_alignment', value => this.contentAlignment = value || 'left');
+                this.$watch('$wire.data.hero_settings.title.color', value => { this.titleColor = value || '#FFFFFF'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.title.size', value => { this.titleSize = value || 'text-5xl'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.subtitle.color', value => { this.subtitleColor = value || '#E5E7EB'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.subtitle.size', value => { this.subtitleSize = value || 'text-sm'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.description.color', value => { this.descriptionColor = value || '#D1D5DB'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.description.size', value => { this.descriptionSize = value || 'text-lg'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.button.text_color', value => { this.buttonTextColor = value || '#FFFFFF'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.button.bg_color', value => { this.buttonBgColor = value || '#3B82F6'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.button.style', value => { this.buttonStyle = value || 'filled'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.content_alignment', value => { this.contentAlignment = value || 'left'; this.updatePreview(); });
                 
                 // 오버레이 설정 감지
-                this.$watch('$wire.data.hero_settings.overlay.enabled', value => this.overlayEnabled = value !== false);
-                this.$watch('$wire.data.hero_settings.overlay.color', value => this.overlayColor = value || '#000000');
-                this.$watch('$wire.data.hero_settings.overlay.opacity', value => this.overlayOpacity = value || 60);
+                this.$watch('$wire.data.hero_settings.overlay.enabled', value => { this.overlayEnabled = value !== false; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.overlay.color', value => { this.overlayColor = value || '#000000'; this.updatePreview(); });
+                this.$watch('$wire.data.hero_settings.overlay.opacity', value => { this.overlayOpacity = value || 60; this.updatePreview(); });
             }
             
             // 초기값 설정
             this.loadInitialValues();
+            this.updatePreview();
         },
         
         loadInitialValues() {
@@ -136,28 +95,84 @@ function heroPreview() {
             }
         },
         
-        getContainerClasses() {
-            if (this.contentAlignment === 'right') {
-                return 'text-left'; // 오른쪽 위치, 왼쪽 정렬
-            }
-            return this.contentAlignment === 'center' ? 'text-center' : 'text-left';
-        },
-        
-        getAlignmentClasses() {
-            const alignments = {
+        updatePreview() {
+            const iframe = document.getElementById('hero-preview-iframe');
+            if (!iframe) return;
+            
+            const alignmentClasses = {
                 'left': 'items-center justify-start',
                 'center': 'items-center justify-center',
                 'right': 'items-center justify-end'
             };
-            return alignments[this.contentAlignment] || 'items-center justify-start';
-        },
-        
-        getButtonStyle() {
-            if (this.buttonStyle === 'filled') {
-                return `color: ${this.buttonTextColor}; background-color: ${this.buttonBgColor}; border: 2px solid ${this.buttonBgColor};`;
-            } else {
-                return `color: ${this.buttonTextColor}; background-color: transparent; border: 2px solid ${this.buttonTextColor};`;
-            }
+            
+            const textAlignment = this.contentAlignment === 'center' ? 'text-center' : 'text-left';
+            const containerAlignment = alignmentClasses[this.contentAlignment] || 'items-center justify-start';
+            
+            const overlayOpacityHex = Math.round(this.overlayOpacity * 2.55).toString(16).padStart(2, '0');
+            const overlayOpacityHex2 = Math.round(this.overlayOpacity * 1.275).toString(16).padStart(2, '0');
+            
+            const buttonClasses = this.buttonStyle === 'filled' 
+                ? `color: ${this.buttonTextColor}; background-color: ${this.buttonBgColor}; border-color: ${this.buttonBgColor};`
+                : `color: ${this.buttonTextColor}; background-color: transparent; border-color: ${this.buttonTextColor};`;
+            
+            const content = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <style>
+                        body { margin: 0; padding: 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="relative h-[320px] bg-black overflow-hidden">
+                        ${this.overlayEnabled ? `
+                        <div class="absolute inset-0 z-10" 
+                             style="background: linear-gradient(to right, ${this.overlayColor}${overlayOpacityHex}, ${this.overlayColor}${overlayOpacityHex2}, transparent);">
+                        </div>
+                        ` : ''}
+                        
+                        <div class="relative h-full z-20">
+                            <div class="h-full max-w-7xl mx-auto px-8">
+                                <div class="flex h-full ${containerAlignment}">
+                                    <div class="max-w-xl ${textAlignment}">
+                                        ${this.subtitle ? `
+                                        <p class="${this.subtitleSize} uppercase tracking-wider mb-2" 
+                                           style="color: ${this.subtitleColor}">
+                                            ${this.subtitle}
+                                        </p>
+                                        ` : ''}
+                                        
+                                        ${this.title ? `
+                                        <h1 class="${this.titleSize} font-bold mb-4" 
+                                            style="color: ${this.titleColor}">
+                                            ${this.title}
+                                        </h1>
+                                        ` : ''}
+                                        
+                                        ${this.description ? `
+                                        <p class="${this.descriptionSize} mb-6 leading-relaxed" 
+                                           style="color: ${this.descriptionColor}">
+                                            ${this.description}
+                                        </p>
+                                        ` : ''}
+                                        
+                                        ${this.buttonText ? `
+                                        <button class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 border-2"
+                                                style="${buttonClasses}">
+                                            ${this.buttonText}
+                                        </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            iframe.srcdoc = content;
         }
     }
 }
