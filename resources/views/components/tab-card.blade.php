@@ -1,6 +1,7 @@
-<div class="shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 h-full"
-     style="background-color: {{ $backgroundColor }}">
-    <div class="h-full flex flex-col items-center justify-center p-4 text-white relative">
+<a href="{{ route('posts.show', ['type' => $post->type, 'post' => $post]) }}" class="block h-full">
+    <div class="shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 h-full cursor-pointer"
+         style="background-color: {{ $backgroundColor }}">
+        <div class="h-full flex flex-col items-center justify-center p-4 text-white relative">
         {{-- 아이콘 추출 및 표시 --}}
         @php
             $iconPattern = '/[\x{1F300}-\x{1F6FF}]|[\x{1F900}-\x{1F9FF}]|[\x{2600}-\x{26FF}]|[\x{2700}-\x{27BF}]/u';
@@ -45,10 +46,11 @@
             </p>
         @endif
         
-        @if($post->read_more_text)
-            <a href="{{ route('posts.show', ['type' => $post->type, 'post' => $post]) }}" class="inline-flex text-center items-center text-white hover:opacity-80 text-sm font-medium">
-                <span>{{ $post->read_more_text }}</span>
-            </a>
-        @endif
+            @if($post->read_more_text)
+                <span class="inline-flex text-center items-center text-white hover:opacity-80 text-sm font-medium">
+                    {{ $post->read_more_text }}
+                </span>
+            @endif
+        </div>
     </div>
-</div>
+</a>
