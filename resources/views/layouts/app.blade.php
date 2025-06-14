@@ -22,7 +22,7 @@
     <body class="font-sans antialiased">
         <x-banner />
 
-        <div class="min-h-screen">
+        <div class="min-h-screen flex flex-col">
             @livewire('navigation-menu')
 
             <!-- Page Heading -->
@@ -35,9 +35,12 @@
             @endif
 
             <!-- Page Content -->
-            <main>
+            <main class="flex-grow">
                 {{ $slot }}
             </main>
+
+            <!-- Footer -->
+            @livewire('footer')
         </div>
 
         @stack('modals')
