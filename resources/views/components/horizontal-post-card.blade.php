@@ -34,7 +34,7 @@
                 </p>
                 
                 {{-- 더보기 링크 --}}
-                <a href="{{ route('posts.show', $post) }}" 
+                <a href="{{ route('posts.show', ['type' => $post->type, 'post' => $post]) }}" 
                    class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-lg">
                     더보기
                     <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

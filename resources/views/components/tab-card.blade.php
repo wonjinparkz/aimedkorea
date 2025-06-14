@@ -46,7 +46,7 @@
         @endif
         
         @if($post->read_more_text)
-            <a href="{{ route('posts.show', $post) }}" class="inline-flex text-center items-center text-white hover:opacity-80 text-sm font-medium">
+            <a href="{{ route('posts.show', ['type' => $post->type, 'post' => $post]) }}" class="inline-flex text-center items-center text-white hover:opacity-80 text-sm font-medium">
                 <span>{{ $post->read_more_text }}</span>
             </a>
         @endif

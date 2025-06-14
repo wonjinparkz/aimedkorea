@@ -124,7 +124,7 @@
                                     $relatedPost = \App\Models\Post::find($articleId);
                                 @endphp
                                 @if($relatedPost)
-                                    <a href="{{ route('posts.show', $relatedPost) }}" 
+                                    <a href="{{ route('posts.show', ['type' => $relatedPost->type, 'post' => $relatedPost]) }}" 
                                        class="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 transition-colors">
                                         @php
                                             // 관련 기사 제목에서도 이모지 제거
@@ -152,7 +152,7 @@
                                 @endphp
                                 @if($relatedPost)
                                     <div>
-                                        <a href="{{ route('posts.show', $relatedPost) }}" 
+                                        <a href="{{ route('posts.show', ['type' => $relatedPost->type, 'post' => $relatedPost]) }}" 
                                            class="text-blue-600 hover:text-blue-800 font-medium">
                                             {{ $relatedPost->title }}
                                         </a>

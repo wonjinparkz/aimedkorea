@@ -1,5 +1,5 @@
 <article class="border border-gray-200 overflow-hidden bg-white hover:shadow-lg transition-shadow duration-300">
-    <a href="{{ route('posts.show', $post) }}" class="block">
+    <a href="{{ route('posts.show', ['type' => $post->type, 'post' => $post]) }}" class="block">
         @if($post->image)
             <div class="aspect-[16/9] overflow-hidden">
                 <img src="{{ Storage::url($post->image) }}" 
