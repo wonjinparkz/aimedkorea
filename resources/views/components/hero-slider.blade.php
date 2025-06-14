@@ -39,8 +39,8 @@
                 $descriptionSize = $descriptionSizeMap[$settings['description']['size'] ?? 'text-lg'] ?? 'text-lg';
                 
                 // 오버레이 계산
-                $overlayOpacity = $overlaySettings['opacity'] / 100;
-                $overlayColor = $overlaySettings['color'];
+                $overlayOpacity = ($overlaySettings['opacity'] ?? 60) / 100;
+                $overlayColor = $overlaySettings['color'] ?? '#000000';
             @endphp
             
             <div class="absolute inset-0 transition-opacity duration-1000"
@@ -59,7 +59,7 @@
                     @endif
                     
                     {{-- 오버레이 --}}
-                    @if($overlaySettings['enabled'])
+                    @if($overlaySettings['enabled'] ?? true)
                         @php
                             $opacity1 = dechex(min(255, round($overlayOpacity * 255 * 0.8)));
                             $opacity2 = dechex(min(255, round($overlayOpacity * 255 * 0.5)));
