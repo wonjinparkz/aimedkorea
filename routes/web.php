@@ -36,6 +36,11 @@ Route::get('/posts/{post}', function (Post $post) {
     return view('posts.show', compact('post'));
 })->name('posts.show');
 
+// Hero 프리뷰 라우트
+Route::get('/admin/hero-preview', function () {
+    return view('filament.hero-preview');
+})->name('filament.hero-preview');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),

@@ -79,7 +79,7 @@
                 <div class="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex items-center h-full {{ $contentAlignment === 'center' ? 'justify-center' : ($contentAlignment === 'right' ? 'justify-end' : 'justify-start') }}">
                         <div class="w-full md:w-2/3 lg:w-1/2 {{ $contentAlignment === 'center' ? 'text-center' : 'text-left' }}">
-                            @if($hero->subtitle)
+                            @if($hero->subtitle && ($settings['subtitle']['position'] ?? 'above') === 'above')
                                 <p class="uppercase tracking-wider mb-2 {{ $subtitleSize }}"
                                    style="color: {{ $settings['subtitle']['color'] ?? '#E5E7EB' }}">
                                     {{ $hero->subtitle }}
@@ -90,6 +90,13 @@
                                 style="color: {{ $settings['title']['color'] ?? '#FFFFFF' }}">
                                 {{ $hero->title }}
                             </h1>
+                            
+                            @if($hero->subtitle && ($settings['subtitle']['position'] ?? 'above') === 'below')
+                                <p class="uppercase tracking-wider mb-2 {{ $subtitleSize }}"
+                                   style="color: {{ $settings['subtitle']['color'] ?? '#E5E7EB' }}">
+                                    {{ $hero->subtitle }}
+                                </p>
+                            @endif
                             
                             @if($hero->description)
                                 <p class="mb-8 leading-relaxed {{ $descriptionSize }}"

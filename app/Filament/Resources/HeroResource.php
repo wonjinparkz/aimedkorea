@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Storage;
 
 class HeroResource extends Resource
 {
@@ -29,6 +30,219 @@ class HeroResource extends Resource
     {
         return $form
             ->schema([
+                // 실시간 프리뷰 섹션
+                Forms\Components\Section::make('미리보기')
+                    ->description('아래에서 수정한 내용이 실시간으로 표시됩니다')
+                    ->schema([
+                        Forms\Components\Placeholder::make('preview')
+                            ->label('')
+                            ->content(function ($record) {
+                                $existingImageUrl = $record && $record->background_image ? Storage::url($record->background_image) : '';
+                                $existingVideoUrl = $record && $record->background_video ? Storage::url($record->background_video) : '';
+                                
+                                return new HtmlString('
+                                <div id="hero-preview-wrapper" 
+                                     data-existing-image-url="' . $existingImageUrl . '"
+                                     data-existing-video-url="' . $existingVideoUrl . '"
+                                     style="overflow: hidden;">
+                                    <iframe 
+                                        id="hero-preview-iframe"
+                                        src="' . route('filament.hero-preview') . '"
+                                        style="width: 100%; height: 500px; border: none; border-radius: 8px; display: block;"
+                                        scrolling="no"
+                                    ></iframe>
+                                </div>
+                                <script>
+                                    let previewIframe = null;
+                                    let previousData = {};
+                                    let updateInterval = null;
+                                    
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        previewIframe = document.getElementById("hero-preview-iframe");
+                                        
+                                        // iframe 로드 완료 시 초기 데이터 전송
+                                        previewIframe.onload = function() {
+                                            console.log("Preview iframe loaded");
+                                            setTimeout(function() {
+                                                updatePreview();
+                                                // 초기 로드 후 다시 한번 업데이트 (안전을 위해)
+                                                setTimeout(updatePreview, 1000);
+                                            }, 500);
+                                        };
+                                        
+                                        // 주기적으로 업데이트 체크 (500ms마다)
+                                        updateInterval = setInterval(updatePreview, 500);
+                                    });
+                                    
+                                    // 페이지 떠날 때 interval 정리
+                                    window.addEventListener(\'beforeunload\', function() {
+                                        if (updateInterval) {
+                                            clearInterval(updateInterval);
+                                        }
+                                    });
+                                    
+                                    function updatePreview() {
+                                        if (!previewIframe || !previewIframe.contentWindow) return;
+                                        
+                                        // 폼 데이터 수집 - Filament의 실제 ID 속성 사용
+                                        const getFieldValue = (fieldName) => {
+                                            // Filament은 ID를 사용하므로 ID로 찾기
+                                            const fieldId = `data.${fieldName}`;
+                                            const field = document.getElementById(fieldId);
+                                            
+                                            if (field) {
+                                                // ColorPicker의 경우 다른 위치에 값이 있을 수 있음
+                                                if (field.type === \'text\' && field.value === \'\') {
+                                                    // 형제 요소 중 color input 찾기
+                                                    const colorInput = field.parentElement.querySelector(\'input[type="color"]\');
+                                                    if (colorInput) {
+                                                        return colorInput.value;
+                                                    }
+                                                }
+                                                return field.value;
+                                            }
+                                            
+                                            // 못 찾으면 fieldName 그대로 시도
+                                            const directField = document.getElementById(fieldName);
+                                            if (directField) {
+                                                return directField.value;
+                                            }
+                                            
+                                            return \'\';
+                                        };
+                                        
+                                        const getRadioValue = (fieldName) => {
+                                            // Radio 버튼은 name 속성을 사용
+                                            const fieldId = `data.${fieldName}`;
+                                            const checkedRadio = document.querySelector(`input[name="${fieldId}"]:checked`);
+                                            if (checkedRadio) return checkedRadio.value;
+                                            
+                                            // name으로 못 찾으면 fieldName 그대로 시도
+                                            const directRadio = document.querySelector(`input[name="${fieldName}"]:checked`);
+                                            if (directRadio) return directRadio.value;
+                                            
+                                            return \'\';
+                                        };
+                                        
+                                        const getCheckboxValue = (fieldName) => {
+                                            const fieldId = `data.${fieldName}`;
+                                            const checkbox = document.getElementById(fieldId);
+                                            if (checkbox && checkbox.type === \'checkbox\') {
+                                                return checkbox.checked;
+                                            }
+                                            return false;
+                                        };
+                                        
+                                        // 각 필드 값 가져오기
+                                        const title = getFieldValue(\'title\');
+                                        const subtitle = getFieldValue(\'subtitle\');
+                                        const description = getFieldValue(\'description\');
+                                        const buttonText = getFieldValue(\'button_text\');
+                                        
+                                        const titleColor = getFieldValue(\'hero_settings.title.color\');
+                                        const titleSize = getFieldValue(\'hero_settings.title.size\');
+                                        const subtitleColor = getFieldValue(\'hero_settings.subtitle.color\');
+                                        const subtitleSize = getFieldValue(\'hero_settings.subtitle.size\');
+                                        const subtitlePosition = getRadioValue(\'hero_settings.subtitle.position\');
+                                        const descriptionColor = getFieldValue(\'hero_settings.description.color\');
+                                        const descriptionSize = getFieldValue(\'hero_settings.description.size\');
+                                        const buttonTextColor = getFieldValue(\'hero_settings.button.text_color\');
+                                        const buttonBgColor = getFieldValue(\'hero_settings.button.bg_color\');
+                                        const buttonStyle = getFieldValue(\'hero_settings.button.style\');
+                                        const contentAlignment = getRadioValue(\'hero_settings.content_alignment\');
+                                        const overlayEnabled = getCheckboxValue(\'hero_settings.overlay.enabled\');
+                                        const overlayColor = getFieldValue(\'hero_settings.overlay.color\');
+                                        const overlayOpacity = getFieldValue(\'hero_settings.overlay.opacity\');
+                                        const backgroundType = getRadioValue(\'background_type\');
+                                        
+                                        const data = {
+                                            title: title,
+                                            subtitle: subtitle,
+                                            description: description,
+                                            buttonText: buttonText,
+                                            titleColor: titleColor || "#FFFFFF",
+                                            titleSize: titleSize || "text-5xl",
+                                            subtitleColor: subtitleColor || "#E5E7EB",
+                                            subtitleSize: subtitleSize || "text-sm",
+                                            subtitlePosition: subtitlePosition || "above",
+                                            descriptionColor: descriptionColor || "#D1D5DB",
+                                            descriptionSize: descriptionSize || "text-lg",
+                                            buttonTextColor: buttonTextColor || "#FFFFFF",
+                                            buttonBgColor: buttonBgColor || "#3B82F6",
+                                            buttonStyle: buttonStyle || "filled",
+                                            contentAlignment: contentAlignment || "left",
+                                            overlayEnabled: overlayEnabled,
+                                            overlayColor: overlayColor || "#000000",
+                                            overlayOpacity: overlayOpacity ? parseInt(overlayOpacity) : 60,
+                                            backgroundType: backgroundType || "image"
+                                        };
+                                        
+                                        // 데이터 변경 확인 (파일 제외)
+                                        const dataWithoutFiles = {...data};
+                                        const previousWithoutFiles = {...previousData};
+                                        delete previousWithoutFiles.backgroundImageUrl;
+                                        delete previousWithoutFiles.backgroundVideoUrl;
+                                        
+                                        if (JSON.stringify(dataWithoutFiles) === JSON.stringify(previousWithoutFiles)) {
+                                            // 변경사항이 없으면 리턴
+                                            return;
+                                        }
+                                        
+                                        console.log("Preview data changed:", data);
+                                        previousData = {...data};
+                                        
+                                        // 배경 이미지/비디오 입력 처리
+                                        const backgroundImageInput = document.querySelector(\'input[type="file"][accept*="image"]\');
+                                        const backgroundVideoInput = document.querySelector(\'input[type="file"][accept*="video"]\');
+                                        
+                                        // 배경 이미지 처리
+                                        if (backgroundImageInput && backgroundImageInput.files && backgroundImageInput.files[0]) {
+                                            const file = backgroundImageInput.files[0];
+                                            const reader = new FileReader();
+                                            reader.onload = function(e) {
+                                                data.backgroundImageUrl = e.target.result;
+                                                previewIframe.contentWindow.postMessage({
+                                                    type: "hero-preview-update",
+                                                    data: data
+                                                }, "*");
+                                            };
+                                            reader.readAsDataURL(file);
+                                        } else if (backgroundVideoInput && backgroundVideoInput.files && backgroundVideoInput.files[0]) {
+                                            const file = backgroundVideoInput.files[0];
+                                            const reader = new FileReader();
+                                            reader.onload = function(e) {
+                                                data.backgroundVideoUrl = e.target.result;
+                                                previewIframe.contentWindow.postMessage({
+                                                    type: "hero-preview-update",
+                                                    data: data
+                                                }, "*");
+                                            };
+                                            reader.readAsDataURL(file);
+                                        } else {
+                                            // 기존 이미지 URL 확인 (수정 모드)
+                                            const previewWrapper = document.getElementById(\'hero-preview-wrapper\');
+                                            const existingImageUrl = previewWrapper ? previewWrapper.getAttribute(\'data-existing-image-url\') : \'\';  
+                                            const existingVideoUrl = previewWrapper ? previewWrapper.getAttribute(\'data-existing-video-url\') : \'\';
+                                            
+                                            if (existingImageUrl && backgroundType === \'image\') {
+                                                data.backgroundImageUrl = existingImageUrl;
+                                            } else if (existingVideoUrl && backgroundType === \'video\') {
+                                                data.backgroundVideoUrl = existingVideoUrl;
+                                            }
+                                            
+                                            // iframe으로 데이터 전송
+                                            previewIframe.contentWindow.postMessage({
+                                                type: "hero-preview-update",
+                                                data: data
+                                            }, "*");
+                                        }
+                                    }
+                                </script>
+                            ');
+                            }),
+                    ])
+                    ->collapsible(),
+                
                 // 제목 섹션
                 Forms\Components\Section::make('제목 설정')
                     ->description('슬라이드의 메인 제목을 입력하고 스타일을 설정하세요')
@@ -84,6 +298,15 @@ class HeroResource extends Resource
                                     ->default('text-sm')
                                     ->reactive(),
                             ]),
+                        Forms\Components\Radio::make('hero_settings.subtitle.position')
+                            ->label('부제목 위치')
+                            ->options([
+                                'above' => '제목 위',
+                                'below' => '제목 아래',
+                            ])
+                            ->default('above')
+                            ->reactive()
+                            ->inline(),
                     ])
                     ->collapsed(),
                 
