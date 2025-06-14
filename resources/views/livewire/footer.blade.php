@@ -101,31 +101,4 @@
             </div>
         </div>
     </div>
-
-    <!-- Bottom Footer -->
-    <div class="bg-gray-100 py-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row items-center justify-between">
-                <div class="flex flex-wrap justify-center md:justify-start space-x-6 text-sm mb-4 md:mb-0">
-                    <a href="/about" class="text-gray-600 hover:text-gray-900 transition-colors">회사 소개</a>
-                    <a href="/terms" class="text-gray-600 hover:text-gray-900 transition-colors">이용약관</a>
-                    <a href="/privacy" class="text-gray-600 hover:text-gray-900 transition-colors">개인정보처리방침</a>
-                    <a href="/support" class="text-gray-600 hover:text-gray-900 transition-colors">고객센터</a>
-                    <a href="/partnership" class="text-gray-600 hover:text-gray-900 transition-colors">제휴제안</a>
-                    <div class="relative group">
-                        <button class="text-gray-600 hover:text-gray-900 transition-colors flex items-center">
-                            패밀리사이트
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <!-- 패밀리사이트 드롭다운 (추후 구현 가능) -->
-                    </div>
-                </div>
-                <div class="text-gray-600 text-sm">
-                    &copy; {{ date('Y') }} AIMED KOREA. All rights reserved.
-                </div>
-            </div>
-        </div>
-    </div>
 </footer>
