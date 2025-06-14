@@ -6,7 +6,7 @@ use App\Models\Hero;
 
 Route::get('/', function () {
     // Hero 슬라이드
-    $heroes = Hero::active()->get();
+    $heroes = Hero::active()->with('buttonPost')->get();
     
     // 특징 게시물 - featured 타입의 가장 최신 게시물 1개
     $featuredPost = Post::where('type', 'featured')
@@ -32,7 +32,7 @@ Route::get('/', function () {
     return view('welcome', compact('heroes', 'featuredPost', 'routinePosts', 'blogPosts', 'tabPosts'));
 });
 
-Route::get('/posts/{post}', function (Post $post) {
+Route::get('/posts/{type}/{post}', function ($type, Post $post) {
     return view('posts.show', compact('post'));
 })->name('posts.show');
 

@@ -105,7 +105,7 @@
                                 </p>
                             @endif
                             
-                            @if($hero->button_text && $hero->button_url)
+                            @if($hero->button_text && ($hero->button_url || $hero->button_post_id))
                                 @php
                                     // 버튼 설정 가져오기 - 다양한 키 형식 지원
                                     $buttonSettings = $settings['button'] ?? [];
@@ -132,7 +132,12 @@
                                         $hoverStyles = "hover:bg-white/20";
                                     }
                                 @endphp
-                                <a href="{{ $hero->button_url }}" 
+                                @php
+                                    $buttonUrl = $hero->button_post_id 
+                                        ? route('posts.show', ['type' => 'banner', 'post' => $hero->buttonPost]) 
+                                        : $hero->button_url;
+                                @endphp
+                                <a href="{{ $buttonUrl }}" 
                                    class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 {{ $buttonClasses }} {{ $hoverStyles ?? '' }} transform hover:scale-105"
                                    style="{{ $buttonStyles }}">
                                     {{ $hero->button_text }}

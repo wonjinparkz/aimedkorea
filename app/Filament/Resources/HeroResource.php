@@ -13,6 +13,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Post;
 
 class HeroResource extends Resource
 {
@@ -25,6 +26,10 @@ class HeroResource extends Resource
     protected static ?string $modelLabel = 'Hero 슬라이드';
     
     protected static ?string $pluralModelLabel = 'Hero 슬라이드';
+    
+    protected static ?string $navigationGroup = 'Hero';
+    
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -349,10 +354,16 @@ class HeroResource extends Resource
                                     ->placeholder('예: 자세히 보기')
                                     ->maxLength(255)
                                     ->reactive(),
-                                Forms\Components\TextInput::make('button_url')
-                                    ->label('버튼 링크 (URL)')
-                                    ->placeholder('예: /about')
-                                    ->maxLength(255),
+                                Forms\Components\Select::make('button_post_id')
+                                    ->label('버튼 링크 (배너 포스트 선택)')
+                                    ->relationship('buttonPost', 'title')
+                                    ->options(function () {
+                                        return Post::where('type', Post::TYPE_BANNER)
+                                            ->where('is_published', true)
+                                            ->pluck('title', 'id');
+                                    })
+                                    ->searchable()
+                                    ->placeholder('배너 포스트를 선택하세요'),
                             ]),
                         Forms\Components\Grid::make(3)
                             ->schema([

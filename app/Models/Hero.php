@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Hero extends Model
 {
@@ -15,6 +16,7 @@ class Hero extends Model
         'description',
         'button_text',
         'button_url',
+        'button_post_id',
         'background_image',
         'background_video',
         'background_type',
@@ -59,5 +61,10 @@ class Hero extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true)->orderBy('order');
+    }
+
+    public function buttonPost(): BelongsTo
+    {
+        return $this->belongsTo(Post::class, 'button_post_id');
     }
 }
