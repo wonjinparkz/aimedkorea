@@ -107,9 +107,19 @@
                             
                             @if($hero->button_text && $hero->button_url)
                                 @php
+                                    // 버튼 설정 가져오기 - 다양한 키 형식 지원
                                     $buttonSettings = $settings['button'] ?? [];
-                                    $textColor = $buttonSettings['text_color'] ?? '#FFFFFF';
-                                    $bgColor = $buttonSettings['bg_color'] ?? '#3B82F6';
+                                    
+                                    // text_color 또는 textColor 키 확인
+                                    $textColor = $buttonSettings['text_color'] ?? 
+                                                $buttonSettings['textColor'] ?? 
+                                                '#FFFFFF';
+                                    
+                                    // bg_color 또는 bgColor 키 확인                    
+                                    $bgColor = $buttonSettings['bg_color'] ?? 
+                                              $buttonSettings['bgColor'] ?? 
+                                              '#3B82F6';
+                                              
                                     $buttonStyle = $buttonSettings['style'] ?? 'filled';
                                     
                                     if ($buttonStyle === 'filled') {
@@ -133,43 +143,46 @@
         @endforeach
     </div>
     
-    {{-- Slide Indicators --}}
+    {{-- Navigation Controls --}}
     @if($heroes->count() > 1)
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4 z-20">
-            @foreach($heroes as $index => $hero)
-                <button @click="goToSlide({{ $index }})"
-                        class="relative h-1 transition-all duration-300"
-                        :class="currentSlide === {{ $index }} ? 'w-12 bg-white' : 'w-8 bg-white/40'">
-                </button>
-            @endforeach
+        <div class="absolute inset-x-0 bottom-0 top-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-none">
+            {{-- Navigation Arrows --}}
+            <button @click="previousSlide()"
+                    class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white z-20 pointer-events-auto">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            
+            <button @click="nextSlide()"
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white z-20 pointer-events-auto">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            
+            {{-- Slide Indicators --}}
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4 z-20 pointer-events-auto">
+                @foreach($heroes as $index => $hero)
+                    <button @click="goToSlide({{ $index }})"
+                            class="relative h-1 transition-all duration-300"
+                            :class="currentSlide === {{ $index }} ? 'w-12 bg-white' : 'w-8 bg-white/40'">
+                    </button>
+                @endforeach
+            </div>
+            
+            {{-- Pause/Play Button --}}
+            <button @click="toggleAutoPlay()"
+                    class="absolute bottom-8 right-8 text-white/60 hover:text-white z-20 pointer-events-auto">
+                <svg x-show="!isPaused" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <svg x-show="isPaused" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </button>
         </div>
-        
-        {{-- Navigation Arrows --}}
-        <button @click="previousSlide()"
-                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white z-20">
-            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-            </svg>
-        </button>
-        
-        <button @click="nextSlide()"
-                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white z-20">
-            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-        </button>
-        
-        {{-- Pause/Play Button --}}
-        <button @click="toggleAutoPlay()"
-                class="absolute bottom-8 right-8 text-white/60 hover:text-white z-20">
-            <svg x-show="!isPaused" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <svg x-show="isPaused" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-        </button>
     @endif
 </div>
 
