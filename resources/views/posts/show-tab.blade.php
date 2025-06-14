@@ -36,7 +36,7 @@
                                 @php
                                     $allTabPosts = \App\Models\Post::where('type', 'tab')
                                         ->where('is_published', true)
-                                        ->orderBy('created_at', 'asc')
+                                        ->orderBy('created_at', 'desc')
                                         ->get();
                                     $currentIndex = $allTabPosts->search(function ($item) use ($post) {
                                         return $item->id === $post->id;
