@@ -33,6 +33,12 @@ Route::get('/', function () {
 });
 
 Route::get('/posts/{type}/{post}', function ($type, Post $post) {
+    // 탭 타입인 경우 별도의 뷰 파일 사용
+    if ($post->type === 'tab') {
+        return view('posts.show-tab', compact('post'));
+    }
+    
+    // 그 외의 경우 기본 뷰 파일 사용
     return view('posts.show', compact('post'));
 })->name('posts.show');
 

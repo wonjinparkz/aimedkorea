@@ -36,94 +36,11 @@
                     </div>
                 @endif
 
-                <!-- Content for tab type posts -->
-                @if($post->type === 'tab' && $post->content_sections)
-                    <div class="mb-12 space-y-16">
-                        {{-- Overview Section --}}
-                        @if(isset($post->content_sections['overview']))
-                            <div class="space-y-4">
-                                <div class="w-32 h-0.5 bg-black"></div>
-                                <div class="grid grid-cols-12 gap-8">
-                                    <div class="col-span-3">
-                                        <h3 class="text-xl font-semibold">Overview</h3>
-                                    </div>
-                                    <div class="col-span-9 prose prose-lg max-w-none">
-                                        {!! $post->content_sections['overview'] !!}
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
+                <!-- Content -->
+                <div class="prose prose-lg max-w-none mb-12">
+                    {!! $post->content !!}
+                </div>
 
-                        {{-- Our Vision Section --}}
-                        @if(isset($post->content_sections['our_vision']))
-                            <div class="space-y-4">
-                                <div class="w-32 h-0.5 bg-black"></div>
-                                <div class="grid grid-cols-12 gap-8">
-                                    <div class="col-span-3">
-                                        <h3 class="text-xl font-semibold">Our Vision</h3>
-                                    </div>
-                                    <div class="col-span-9 prose prose-lg max-w-none">
-                                        {!! $post->content_sections['our_vision'] !!}
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Research Topics Section --}}
-                        @if(isset($post->content_sections['research_topics']))
-                            <div class="space-y-4">
-                                <div class="w-32 h-0.5 bg-black"></div>
-                                <div class="grid grid-cols-12 gap-8">
-                                    <div class="col-span-3">
-                                        <h3 class="text-xl font-semibold">Research Topics</h3>
-                                    </div>
-                                    <div class="col-span-9 prose prose-lg max-w-none">
-                                        {!! $post->content_sections['research_topics'] !!}
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Principles for AI Ethics Section --}}
-                        @if(isset($post->content_sections['principles_for_ai_ethics']))
-                            <div class="space-y-4">
-                                <div class="w-32 h-0.5 bg-black"></div>
-                                <div class="grid grid-cols-12 gap-8">
-                                    <div class="col-span-3">
-                                        <h3 class="text-xl font-semibold">Principles for AI Ethics</h3>
-                                    </div>
-                                    <div class="col-span-9 prose prose-lg max-w-none">
-                                        {!! $post->content_sections['principles_for_ai_ethics'] !!}
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                @else
-                    <!-- Regular Content -->
-                    <div class="prose prose-lg max-w-none mb-12">
-                        {!! $post->content !!}
-                    </div>
-                @endif
-
-                <!-- Related Articles Section -->
-                @if($post->type === 'tab' && $post->related_articles && count($post->related_articles) > 0)
-                    <div class="mt-16">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Related Articles</h2>
-                        <div class="border-t-4 border-black mb-8"></div>
-                        
-                        <div class="space-y-6">
-                            @foreach($post->related_articles as $articleId)
-                                @php
-                                    $relatedPost = \App\Models\Post::find($articleId);
-                                @endphp
-                                @if($relatedPost)
-                                    <x-related-article-card :post="$relatedPost" />
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
             </article>
 
             <!-- Bottom CTA -->
