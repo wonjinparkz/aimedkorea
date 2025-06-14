@@ -1,9 +1,62 @@
 @php
-    $mainMenu = \App\Models\Menu::getBySlug('main-menu');
+    // project_options에서 헤더 메뉴 가져오기
+    $headerMenuItems = get_option('header_menu', []);
+    
+    // 메뉴 객체 형태로 변환
+    $menuData = new \stdClass();
+    $menuData->items = collect($headerMenuItems)->map(function ($item) {
+        $menuItem = new \stdClass();
+        $menuItem->title = $item['label'] ?? '';
+        $menuItem->url = $item['url'] ?? '';
+        $menuItem->full_url = $item['url'] ?? '';
+        $menuItem->target = '_self';
+        $menuItem->css_class = '';
+        $menuItem->icon = null;
+        $menuItem->is_active = true;
+        $menuItem->description = '';
+        
+        // 메뉴 타입에 따른 처리
+        if ($item['type'] === 'mega') {
+            $menuItem->is_mega_menu = true;
+            $menuItem->mega_menu_content = [
+                'columns' => collect($item['groups'] ?? [])->map(function ($group) {
+                    return [
+                        'title' => $group['group_label'] ?? '',
+                        'items' => collect($group['items'] ?? [])->map(function ($groupItem) {
+                            return [
+                                'title' => $groupItem['label'] ?? '',
+                                'url' => $groupItem['url'] ?? '',
+                                'description' => ''
+                            ];
+                        })->toArray()
+                    ];
+                })->toArray()
+            ];
+            $menuItem->activeChildren = collect([]);
+        } elseif ($item['type'] === 'dropdown') {
+            $menuItem->is_mega_menu = false;
+            $menuItem->activeChildren = collect($item['children'] ?? [])->map(function ($child) {
+                $childItem = new \stdClass();
+                $childItem->title = $child['label'] ?? '';
+                $childItem->url = $child['url'] ?? '';
+                $childItem->full_url = $child['url'] ?? '';
+                $childItem->target = '_self';
+                $childItem->icon = null;
+                return $childItem;
+            });
+        } else {
+            $menuItem->is_mega_menu = false;
+            $menuItem->activeChildren = collect([]);
+        }
+        
+        $menuItem->id = uniqid();
+        
+        return $menuItem;
+    });
 @endphp
 
-@if($mainMenu)
-    <x-mega-menu.navigation :menu="$mainMenu" />
+@if(count($headerMenuItems) > 0)
+    <x-mega-menu.navigation :menu="$menuData" />
 @else
     <!-- 기본 네비게이션 (메뉴가 없을 때) -->
     <nav x-data="{ open: false }" class="bg-white max-w-7xl border-b border-gray-100">

@@ -20,6 +20,73 @@ class ProjectOptionSeeder extends Seeder
                 'option_value' => 'AIMED KOREA',
                 'autoload' => 'yes'
             ],
+            
+            // 헤더 메뉴 설정
+            [
+                'option_name' => 'header_menu',
+                'option_value' => json_encode([
+                    [
+                        'label' => '회사소개',
+                        'url' => '/about',
+                        'type' => 'dropdown',
+                        'children' => [
+                            ['label' => 'CEO 인사말', 'url' => '/about/greeting'],
+                            ['label' => '비전 & 미션', 'url' => '/about/vision'],
+                            ['label' => '연혁', 'url' => '/about/history'],
+                            ['label' => '조직도', 'url' => '/about/organization']
+                        ]
+                    ],
+                    [
+                        'label' => '제품 & 서비스',
+                        'url' => '',
+                        'type' => 'mega',
+                        'groups' => [
+                            [
+                                'group_label' => '의료 AI 솔루션',
+                                'items' => [
+                                    ['label' => 'AI 진단 시스템', 'url' => '/products/ai-diagnosis'],
+                                    ['label' => '의료 영상 분석', 'url' => '/products/image-analysis'],
+                                    ['label' => '예측 모델링', 'url' => '/products/predictive-modeling']
+                                ]
+                            ],
+                            [
+                                'group_label' => '헬스케어 플랫폼',
+                                'items' => [
+                                    ['label' => '원격 진료 시스템', 'url' => '/products/telemedicine'],
+                                    ['label' => '병원 정보 시스템', 'url' => '/products/his'],
+                                    ['label' => '환자 관리 앱', 'url' => '/products/patient-app']
+                                ]
+                            ]
+                        ]
+                    ],
+                    [
+                        'label' => '연구개발',
+                        'url' => '/research',
+                        'type' => 'link'
+                    ],
+                    [
+                        'label' => '뉴스',
+                        'url' => '/news',
+                        'type' => 'dropdown',
+                        'children' => [
+                            ['label' => '공지사항', 'url' => '/news/notice'],
+                            ['label' => '보도자료', 'url' => '/news/press'],
+                            ['label' => '이벤트', 'url' => '/news/events']
+                        ]
+                    ],
+                    [
+                        'label' => '고객센터',
+                        'url' => '/support',
+                        'type' => 'dropdown',
+                        'children' => [
+                            ['label' => '자주 묻는 질문', 'url' => '/support/faq'],
+                            ['label' => '문의하기', 'url' => '/support/contact'],
+                            ['label' => '다운로드', 'url' => '/support/downloads']
+                        ]
+                    ]
+                ]),
+                'autoload' => 'yes'
+            ],
             [
                 'option_name' => 'site_tagline',
                 'option_value' => '디지털 노화 가속 스위치, 당신의 건강을 무너뜨려 노화를 앞당기게 됩니다. 그 스위치, 이제 끌 수 있습니다.',
