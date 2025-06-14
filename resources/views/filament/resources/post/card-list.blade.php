@@ -1,5 +1,23 @@
 <x-filament-panels::page>
-    <div class="grid grid-cols-3 gap-6">
+    <style>
+        .post-card-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 1.5rem !important;
+        }
+        @media (max-width: 1024px) {
+            .post-card-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        @media (max-width: 640px) {
+            .post-card-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+    
+    <div class="post-card-grid">
         @php
             $records = $this->getFilteredSortedTableQuery()->paginate($this->getTableRecordsPerPage());
         @endphp
