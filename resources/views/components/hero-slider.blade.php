@@ -3,7 +3,7 @@
     'heroes' => collect([])
 ])
 
-<div class="relative h-[500px] bg-black overflow-hidden" x-data="heroSlider()">
+<div class="relative h-[500px] max-w-7xl mx-auto bg-black overflow-hidden" x-data="heroSlider()">
     {{-- Slides --}}
     <div class="relative h-full">
         @foreach($heroes as $index => $hero)
@@ -123,17 +123,22 @@
                                     $buttonStyle = $buttonSettings['style'] ?? 'filled';
                                     
                                     if ($buttonStyle === 'filled') {
-                                        $buttonClasses = 'border-2';
+                                        $buttonClasses = 'border-2 font-medium';
                                         $buttonStyles = "color: {$textColor}; background-color: {$bgColor}; border-color: {$bgColor};";
+                                        $hoverStyles = "hover:opacity-90";
                                     } else {
-                                        $buttonClasses = 'border-2';
-                                        $buttonStyles = "color: {$textColor}; background-color: transparent; border-color: {$textColor};";
+                                        $buttonClasses = 'border-2 font-medium backdrop-blur-sm';
+                                        $buttonStyles = "color: {$textColor}; background-color: rgba(255,255,255,0.1); border-color: {$textColor};";
+                                        $hoverStyles = "hover:bg-white/20";
                                     }
                                 @endphp
                                 <a href="{{ $hero->button_url }}" 
-                                   class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 hover:opacity-80 {{ $buttonClasses }}"
+                                   class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 {{ $buttonClasses }} {{ $hoverStyles ?? '' }} transform hover:scale-105"
                                    style="{{ $buttonStyles }}">
                                     {{ $hero->button_text }}
+                                    <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
                                 </a>
                             @endif
                         </div>
