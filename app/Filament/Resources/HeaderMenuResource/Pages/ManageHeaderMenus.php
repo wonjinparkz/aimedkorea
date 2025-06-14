@@ -9,6 +9,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Actions\Action;
 use Illuminate\Contracts\View\View;
+use Filament\Forms\Form;
 
 class ManageHeaderMenus extends Page implements HasForms
 {
@@ -32,14 +33,11 @@ class ManageHeaderMenus extends Page implements HasForms
         ]);
     }
     
-    protected function getFormSchema(): array
+    public function form(Form $form): Form
     {
-        return HeaderMenuResource::form($this->form)->getSchema();
-    }
-    
-    protected function getFormStatePath(): ?string
-    {
-        return 'data';
+        return $form
+            ->schema(HeaderMenuResource::form($form)->getSchema())
+            ->statePath('data');
     }
     
     public function save(): void
