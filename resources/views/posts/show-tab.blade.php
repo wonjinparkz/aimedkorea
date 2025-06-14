@@ -36,7 +36,7 @@
                                 @php
                                     $allTabPosts = \App\Models\Post::where('type', 'tab')
                                         ->where('is_published', true)
-                                        ->orderBy('order')
+                                        ->orderBy('created_at', 'asc')
                                         ->get();
                                     $currentIndex = $allTabPosts->search(function ($item) use ($post) {
                                         return $item->id === $post->id;
@@ -202,19 +202,21 @@
         let currentTabIndex = {{ $currentIndex }};
         const tabsContainer = document.getElementById('tabsContainer');
         const tabs = tabsContainer.children;
-        const tabWidth = 200; // 예상 탭 너비
         
         function scrollTabs(direction) {
             const containerWidth = tabsContainer.parentElement.offsetWidth;
-            const totalWidth = tabs.length * tabWidth;
-            const maxScroll = Math.max(0, totalWidth - containerWidth);
+            const scrollStep = 300; // 스크롤 단위
             
             let currentScroll = parseInt(tabsContainer.style.transform.replace('translateX(', '').replace('px)', '') || '0');
             
             if (direction === 'left') {
-                currentScroll = Math.min(0, currentScroll + tabWidth);
+                currentScroll = Math.min(0, currentScroll + scrollStep);
             } else {
-                currentScroll = Math.max(-maxScroll, currentScroll - tabWidth);
+                currentScroll = currentScroll - scrollStep;
+                // 스크롤 한계 검사
+                const totalWidth = Array.from(tabs).reduce((sum, tab) => sum + tab.offsetWidth, 0);
+                const maxScroll = -(totalWidth - containerWidth);
+                currentScroll = Math.max(maxScroll, currentScroll);
             }
             
             tabsContainer.style.transform = `translateX(${currentScroll}px)`;
@@ -222,13 +224,26 @@
         
         // 초기 위치 설정 - 현재 탭이 보이도록
         document.addEventListener('DOMContentLoaded', function() {
-            const containerWidth = tabsContainer.parentElement.offsetWidth;
-            const currentTabOffset = currentTabIndex * tabWidth;
-            
-            if (currentTabOffset > containerWidth - tabWidth) {
-                const scroll = -(currentTabOffset - containerWidth + tabWidth * 2);
-                tabsContainer.style.transform = `translateX(${scroll}px)`;
-            }
+            setTimeout(() => {
+                const containerWidth = tabsContainer.parentElement.offsetWidth;
+                let currentTabOffset = 0;
+                
+                // 현재 탭까지의 오프셋 계산
+                for (let i = 0; i < currentTabIndex; i++) {
+                    currentTabOffset += tabs[i].offsetWidth;
+                }
+                
+                // 현재 탭이 화면 중앙에 오도록 조정
+                const currentTabWidth = tabs[currentTabIndex].offsetWidth;
+                const targetScroll = -(currentTabOffset - (containerWidth / 2) + (currentTabWidth / 2));
+                
+                // 스크롤 범위 제한
+                const totalWidth = Array.from(tabs).reduce((sum, tab) => sum + tab.offsetWidth, 0);
+                const maxScroll = -(totalWidth - containerWidth);
+                const finalScroll = Math.max(maxScroll, Math.min(0, targetScroll));
+                
+                tabsContainer.style.transform = `translateX(${finalScroll}px)`;
+            }, 100); // DOM 렌더링 완료 후 실행
         });
     </script>
 </x-app-layout>
