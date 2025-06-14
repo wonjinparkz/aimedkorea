@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\HeaderMenuResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Resources\Pages\Page;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
