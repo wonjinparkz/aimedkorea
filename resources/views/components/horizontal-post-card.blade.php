@@ -22,7 +22,7 @@
         
         {{-- 우측 텍스트 섹션 - 테두리 적용 --}}
         <div class="flex items-stretch border border-gray-200">
-            <div class="flex flex-col justify-center p-6 lg:p-8 w-full">
+            <div class="flex flex-col justify-center px-6 lg:px-8 w-full">
                 {{-- 제목 --}}
                 <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 break-words">
                     {{ $post->title }}

@@ -25,7 +25,7 @@
 @click.away="closeDropdowns()"
 class="bg-white border-b border-gray-200 shadow-sm relative z-50">
     <!-- Primary Navigation Menu -->
-    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-0">
         <div class="flex justify-between h-20">
             <div class="flex items-center w-full">
                 <!-- Logo -->
