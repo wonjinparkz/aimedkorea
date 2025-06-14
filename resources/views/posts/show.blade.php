@@ -38,76 +38,67 @@
 
                 <!-- Content for tab type posts -->
                 @if($post->type === 'tab' && $post->content_sections)
-                    <div class="mb-12">
-                        <!-- Tab Navigation -->
-                        <div class="border-b border-gray-200">
-                            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                                <button 
-                                    onclick="showTab('overview')" 
-                                    id="overview-tab" 
-                                    class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600">
-                                    Overview
-                                </button>
-                                <button 
-                                    onclick="showTab('our_vision')" 
-                                    id="our_vision-tab" 
-                                    class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                                    Our Vision
-                                </button>
-                                <button 
-                                    onclick="showTab('research_topics')" 
-                                    id="research_topics-tab" 
-                                    class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                                    Research Topics
-                                </button>
-                                <button 
-                                    onclick="showTab('principles_for_ai_ethics')" 
-                                    id="principles_for_ai_ethics-tab" 
-                                    class="tab-button whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                                    Principles for AI Ethics
-                                </button>
-                            </nav>
-                        </div>
+                    <div class="mb-12 space-y-16">
+                        {{-- Overview Section --}}
+                        @if(isset($post->content_sections['overview']))
+                            <div class="grid grid-cols-12 gap-8">
+                                <div class="col-span-3">
+                                    <div class="flex items-center">
+                                        <div class="w-20 h-0.5 bg-black mr-4"></div>
+                                        <h3 class="text-xl font-semibold whitespace-nowrap">Overview</h3>
+                                    </div>
+                                </div>
+                                <div class="col-span-9 prose prose-lg max-w-none">
+                                    {!! $post->content_sections['overview'] !!}
+                                </div>
+                            </div>
+                        @endif
 
-                        <!-- Tab Content -->
-                        <div class="mt-8">
-                            <div id="overview-content" class="tab-content prose prose-lg max-w-none">
-                                {!! $post->content_sections['overview'] ?? '' !!}
+                        {{-- Our Vision Section --}}
+                        @if(isset($post->content_sections['our_vision']))
+                            <div class="grid grid-cols-12 gap-8">
+                                <div class="col-span-3">
+                                    <div class="flex items-center">
+                                        <div class="w-20 h-0.5 bg-black mr-4"></div>
+                                        <h3 class="text-xl font-semibold whitespace-nowrap">Our Vision</h3>
+                                    </div>
+                                </div>
+                                <div class="col-span-9 prose prose-lg max-w-none">
+                                    {!! $post->content_sections['our_vision'] !!}
+                                </div>
                             </div>
-                            <div id="our_vision-content" class="tab-content prose prose-lg max-w-none hidden">
-                                {!! $post->content_sections['our_vision'] ?? '' !!}
+                        @endif
+
+                        {{-- Research Topics Section --}}
+                        @if(isset($post->content_sections['research_topics']))
+                            <div class="grid grid-cols-12 gap-8">
+                                <div class="col-span-3">
+                                    <div class="flex items-center">
+                                        <div class="w-20 h-0.5 bg-black mr-4"></div>
+                                        <h3 class="text-xl font-semibold whitespace-nowrap">Research Topics</h3>
+                                    </div>
+                                </div>
+                                <div class="col-span-9 prose prose-lg max-w-none">
+                                    {!! $post->content_sections['research_topics'] !!}
+                                </div>
                             </div>
-                            <div id="research_topics-content" class="tab-content prose prose-lg max-w-none hidden">
-                                {!! $post->content_sections['research_topics'] ?? '' !!}
+                        @endif
+
+                        {{-- Principles for AI Ethics Section --}}
+                        @if(isset($post->content_sections['principles_for_ai_ethics']))
+                            <div class="grid grid-cols-12 gap-8">
+                                <div class="col-span-3">
+                                    <div class="flex items-center">
+                                        <div class="w-20 h-0.5 bg-black mr-4"></div>
+                                        <h3 class="text-xl font-semibold whitespace-nowrap">Principles for AI Ethics</h3>
+                                    </div>
+                                </div>
+                                <div class="col-span-9 prose prose-lg max-w-none">
+                                    {!! $post->content_sections['principles_for_ai_ethics'] !!}
+                                </div>
                             </div>
-                            <div id="principles_for_ai_ethics-content" class="tab-content prose prose-lg max-w-none hidden">
-                                {!! $post->content_sections['principles_for_ai_ethics'] ?? '' !!}
-                            </div>
-                        </div>
+                        @endif
                     </div>
-
-                    <script>
-                        function showTab(tabName) {
-                            // Hide all tab contents
-                            document.querySelectorAll('.tab-content').forEach(content => {
-                                content.classList.add('hidden');
-                            });
-                            
-                            // Remove active state from all tabs
-                            document.querySelectorAll('.tab-button').forEach(button => {
-                                button.classList.remove('border-blue-500', 'text-blue-600');
-                                button.classList.add('border-transparent', 'text-gray-500');
-                            });
-                            
-                            // Show selected content
-                            document.getElementById(tabName + '-content').classList.remove('hidden');
-                            
-                            // Add active state to selected tab
-                            const activeTab = document.getElementById(tabName + '-tab');
-                            activeTab.classList.remove('border-transparent', 'text-gray-500');
-                            activeTab.classList.add('border-blue-500', 'text-blue-600');
-                        }
-                    </script>
                 @else
                     <!-- Regular Content -->
                     <div class="prose prose-lg max-w-none mb-12">
