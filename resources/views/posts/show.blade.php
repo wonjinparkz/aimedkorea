@@ -41,60 +41,60 @@
                     <div class="mb-12 space-y-16">
                         {{-- Overview Section --}}
                         @if(isset($post->content_sections['overview']))
-                            <div class="grid grid-cols-12 gap-8">
-                                <div class="col-span-3">
-                                    <div class="flex items-center">
-                                        <div class="w-20 h-0.5 bg-black mr-4"></div>
-                                        <h3 class="text-xl font-semibold whitespace-nowrap">Overview</h3>
+                            <div class="space-y-4">
+                                <div class="w-32 h-0.5 bg-black"></div>
+                                <div class="grid grid-cols-12 gap-8">
+                                    <div class="col-span-3">
+                                        <h3 class="text-xl font-semibold">Overview</h3>
                                     </div>
-                                </div>
-                                <div class="col-span-9 prose prose-lg max-w-none">
-                                    {!! $post->content_sections['overview'] !!}
+                                    <div class="col-span-9 prose prose-lg max-w-none">
+                                        {!! $post->content_sections['overview'] !!}
+                                    </div>
                                 </div>
                             </div>
                         @endif
 
                         {{-- Our Vision Section --}}
                         @if(isset($post->content_sections['our_vision']))
-                            <div class="grid grid-cols-12 gap-8">
-                                <div class="col-span-3">
-                                    <div class="flex items-center">
-                                        <div class="w-20 h-0.5 bg-black mr-4"></div>
-                                        <h3 class="text-xl font-semibold whitespace-nowrap">Our Vision</h3>
+                            <div class="space-y-4">
+                                <div class="w-32 h-0.5 bg-black"></div>
+                                <div class="grid grid-cols-12 gap-8">
+                                    <div class="col-span-3">
+                                        <h3 class="text-xl font-semibold">Our Vision</h3>
                                     </div>
-                                </div>
-                                <div class="col-span-9 prose prose-lg max-w-none">
-                                    {!! $post->content_sections['our_vision'] !!}
+                                    <div class="col-span-9 prose prose-lg max-w-none">
+                                        {!! $post->content_sections['our_vision'] !!}
+                                    </div>
                                 </div>
                             </div>
                         @endif
 
                         {{-- Research Topics Section --}}
                         @if(isset($post->content_sections['research_topics']))
-                            <div class="grid grid-cols-12 gap-8">
-                                <div class="col-span-3">
-                                    <div class="flex items-center">
-                                        <div class="w-20 h-0.5 bg-black mr-4"></div>
-                                        <h3 class="text-xl font-semibold whitespace-nowrap">Research Topics</h3>
+                            <div class="space-y-4">
+                                <div class="w-32 h-0.5 bg-black"></div>
+                                <div class="grid grid-cols-12 gap-8">
+                                    <div class="col-span-3">
+                                        <h3 class="text-xl font-semibold">Research Topics</h3>
                                     </div>
-                                </div>
-                                <div class="col-span-9 prose prose-lg max-w-none">
-                                    {!! $post->content_sections['research_topics'] !!}
+                                    <div class="col-span-9 prose prose-lg max-w-none">
+                                        {!! $post->content_sections['research_topics'] !!}
+                                    </div>
                                 </div>
                             </div>
                         @endif
 
                         {{-- Principles for AI Ethics Section --}}
                         @if(isset($post->content_sections['principles_for_ai_ethics']))
-                            <div class="grid grid-cols-12 gap-8">
-                                <div class="col-span-3">
-                                    <div class="flex items-center">
-                                        <div class="w-20 h-0.5 bg-black mr-4"></div>
-                                        <h3 class="text-xl font-semibold whitespace-nowrap">Principles for AI Ethics</h3>
+                            <div class="space-y-4">
+                                <div class="w-32 h-0.5 bg-black"></div>
+                                <div class="grid grid-cols-12 gap-8">
+                                    <div class="col-span-3">
+                                        <h3 class="text-xl font-semibold">Principles for AI Ethics</h3>
                                     </div>
-                                </div>
-                                <div class="col-span-9 prose prose-lg max-w-none">
-                                    {!! $post->content_sections['principles_for_ai_ethics'] !!}
+                                    <div class="col-span-9 prose prose-lg max-w-none">
+                                        {!! $post->content_sections['principles_for_ai_ethics'] !!}
+                                    </div>
                                 </div>
                             </div>
                         @endif
