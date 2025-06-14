@@ -1,4 +1,59 @@
-@props(['menu'])
+@php
+    // project_options에서 헤더 메뉴 가져오기
+    $headerMenuItems = get_option('header_menu', []);
+    
+    // 메뉴 객체 형태로 변환
+    $menuData = new \stdClass();
+    $menuData->items = collect($headerMenuItems)->map(function ($item) {
+        $menuItem = new \stdClass();
+        $menuItem->title = $item['label'] ?? '';
+        $menuItem->url = $item['url'] ?? '';
+        $menuItem->full_url = $item['url'] ?? '';
+        $menuItem->target = '_self';
+        $menuItem->css_class = '';
+        $menuItem->icon = null;
+        $menuItem->is_active = true;
+        $menuItem->description = '';
+        
+        // 메뉴 타입에 따른 처리
+        if ($item['type'] === 'mega') {
+            $menuItem->is_mega_menu = true;
+            $menuItem->mega_menu_content = [
+                'columns' => collect($item['groups'] ?? [])->map(function ($group) {
+                    return [
+                        'title' => $group['group_label'] ?? '',
+                        'items' => collect($group['items'] ?? [])->map(function ($groupItem) {
+                            return [
+                                'title' => $groupItem['label'] ?? '',
+                                'url' => $groupItem['url'] ?? '',
+                                'description' => ''
+                            ];
+                        })->toArray()
+                    ];
+                })->toArray()
+            ];
+            $menuItem->activeChildren = collect([]);
+        } elseif ($item['type'] === 'dropdown') {
+            $menuItem->is_mega_menu = false;
+            $menuItem->activeChildren = collect($item['children'] ?? [])->map(function ($child) {
+                $childItem = new \stdClass();
+                $childItem->title = $child['label'] ?? '';
+                $childItem->url = $child['url'] ?? '';
+                $childItem->full_url = $child['url'] ?? '';
+                $childItem->target = '_self';
+                $childItem->icon = null;
+                return $childItem;
+            });
+        } else {
+            $menuItem->is_mega_menu = false;
+            $menuItem->activeChildren = collect([]);
+        }
+        
+        $menuItem->id = uniqid();
+        
+        return $menuItem;
+    });
+@endphp
 
 <nav x-data="{ 
     open: false,
@@ -31,45 +86,45 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center mr-8">
                     <a href="/" class="flex items-center">
-                        <span class="ml-3 text-2xl font-bold text-gray-900">AIMED KOREA</span>
+                        <span class="ml-3 text-2xl font-bold text-gray-900">{{ get_option('site_title', 'AIMED KOREA') }}</span>
                     </a>
                 </div>
 
                 <!-- Desktop Navigation Links -->
                 <div class="hidden lg:flex lg:items-center lg:justify-between w-full">
                     <div class="flex items-center space-x-1">
-                        @foreach($menu->items as $item)
+                        @foreach($menuData->items as $item)
                             @if($item->is_active)
                                 <div class="relative">
                                     @if($item->activeChildren->count() > 0 || $item->is_mega_menu)
                                         <!-- Dropdown Menu Item -->
                                         <button
-                                            @mouseenter="openDropdown({{ $item->id }})"
+                                            @mouseenter="openDropdown('{{ $item->id }}')"
                                             @mouseleave="closeDropdown()"
-                                            @click="openDropdown({{ $item->id }})"
+                                            @click="openDropdown('{{ $item->id }}')"
                                             class="inline-flex items-center px-5 py-2 h-20 text-base font-medium text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600 transition duration-150 ease-in-out relative group"
-                                            :class="{ 'text-blue-600': activeDropdown === {{ $item->id }} }"
+                                            :class="{ 'text-blue-600': activeDropdown === '{{ $item->id }}' }"
                                         >
                                             @if($item->icon)
                                                 <x-dynamic-component :component="$item->icon" class="w-5 h-5 mr-2" />
                                             @endif
                                             {{ $item->title }}
                                             <svg class="ml-2 h-4 w-4 transition-transform duration-200" 
-                                                 :class="{ 'rotate-180': activeDropdown === {{ $item->id }} }"
+                                                 :class="{ 'rotate-180': activeDropdown === '{{ $item->id }}' }"
                                                  xmlns="http://www.w3.org/2000/svg" 
                                                  viewBox="0 0 20 20" 
                                                  fill="currentColor">
                                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                             </svg>
                                             <span class="absolute bottom-0 left-0 w-full h-1 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
-                                                  :class="{ 'scale-x-100': activeDropdown === {{ $item->id }} }"></span>
+                                                  :class="{ 'scale-x-100': activeDropdown === '{{ $item->id }}' }"></span>
                                         </button>
 
                                         <!-- Mega Menu Dropdown -->
                                         @if($item->is_mega_menu && $item->mega_menu_content)
                                             <div
-                                                x-show="activeDropdown === {{ $item->id }}"
-                                                @mouseenter="openDropdown({{ $item->id }})"
+                                                x-show="activeDropdown === '{{ $item->id }}'"
+                                                @mouseenter="openDropdown('{{ $item->id }}')"
                                                 @mouseleave="closeDropdown()"
                                                 x-transition:enter="transition ease-out duration-200"
                                                 x-transition:enter-start="opacity-0 transform -translate-y-2"
@@ -128,8 +183,8 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
                                         @else
                                             <!-- Regular Dropdown -->
                                             <div
-                                                x-show="activeDropdown === {{ $item->id }}"
-                                                @mouseenter="openDropdown({{ $item->id }})"
+                                                x-show="activeDropdown === '{{ $item->id }}'"
+                                                @mouseenter="openDropdown('{{ $item->id }}')"
                                                 @mouseleave="closeDropdown()"
                                                 x-transition:enter="transition ease-out duration-200"
                                                 x-transition:enter-start="opacity-0 transform -translate-y-2"
@@ -279,7 +334,7 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
 
             <!-- Mega Menu Content Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                @foreach($menu->items as $item)
+                @foreach($menuData->items as $item)
                     @if($item->is_active)
                         <div>
                             <!-- Main Category -->
@@ -357,14 +412,13 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
                 @endforeach
             </div>
 
-
         </div>
     </div>
 
     <!-- Mobile menu -->
     <div :class="{'block': open, 'hidden': !open}" class="lg:hidden">
         <div class="pt-2 pb-3 space-y-1 bg-gray-50">
-            @foreach($menu->items as $item)
+            @foreach($menuData->items as $item)
                 @if($item->is_active)
                     @if($item->activeChildren->count() > 0)
                         <div x-data="{ mobileOpen: false }">
