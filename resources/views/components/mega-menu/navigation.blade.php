@@ -357,39 +357,7 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
                 @endforeach
             </div>
 
-            <!-- Bottom Section with Additional Links -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- News & Blog -->
-                    <div>
-                        <h4 class="text-sm font-semibold text-gray-900 mb-3">뉴스 & 블로그</h4>
-                        <ul class="space-y-2">
-                            <li><a href="#" class="text-sm text-gray-600 hover:text-blue-600" @click="megaMenuOpen = false">최신 소식</a></li>
-                            <li><a href="#" class="text-sm text-gray-600 hover:text-blue-600" @click="megaMenuOpen = false">블로그</a></li>
-                            <li><a href="#" class="text-sm text-gray-600 hover:text-blue-600" @click="megaMenuOpen = false">뉴스레터</a></li>
-                        </ul>
-                    </div>
-                    
-                    <!-- About -->
-                    <div>
-                        <h4 class="text-sm font-semibold text-gray-900 mb-3">회사 소개</h4>
-                        <ul class="space-y-2">
-                            <li><a href="#" class="text-sm text-gray-600 hover:text-blue-600" @click="megaMenuOpen = false">비전 & 미션</a></li>
-                            <li><a href="#" class="text-sm text-gray-600 hover:text-blue-600" @click="megaMenuOpen = false">이벤트</a></li>
-                            <li><a href="#" class="text-sm text-gray-600 hover:text-blue-600" @click="megaMenuOpen = false">갤러리</a></li>
-                        </ul>
-                    </div>
-                    
-                    <!-- Culture -->
-                    <div>
-                        <h4 class="text-sm font-semibold text-gray-900 mb-3">문화</h4>
-                        <ul class="space-y-2">
-                            <li><a href="#" class="text-sm text-gray-600 hover:text-blue-600" @click="megaMenuOpen = false">연구원 소개</a></li>
-                            <li><a href="#" class="text-sm text-gray-600 hover:text-blue-600" @click="megaMenuOpen = false">생활 @ AIMED</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 
