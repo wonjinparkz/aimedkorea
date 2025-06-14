@@ -4,10 +4,9 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <!-- Left Column - Company Info -->
             <div>
-                <h3 class="text-xl font-bold mb-4">AIMED KOREA</h3>
+                <h3 class="text-xl font-bold mb-4">{{ $siteTitle }}</h3>
                 <p class="text-gray-600 mb-6 leading-relaxed">
-                    디지털 노화 가속 스위치, 당신의 건강을 무너뜨려 노화를 앞당기게 됩니다.<br>
-                    그 스위치, 이제 끌 수 있습니다.
+                    {{ $siteTagline }}
                 </p>
                 <!-- Placeholder Image -->
                 <div class="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center border border-gray-300">
@@ -107,11 +106,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row items-center justify-between">
                 <div class="flex flex-wrap justify-center md:justify-start space-x-6 text-sm mb-4 md:mb-0">
-                    <a href="/about" class="text-gray-600 hover:text-gray-900 transition-colors">회사 소개</a>
-                    <a href="/terms" class="text-gray-600 hover:text-gray-900 transition-colors">이용약관</a>
-                    <a href="/privacy" class="text-gray-600 hover:text-gray-900 transition-colors">개인정보처리방침</a>
-                    <a href="/support" class="text-gray-600 hover:text-gray-900 transition-colors">고객센터</a>
-                    <a href="/partnership" class="text-gray-600 hover:text-gray-900 transition-colors">제휴제안</a>
+                    @foreach($footerLinks as $link)
+                        <a href="{{ $link['url'] }}" class="text-gray-600 hover:text-gray-900 transition-colors">{{ $link['title'] }}</a>
+                    @endforeach
                     <div class="relative group">
                         <button class="text-gray-600 hover:text-gray-900 transition-colors flex items-center">
                             패밀리사이트
@@ -123,7 +120,7 @@
                     </div>
                 </div>
                 <div class="text-gray-600 text-sm">
-                    &copy; {{ date('Y') }} AIMED KOREA. All rights reserved.
+                    &copy; {{ date('Y') }} {{ $siteTitle }}. All rights reserved.
                 </div>
             </div>
         </div>
