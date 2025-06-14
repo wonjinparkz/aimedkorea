@@ -115,48 +115,19 @@
                     </div>
                 @endif
 
-                <!-- Tags for related articles -->
+                <!-- Related Articles Section -->
                 @if($post->type === 'tab' && $post->related_articles && count($post->related_articles) > 0)
-                    <div class="border-t border-gray-200 pt-8 mb-12">
-                        <div class="flex flex-wrap gap-2">
+                    <div class="mt-16">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Related Articles</h2>
+                        <div class="border-t-4 border-black mb-8"></div>
+                        
+                        <div class="space-y-6">
                             @foreach($post->related_articles as $articleId)
                                 @php
                                     $relatedPost = \App\Models\Post::find($articleId);
                                 @endphp
                                 @if($relatedPost)
-                                    <a href="{{ route('posts.show', ['type' => $relatedPost->type, 'post' => $relatedPost]) }}" 
-                                       class="inline-flex items-center px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 transition-colors">
-                                        @php
-                                            // 관련 기사 제목에서도 이모지 제거
-                                            $cleanRelatedTitle = preg_replace('/[\p{Emoji_Presentation}\p{Emoji}\x{1F300}-\x{1F9FF}]/u', '', $relatedPost->title);
-                                            $cleanRelatedTitle = trim($cleanRelatedTitle);
-                                            // [논문] 등의 접두사 제거
-                                            $cleanRelatedTitle = preg_replace('/^\[.*?\]\s*/', '', $cleanRelatedTitle);
-                                        @endphp
-                                        {{ Str::limit($cleanRelatedTitle, 50) }}
-                                    </a>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Related Articles Section -->
-                @if($post->type === 'tab' && $post->related_articles && count($post->related_articles) > 0)
-                    <div class="border-t border-gray-200 pt-8">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-6">RELATED ARTICLES</h2>
-                        <div class="space-y-4">
-                            @foreach(array_slice($post->related_articles, 0, 3) as $articleId)
-                                @php
-                                    $relatedPost = \App\Models\Post::find($articleId);
-                                @endphp
-                                @if($relatedPost)
-                                    <div>
-                                        <a href="{{ route('posts.show', ['type' => $relatedPost->type, 'post' => $relatedPost]) }}" 
-                                           class="text-blue-600 hover:text-blue-800 font-medium">
-                                            {{ $relatedPost->title }}
-                                        </a>
-                                    </div>
+                                    <x-related-article-card :post="$relatedPost" />
                                 @endif
                             @endforeach
                         </div>
