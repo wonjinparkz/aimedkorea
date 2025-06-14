@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-3 gap-6">
         @php
             $records = $this->getFilteredSortedTableQuery()->paginate($this->getTableRecordsPerPage());
         @endphp
@@ -38,31 +38,29 @@
                         </p>
                     @endif
                     
-                    {{-- 더보기 문구와 액션 --}}
-                    <div class="flex items-center justify-between">
+                    {{-- 더보기 문구 --}}
+                    <div class="mb-4">
                         <span class="text-blue-600 text-sm font-medium">
                             {{ $record->read_more_text ?? '자세히 보기' }}
                         </span>
+                    </div>
+                    
+                    {{-- 구분선 --}}
+                    <hr class="border-gray-200 mb-4">
+                    
+                    {{-- 액션 버튼들 --}}
+                    <div class="flex items-center gap-4">
+                        <a href="{{ $this->getResource()::getUrl('edit', ['record' => $record]) }}" 
+                           class="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                           wire:loading.attr="disabled">
+                            수정
+                        </a>
                         
-                        {{-- 액션 버튼들 --}}
-                        <div class="flex items-center gap-2">
-                            <a href="{{ $this->getResource()::getUrl('edit', ['record' => $record]) }}" 
-                               class="text-gray-500 hover:text-gray-700 transition-colors"
-                               title="수정">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                            </a>
-                            
-                            <button wire:click="mountTableAction('delete', '{{ $record->getKey() }}')" 
-                                    wire:loading.attr="disabled"
-                                    class="text-red-500 hover:text-red-700 transition-colors"
-                                    title="삭제">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                        </div>
+                        <button wire:click="mountTableAction('delete', '{{ $record->getKey() }}')" 
+                                wire:loading.attr="disabled"
+                                class="text-sm text-red-600 hover:text-red-800 font-medium transition-colors">
+                            삭제
+                        </button>
                     </div>
                 </div>
             </div>
