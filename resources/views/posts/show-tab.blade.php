@@ -11,8 +11,8 @@
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
                 <h1 class="text-5xl md:text-6xl font-bold text-white text-center mb-16">
                     @php
-                        // 제목에서 이모티콘 제거
-                        $cleanTitle = preg_replace('/[\p{Emoji_Presentation}\p{Emoji}\x{1F300}-\x{1F9FF}]/u', '', $post->title);
+                        // 제목에서 이모티콘 제거 - 더 호환성 있는 방법
+                        $cleanTitle = preg_replace('/[\x{1F300}-\x{1F6FF}\x{1F900}-\x{1F9FF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', '', $post->title);
                         $cleanTitle = trim($cleanTitle);
                     @endphp
                     {{ $cleanTitle }}
@@ -45,7 +45,7 @@
                                 
                                 @foreach($allTabPosts as $index => $tabPost)
                                     @php
-                                        $tabCleanTitle = preg_replace('/[\p{Emoji_Presentation}\p{Emoji}\x{1F300}-\x{1F9FF}]/u', '', $tabPost->title);
+                                        $tabCleanTitle = preg_replace('/[\x{1F300}-\x{1F6FF}\x{1F900}-\x{1F9FF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', '', $tabPost->title);
                                         $tabCleanTitle = trim($tabCleanTitle);
                                     @endphp
                                     <a href="{{ route('posts.show', ['type' => 'tab', 'post' => $tabPost]) }}" 
