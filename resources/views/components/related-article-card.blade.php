@@ -3,7 +3,7 @@
     'post' => null
 ])
 
-<article class="flex bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+<article class="flex bg-white overflow-hidden hover:shadow-lg transition-shadow duration-300">
     {{-- 썸네일 영역 --}}
     <div class="w-48 h-36 flex-shrink-0">
         @if($post->image)
@@ -17,7 +17,7 @@
                 // 제목에서 [논문] 같은 접두사 제거
                 $cleanTitle = preg_replace('/^\[.*?\]\s*/', '', $titlePreview);
             @endphp
-            <div class="w-full h-full bg-gradient-to-br from-blue-600 to-cyan-400 flex items-center justify-center p-4">
+            <div class="w-full h-full bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center p-4">
                 <p class="text-white text-sm font-medium text-center leading-tight">
                     {{ $cleanTitle }}
                 </p>
