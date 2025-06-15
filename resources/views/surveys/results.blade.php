@@ -45,7 +45,7 @@
                         <canvas id="gaugeChart"></canvas>
                         
                         <!-- 중앙 텍스트 -->
-                        <div class="absolute inset-0 flex items-center justify-center" style="margin-top: 50px;">
+                        <div class="absolute inset-0 flex items-center justify-center" style="margin-top: 20px;">
                             <div class="text-center">
                                 <div class="text-5xl font-bold text-gray-800">{{ round($gaugePercentage) }}%</div>
                                 <div class="text-sm text-gray-500 mt-1">건강 지수</div>
@@ -193,29 +193,21 @@
             const segments = @json($segments);
             const currentSegmentIndex = {{ $currentSegmentIndex }};
             
-            // 각 세그먼트별 데이터 준비
-            const segmentData = [];
+            // 각 세그먼트별 데이터 준비 (6개 세그먼트만)
+            const segmentData = [1, 1, 1, 1, 1, 1]; // 모두 동일한 크기
             const segmentColors = [];
             const segmentBorderColors = [];
             
             segments.forEach((segment, index) => {
-                // 각 세그먼트는 16.67%씩 차지
-                segmentData.push(16.67);
-                
                 // 현재 값이 포함된 구간까지는 실제 색상, 나머지는 옅은 색
                 if (index <= currentSegmentIndex) {
                     segmentColors.push(segment.color);
                     segmentBorderColors.push(segment.color);
                 } else {
                     segmentColors.push(segment.color + '20'); // 20% 투명도
-                    segmentBorderColors.push(segment.color + '40'); // 40% 투명도
+                    segmentBorderColors.push(segment.color + '20'); // 20% 투명도
                 }
             });
-            
-            // 하단 반원을 만들기 위한 빈 데이터 추가 (100%)
-            segmentData.push(100);
-            segmentColors.push('rgba(0,0,0,0)');
-            segmentBorderColors.push('rgba(0,0,0,0)');
             
             // Chart.js 설정
             const ctx = document.getElementById('gaugeChart').getContext('2d');
@@ -226,15 +218,21 @@
                         data: segmentData,
                         backgroundColor: segmentColors,
                         borderColor: segmentBorderColors,
-                        borderWidth: 1,
+                        borderWidth: 0,
                         circumference: 180,
-                        rotation: -90,
+                        rotation: 270,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     cutout: '70%',
+                    aspectRatio: 2,
+                    layout: {
+                        padding: {
+                            bottom: 20
+                        }
+                    },
                     plugins: {
                         legend: {
                             display: false
