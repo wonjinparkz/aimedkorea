@@ -44,8 +44,8 @@
                     <div class="relative mx-auto" style="width: 100%; max-width: 400px; height: 250px;">
                         <canvas id="gaugeChart"></canvas>
                         
-                        <!-- 중앙 텍스트 -->
-                        <div class="absolute inset-0 flex items-center justify-center" style="margin-top: 20px;">
+                        <!-- 중앙 텍스트 (하단 위치) -->
+                        <div class="absolute bottom-0 left-0 right-0 flex justify-center pb-12">
                             <div class="text-center">
                                 <div class="text-5xl font-bold text-gray-800">{{ round($gaugePercentage) }}%</div>
                                 <div class="text-sm text-gray-500 mt-1">건강 지수</div>
@@ -199,13 +199,14 @@
             const segmentBorderColors = [];
             
             segments.forEach((segment, index) => {
-                // 현재 값이 포함된 구간까지는 실제 색상, 나머지는 옅은 색
+                // 현재 값이 포함된 구간까지는 실제 색상, 나머지는 매우 옅은 색
                 if (index <= currentSegmentIndex) {
                     segmentColors.push(segment.color);
                     segmentBorderColors.push(segment.color);
                 } else {
-                    segmentColors.push(segment.color + '20'); // 20% 투명도
-                    segmentBorderColors.push(segment.color + '20'); // 20% 투명도
+                    // 훨씬 더 옅은 색으로 (10% 불투명도)
+                    segmentColors.push(segment.color + '1A'); // 약 10% 불투명도 (hex)
+                    segmentBorderColors.push(segment.color + '33'); // 약 20% 불투명도 (hex)
                 }
             });
             
@@ -218,7 +219,7 @@
                         data: segmentData,
                         backgroundColor: segmentColors,
                         borderColor: segmentBorderColors,
-                        borderWidth: 0,
+                        borderWidth: 1,
                         circumference: 180,
                         rotation: 270,
                     }]
@@ -226,11 +227,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '70%',
+                    cutout: '65%', // 도넛 두께 조정
                     aspectRatio: 2,
                     layout: {
                         padding: {
-                            bottom: 20
+                            bottom: 50 // 하단 여백 증가
                         }
                     },
                     plugins: {
