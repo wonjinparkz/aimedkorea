@@ -199,14 +199,15 @@
             const segmentBorderColors = [];
             
             segments.forEach((segment, index) => {
-                // 현재 값이 포함된 구간까지는 실제 색상, 나머지는 매우 옅은 색
-                if (index <= currentSegmentIndex) {
+                // 현재 값이 포함된 구간만 실제 색상, 나머지는 매우 옅은 색
+                if (index === currentSegmentIndex) {
+                    // 현재 구간만 진한 색상
                     segmentColors.push(segment.color);
                     segmentBorderColors.push(segment.color);
                 } else {
-                    // 훨씬 더 옅은 색으로 (10% 불투명도)
-                    segmentColors.push(segment.color + '1A'); // 약 10% 불투명도 (hex)
-                    segmentBorderColors.push(segment.color + '33'); // 약 20% 불투명도 (hex)
+                    // 나머지는 매우 옅은 색으로 (15% 불투명도)
+                    segmentColors.push(segment.color + '26'); // 약 15% 불투명도 (hex)
+                    segmentBorderColors.push(segment.color + '40'); // 약 25% 불투명도 (hex)
                 }
             });
             
