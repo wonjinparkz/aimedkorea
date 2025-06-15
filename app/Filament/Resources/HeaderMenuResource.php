@@ -54,7 +54,6 @@ class HeaderMenuResource extends Resource
                                             ->label('링크 주소')
                                             ->placeholder('예: /about 또는 https://...')
                                             ->helperText('페이지 주소를 입력하세요 (하위 메뉴가 있으면 비워두세요)')
-                                            ->url()
                                             ->reactive(),
                                     ]),
                                 
@@ -81,8 +80,7 @@ class HeaderMenuResource extends Resource
                                         TextInput::make('url')
                                             ->label('링크 주소')
                                             ->required()
-                                            ->placeholder('예: /about/greeting')
-                                            ->url(),
+                                            ->placeholder('예: /about/greeting'),
                                     ])
                                     ->visible(fn (Forms\Get $get) => $get('type') === 'dropdown')
                                     ->collapsed()
@@ -112,8 +110,7 @@ class HeaderMenuResource extends Resource
                                                 TextInput::make('url')
                                                     ->label('링크 주소')
                                                     ->required()
-                                                    ->placeholder('예: /about/ceo')
-                                                    ->url(),
+                                                    ->placeholder('예: /about/ceo'),
                                             ])
                                             ->collapsed()
                                             ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
