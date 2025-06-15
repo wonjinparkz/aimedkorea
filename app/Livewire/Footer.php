@@ -42,40 +42,40 @@ class Footer extends Component
         if (empty($this->footerSettings['footer_cards'])) {
             $this->footerSettings['footer_cards'] = [
                 [
-                    'icon' => 'heroicon-o-heart',
-                    'title' => '건강관리',
-                    'description' => '개인 맞춤형 건강관리 서비스를 제공합니다.',
-                    'url' => '/health-care'
+                    'icon' => 'heroicon-o-beaker',
+                    'title' => '과학이 만든 회복 솔루션',
+                    'description' => '임상과 논문으로 검증된 AI 기반 회복 기술',
+                    'url' => '/recovery-solutions'
                 ],
                 [
-                    'icon' => 'heroicon-o-chart-bar',
-                    'title' => '데이터 분석',
-                    'description' => 'AI 기반 건강 데이터 분석 서비스입니다.',
-                    'url' => '/data-analysis'
+                    'icon' => 'heroicon-o-star',
+                    'title' => '추천하는 제품/서비스',
+                    'description' => '눈•뇌•수면 회복에 도움되는 루카의 추천 템',
+                    'url' => '/recommendations'
+                ],
+                [
+                    'icon' => 'heroicon-o-newspaper',
+                    'title' => '디지털 노화 뉴스룸/지식 브리프',
+                    'description' => '최신 과학 뉴스와 뇌•눈•수면 콘텐츠 정리',
+                    'url' => '/newsroom'
+                ],
+                [
+                    'icon' => 'heroicon-o-calendar',
+                    'title' => 'NR3 루틴 무료 서비스',
+                    'description' => '디지털 자가진단-> 맞춤 루틴 코칭 시작하기',
+                    'url' => '/nr3-routine'
+                ],
+                [
+                    'icon' => 'heroicon-o-heart',
+                    'title' => '루틴실천 회복 스토리',
+                    'description' => '회복 전후 변화 사례와 사용자 경험 공유',
+                    'url' => '/recovery-stories'
                 ],
                 [
                     'icon' => 'heroicon-o-user-group',
-                    'title' => '전문가 상담',
-                    'description' => '의료 전문가와의 온라인 상담 서비스입니다.',
-                    'url' => '/consultation'
-                ],
-                [
-                    'icon' => 'heroicon-o-document-text',
-                    'title' => '건강 기록',
-                    'description' => '체계적인 건강 기록 관리 시스템입니다.',
-                    'url' => '/health-records'
-                ],
-                [
-                    'icon' => 'heroicon-o-bell',
-                    'title' => '알림 서비스',
-                    'description' => '건강 관리 알림 및 리마인더 서비스입니다.',
-                    'url' => '/notifications'
-                ],
-                [
-                    'icon' => 'heroicon-o-shield-check',
-                    'title' => '보안',
-                    'description' => '안전한 개인정보 보호 시스템입니다.',
-                    'url' => '/security'
+                    'title' => '우리가 함께하는 사람들',
+                    'description' => '전문가, 기관, 글로벌 파트너들의 소식',
+                    'url' => '/partners'
                 ]
             ];
         }
