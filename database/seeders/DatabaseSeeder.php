@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         // Post 더미 데이터 생성
         $this->call([
             PostSeeder::class,
+            SurveySeeder::class,
         ]);
     }
 }

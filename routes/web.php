@@ -47,6 +47,12 @@ Route::get('/admin/hero-preview', function () {
     return view('filament.hero-preview');
 })->name('filament.hero-preview');
 
+// 설문 관련 라우트
+Route::get('/surveys', [App\Http\Controllers\SurveyController::class, 'index'])->name('surveys.index');
+Route::get('/surveys/{survey}', [App\Http\Controllers\SurveyController::class, 'show'])->name('surveys.show');
+Route::post('/surveys/{survey}/responses', [App\Http\Controllers\SurveyController::class, 'store'])->name('surveys.store');
+Route::get('/surveys/{survey}/results/{response}', [App\Http\Controllers\SurveyController::class, 'results'])->name('surveys.results');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
