@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 
 class FooterMenuResource extends Resource
@@ -53,7 +54,6 @@ class FooterMenuResource extends Resource
                                 TextInput::make('feature_image_url')
                                     ->label('이미지 클릭 시 이동 URL')
                                     ->placeholder('https://example.com 또는 /page')
-                                    ->url()
                                     ->helperText('이미지 클릭 시 이동할 페이지 주소'),
                             ]),
                     ])
@@ -67,11 +67,38 @@ class FooterMenuResource extends Resource
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
-                                        TextInput::make('icon')
-                                            ->label('아이콘')
-                                            ->placeholder('heroicon-o-home')
-                                            ->helperText('Heroicon 이름을 입력하세요 (예: heroicon-o-home)')
-                                            ->required(),
+                                        Select::make('icon')
+                                            ->label('아이콘 선택')
+                                            ->options([
+                                                'heroicon-o-heart' => '❤️ 하트',
+                                                'heroicon-o-chart-bar' => '📊 차트',
+                                                'heroicon-o-user-group' => '👥 사용자 그룹',
+                                                'heroicon-o-document-text' => '📄 문서',
+                                                'heroicon-o-bell' => '🔔 알림',
+                                                'heroicon-o-shield-check' => '🛡️ 보안',
+                                                'heroicon-o-home' => '🏠 홈',
+                                                'heroicon-o-phone' => '📱 전화',
+                                                'heroicon-o-envelope' => '✉️ 이메일',
+                                                'heroicon-o-calendar' => '📅 캘린더',
+                                                'heroicon-o-clock' => '⏰ 시계',
+                                                'heroicon-o-cog' => '⚙️ 설정',
+                                                'heroicon-o-academic-cap' => '🎓 교육',
+                                                'heroicon-o-beaker' => '🧪 연구',
+                                                'heroicon-o-building-office' => '🏢 건물',
+                                                'heroicon-o-chat-bubble-left-right' => '💬 채팅',
+                                                'heroicon-o-computer-desktop' => '🖥️ 컴퓨터',
+                                                'heroicon-o-globe-alt' => '🌍 지구본',
+                                                'heroicon-o-light-bulb' => '💡 아이디어',
+                                                'heroicon-o-map-pin' => '📍 위치',
+                                                'heroicon-o-newspaper' => '📰 뉴스',
+                                                'heroicon-o-presentation-chart-line' => '📈 프레젠테이션',
+                                                'heroicon-o-question-mark-circle' => '❓ 도움말',
+                                                'heroicon-o-star' => '⭐ 별',
+                                                'heroicon-o-trophy' => '🏆 트로피',
+                                            ])
+                                            ->searchable()
+                                            ->required()
+                                            ->helperText('아이콘을 선택하세요'),
                                         
                                         TextInput::make('title')
                                             ->label('제목')
@@ -91,7 +118,6 @@ class FooterMenuResource extends Resource
                                 TextInput::make('url')
                                     ->label('클릭 시 이동 URL')
                                     ->placeholder('https://example.com 또는 /page')
-                                    ->url()
                                     ->required()
                                     ->helperText('카드 클릭 시 이동할 페이지 주소')
                                     ->columnSpanFull(),
