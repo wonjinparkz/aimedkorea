@@ -1,9 +1,9 @@
 <footer class="bg-gray-50 text-gray-900">
     <!-- Main Footer Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <!-- Left Column - Company Info -->
-            <div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+            <!-- Left Column - Company Info (더 작게) -->
+            <div class="lg:col-span-2 lg:px-8">
                 <h3 class="text-xl font-bold mb-4">{{ $siteTitle }}</h3>
                 <p class="text-gray-600 mb-6 leading-relaxed">
                     @if(!empty($footerSettings['footer_description']))
@@ -34,11 +34,11 @@
                 @endif
             </div>
 
-            <!-- Right Column - Service Cards -->
-            <div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Right Column - Service Cards (더 크게) -->
+            <div class="lg:col-span-3 lg:px-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
                     @foreach($footerSettings['footer_cards'] as $card)
-                        <a href="{{ $card['url'] }}" class="bg-white p-6 rounded-lg border border-gray-200 hover:shadow-md transition-shadow block">
+                        <a href="{{ $card['url'] }}" class="bg-white p-5 lg:p-6 rounded-lg border border-gray-200 hover:shadow-md transition-shadow block">
                             <div class="flex flex-col items-center text-center">
                                 @php
                                     // Heroicon 매핑
@@ -83,13 +83,13 @@
                                     $bgColor = $colorClasses[$colorIndex];
                                 @endphp
                                 
-                                <div class="w-12 h-12 {{ $bgColor }} rounded-full flex items-center justify-center mb-3">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="w-14 h-14 {{ $bgColor }} rounded-full flex items-center justify-center mb-4">
+                                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         {!! $iconMap[$card['icon']] ?? $iconMap['heroicon-o-question-mark-circle'] !!}
                                     </svg>
                                 </div>
-                                <h4 class="font-semibold text-gray-900 mb-1">{{ $card['title'] }}</h4>
-                                <p class="text-sm text-gray-600">{{ $card['description'] }}</p>
+                                <h4 class="font-semibold text-gray-900 mb-2 text-base">{{ $card['title'] }}</h4>
+                                <p class="text-sm text-gray-600 leading-relaxed">{{ $card['description'] }}</p>
                             </div>
                         </a>
                     @endforeach
