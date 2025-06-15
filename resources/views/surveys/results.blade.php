@@ -183,7 +183,6 @@
         </div>
     </div>
 
-    @push('scripts')
     <!-- Chart.js 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -213,10 +212,10 @@
                 }
             });
             
-            // 하단 반원을 만들기 위한 빈 데이터 추가 (50%)
+            // 하단 반원을 만들기 위한 빈 데이터 추가 (100%)
             segmentData.push(100);
-            segmentColors.push('transparent');
-            segmentBorderColors.push('transparent');
+            segmentColors.push('rgba(0,0,0,0)');
+            segmentBorderColors.push('rgba(0,0,0,0)');
             
             // Chart.js 설정
             const ctx = document.getElementById('gaugeChart').getContext('2d');
@@ -227,9 +226,9 @@
                         data: segmentData,
                         backgroundColor: segmentColors,
                         borderColor: segmentBorderColors,
-                        borderWidth: 2,
+                        borderWidth: 1,
                         circumference: 180,
-                        rotation: 270,
+                        rotation: -90,
                     }]
                 },
                 options: {
@@ -258,9 +257,7 @@
             });
         });
     </script>
-    @endpush
 
-    @push('styles')
     <style>
         @media print {
             .no-print {
@@ -273,5 +270,4 @@
             }
         }
     </style>
-    @endpush
 </x-app-layout>
