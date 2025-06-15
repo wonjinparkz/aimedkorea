@@ -115,7 +115,6 @@
         </div>
     </div>
 
-    @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('survey-form');
@@ -197,5 +196,4 @@
             showQuestion(0);
         });
     </script>
-    @endpush
 </x-app-layout>
