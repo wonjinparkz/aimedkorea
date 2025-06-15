@@ -19,125 +19,47 @@
                         // 계기판용 역전 백분율 (낮은 점수가 좋은 상태)
                         $gaugePercentage = 100 - $rawPercentage;
                         
-                        // 디버깅 정보
-                        $debugInfo = [
-                            'actualScore' => $actualScore,
-                            'maxPossibleScore' => $maxPossibleScore,
-                            'rawPercentage' => $rawPercentage,
-                            'gaugePercentage' => $gaugePercentage
-                        ];
-                        
                         // 6개 구간 정의
                         $segments = [
-                            ['name' => '붕괴', 'color' => '#991b1b', 'min' => 0, 'max' => 16.67],
-                            ['name' => '위험', 'color' => '#dc2626', 'min' => 16.67, 'max' => 33.33],
-                            ['name' => '주의', 'color' => '#f59e0b', 'min' => 33.33, 'max' => 50],
-                            ['name' => '양호', 'color' => '#10b981', 'min' => 50, 'max' => 66.67],
-                            ['name' => '우수', 'color' => '#059669', 'min' => 66.67, 'max' => 83.33],
-                            ['name' => '최적', 'color' => '#047857', 'min' => 83.33, 'max' => 100]
+                            ['name' => '붕괴', 'color' => '#991b1b', 'range' => [0, 16.67]],
+                            ['name' => '위험', 'color' => '#dc2626', 'range' => [16.67, 33.33]],
+                            ['name' => '주의', 'color' => '#f59e0b', 'range' => [33.33, 50]],
+                            ['name' => '양호', 'color' => '#10b981', 'range' => [50, 66.67]],
+                            ['name' => '우수', 'color' => '#059669', 'range' => [66.67, 83.33]],
+                            ['name' => '최적', 'color' => '#047857', 'range' => [83.33, 100]]
                         ];
                         
                         // 현재 구간 찾기
                         $currentSegmentIndex = 0;
                         foreach ($segments as $index => $segment) {
-                            if ($gaugePercentage >= $segment['min'] && $gaugePercentage <= $segment['max']) {
+                            if ($gaugePercentage >= $segment['range'][0] && $gaugePercentage <= $segment['range'][1]) {
                                 $currentSegmentIndex = $index;
                                 break;
                             }
                         }
                         $currentSegment = $segments[$currentSegmentIndex];
-                        
-                        // 바늘 각도 계산 (-90도에서 90도)
-                        $needleAngle = -90 + ($gaugePercentage * 1.8);
                     @endphp
                     
-                    <!-- 계기판 컨테이너 -->
+                    <!-- Chart.js 게이지 차트 컨테이너 -->
                     <div class="relative mx-auto" style="width: 100%; max-width: 400px; height: 250px;">
-                        <!-- 계기판 배경 -->
-                        <div class="absolute inset-0">
-                            <svg viewBox="0 0 200 100" style="width: 100%; height: 100%;">
-                                <!-- 배경 반원 -->
-                                <path d="M 20 90 A 70 70 0 0 1 180 90" 
-                                      fill="none" 
-                                      stroke="#e5e7eb" 
-                                      stroke-width="15" />
-                                
-                                <!-- 색상 구간들 -->
-                                @foreach($segments as $index => $segment)
-                                    @php
-                                        $startAngle = -90 + ($segment['min'] * 1.8);
-                                        $endAngle = -90 + ($segment['max'] * 1.8);
-                                        $startRad = deg2rad($startAngle);
-                                        $endRad = deg2rad($endAngle);
-                                        
-                                        $x1 = 100 + 70 * cos($startRad);
-                                        $y1 = 90 + 70 * sin($startRad);
-                                        $x2 = 100 + 70 * cos($endRad);
-                                        $y2 = 90 + 70 * sin($endRad);
-                                        
-                                        $largeArc = ($segment['max'] - $segment['min']) > 50 ? 1 : 0;
-                                    @endphp
-                                    <path d="M {{ $x1 }} {{ $y1 }} A 70 70 0 {{ $largeArc }} 1 {{ $x2 }} {{ $y2 }}"
-                                          fill="none"
-                                          stroke="{{ $segment['color'] }}"
-                                          stroke-width="15"
-                                          opacity="{{ $currentSegmentIndex === $index ? '1' : '0.3' }}"
-                                          class="transition-opacity duration-500" />
-                                @endforeach
-                                
-                                <!-- 눈금 표시 -->
-                                @for($i = 0; $i <= 100; $i += 20)
-                                    @php
-                                        $tickAngle = -90 + ($i * 1.8);
-                                        $tickRad = deg2rad($tickAngle);
-                                        $x1 = 100 + 60 * cos($tickRad);
-                                        $y1 = 90 + 60 * sin($tickRad);
-                                        $x2 = 100 + 80 * cos($tickRad);
-                                        $y2 = 90 + 80 * sin($tickRad);
-                                        $textX = 100 + 50 * cos($tickRad);
-                                        $textY = 90 + 50 * sin($tickRad);
-                                    @endphp
-                                    <line x1="{{ $x1 }}" y1="{{ $y1 }}" 
-                                          x2="{{ $x2 }}" y2="{{ $y2 }}" 
-                                          stroke="#9ca3af" 
-                                          stroke-width="2" />
-                                    <text x="{{ $textX }}" y="{{ $textY }}" 
-                                          text-anchor="middle" 
-                                          dominant-baseline="middle"
-                                          fill="#6b7280"
-                                          font-size="10">{{ $i }}</text>
-                                @endfor
-                                
-                                <!-- 바늘 -->
-                                <g transform="translate(100, 90)" id="gauge-needle">
-                                    <line x1="0" y1="0" 
-                                          x2="0" y2="-55" 
-                                          stroke="#1f2937" 
-                                          stroke-width="3"
-                                          stroke-linecap="round"
-                                          transform="rotate({{ $needleAngle }})"
-                                          class="transition-transform duration-1000 ease-out" />
-                                    <circle cx="0" cy="0" r="6" fill="#1f2937" />
-                                </g>
-                            </svg>
-                        </div>
+                        <canvas id="gaugeChart"></canvas>
                         
-                        <!-- 중앙 표시 -->
-                        <div class="absolute inset-0 flex items-end justify-center pb-8">
+                        <!-- 중앙 텍스트 -->
+                        <div class="absolute inset-0 flex items-center justify-center" style="margin-top: 50px;">
                             <div class="text-center">
-                                <div class="text-4xl font-bold text-gray-800">{{ round($gaugePercentage) }}%</div>
-                                <div class="text-sm text-gray-500">건강 지수</div>
+                                <div class="text-5xl font-bold text-gray-800">{{ round($gaugePercentage) }}%</div>
+                                <div class="text-sm text-gray-500 mt-1">건강 지수</div>
                             </div>
                         </div>
-                        
-                        <!-- 라벨 -->
-                        <div class="absolute bottom-0 left-0 right-0 flex justify-between px-2">
-                            @foreach($segments as $segment)
-                                <div class="text-xs {{ $currentSegment['name'] === $segment['name'] ? 'font-bold text-gray-800' : 'text-gray-400' }}">
-                                    {{ $segment['name'] }}
-                                </div>
-                            @endforeach
-                        </div>
+                    </div>
+                    
+                    <!-- 구간 라벨 -->
+                    <div class="flex justify-between px-4 mt-2">
+                        @foreach($segments as $index => $segment)
+                            <div class="text-xs {{ $currentSegmentIndex === $index ? 'font-bold text-gray-800' : 'text-gray-400' }}">
+                                {{ $segment['name'] }}
+                            </div>
+                        @endforeach
                     </div>
                     
                     <!-- 점수 정보 -->
@@ -147,11 +69,10 @@
                             <p class="text-sm text-gray-500 mt-1">
                                 실제 점수: {{ $actualScore }}점 / {{ $maxPossibleScore }}점
                             </p>
-                            <!-- 디버깅 정보 (개발 중에만 표시) -->
                             @if(config('app.debug'))
                                 <div class="mt-2 p-2 bg-gray-100 rounded text-xs text-gray-600">
                                     <p>원점수: {{ $rawPercentage }}% (높을수록 나쁨)</p>
-                                    <p>역전점수: {{ $gaugePercentage }}% (높을수록 좋음)</p>
+                                    <p>건강지수: {{ $gaugePercentage }}% (높을수록 좋음)</p>
                                 </div>
                             @endif
                         </div>
@@ -263,20 +184,68 @@
     </div>
 
     @push('scripts')
+    <!-- Chart.js 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script>
-        // 페이지 로드 시 애니메이션
         document.addEventListener('DOMContentLoaded', function() {
-            // 바늘 애니메이션을 위한 초기 설정
-            const needle = document.querySelector('#gauge-needle line');
-            if (needle) {
-                // 초기 위치를 -90도로 설정
-                needle.style.transform = 'rotate(-90deg)';
+            // 게이지 데이터
+            const gaugePercentage = {{ $gaugePercentage }};
+            const segments = @json($segments);
+            const currentSegmentIndex = {{ $currentSegmentIndex }};
+            
+            // 각 세그먼트별 데이터 준비
+            const segmentData = [];
+            const segmentColors = [];
+            const segmentBorderColors = [];
+            
+            segments.forEach((segment, index) => {
+                // 각 세그먼트는 16.67%씩 차지
+                segmentData.push(16.67);
                 
-                // 약간의 지연 후 목표 각도로 회전
-                setTimeout(() => {
-                    needle.style.transform = 'rotate({{ $needleAngle }}deg)';
-                }, 100);
-            }
+                // 현재 값이 포함된 구간까지는 실제 색상, 나머지는 옅은 색
+                if (index <= currentSegmentIndex) {
+                    segmentColors.push(segment.color);
+                    segmentBorderColors.push(segment.color);
+                } else {
+                    segmentColors.push(segment.color + '20'); // 20% 투명도
+                    segmentBorderColors.push(segment.color + '40'); // 40% 투명도
+                }
+            });
+            
+            // 하단 반원을 만들기 위한 빈 데이터 추가 (50%)
+            segmentData.push(100);
+            segmentColors.push('transparent');
+            segmentBorderColors.push('transparent');
+            
+            // Chart.js 설정
+            const ctx = document.getElementById('gaugeChart').getContext('2d');
+            const gaugeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: segmentData,
+                        backgroundColor: segmentColors,
+                        borderColor: segmentBorderColors,
+                        borderWidth: 2,
+                        circumference: 180,
+                        rotation: 270,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
             
             // 카테고리별 진행도 바 애니메이션
             const progressBars = document.querySelectorAll('.space-y-4 [style*="width"]');
@@ -302,12 +271,6 @@
                 print-color-adjust: exact;
                 -webkit-print-color-adjust: exact;
             }
-        }
-        
-        /* 부드러운 전환 효과 */
-        #gauge-needle line {
-            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-origin: center;
         }
     </style>
     @endpush
