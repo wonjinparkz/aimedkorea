@@ -160,26 +160,51 @@
             </div>
 
             <!-- 카테고리별 분석 -->
-            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">카테고리별 분석</h2>
-                
-                <div class="space-y-4">
-                    @foreach($categoryAnalysis as $category)
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <span class="text-gray-700 font-medium">{{ $category['name'] }}</span>
-                                <span class="text-gray-600 font-semibold">{{ $category['percentage'] }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
-                                <div class="h-full rounded-full transition-all duration-1000 ease-out relative {{ $category['percentage'] >= 70 ? 'bg-gradient-to-r from-green-500 to-green-600' : ($category['percentage'] >= 50 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' : ($category['percentage'] >= 30 ? 'bg-gradient-to-r from-orange-500 to-orange-600' : 'bg-gradient-to-r from-red-500 to-red-600')) }}" 
-                                     style="width: {{ $category['percentage'] }}%">
-                                    <div class="absolute inset-0 bg-white bg-opacity-20"></div>
+            @if(!empty($categoryAnalysis))
+                <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">카테고리별 분석</h2>
+                    
+                    <div class="space-y-4">
+                        @foreach($categoryAnalysis as $category)
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <div>
+                                        <span class="text-gray-700 font-medium">{{ $category['name'] }}</span>
+                                        @if(isset($category['answered_count']) && isset($category['question_count']))
+                                            <span class="text-sm text-gray-500 ml-2">
+                                                ({{ $category['answered_count'] }}/{{ $category['question_count'] }}개 응답)
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <span class="text-gray-600 font-semibold">{{ $category['percentage'] }}%</span>
                                 </div>
+                                <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-1000 ease-out relative {{ $category['percentage'] >= 70 ? 'bg-gradient-to-r from-green-500 to-green-600' : ($category['percentage'] >= 50 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' : ($category['percentage'] >= 30 ? 'bg-gradient-to-r from-orange-500 to-orange-600' : 'bg-gradient-to-r from-red-500 to-red-600')) }}" 
+                                         style="width: {{ $category['percentage'] }}%">
+                                        <div class="absolute inset-0 bg-white bg-opacity-20"></div>
+                                    </div>
+                                </div>
+                                @if(isset($category['score']) && isset($category['max_score']))
+                                    <div class="text-xs text-gray-500 mt-1 text-right">
+                                        득점: {{ $category['score'] }}/{{ $category['max_score'] }}점
+                                    </div>
+                                @endif
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
+                    
+                    <!-- 카테고리 분석 설명 -->
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600">
+                            <span class="font-semibold">카테고리별 점수 해석:</span><br>
+                            70% 이상: 우수한 상태입니다.<br>
+                            50-69%: 양호한 상태이나 개선의 여지가 있습니다.<br>
+                            30-49%: 주의가 필요한 상태입니다.<br>
+                            30% 미만: 즉각적인 개선이 필요합니다.
+                        </p>
+                    </div>
                 </div>
-            </div>
+            @endif
 
             <!-- 액션 버튼 -->
             <div class="flex justify-center space-x-4">
@@ -242,5 +267,3 @@
     </style>
     @endpush
 </x-app-layout>
-</parameter>
-</invoke>
