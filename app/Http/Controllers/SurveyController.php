@@ -72,38 +72,11 @@ class SurveyController extends Controller
     
     public function results(Survey $survey, SurveyResponse $response)
     {
-        // 점수 계산 및 분석
-        $maxScore = count($survey->questions) * 4; // 각 문항 최대 4점 (매우 그렇다)
-        $rawPercentage = round(($response->total_score / $maxScore) * 100);
-        
-        // 계기판 표시를 위해 역전 (낮은 점수가 좋은 상태)
-        $percentage = 100 - $rawPercentage;
-        
-        // 레벨 판정
-        $level = $this->getLevel($percentage);
-        
         // 실제 카테고리별 분석 데이터 사용
         $categoryAnalysis = $this->analyzeCategoriesForSurvey($survey, $response);
         
-        return view('surveys.results', compact('survey', 'response', 'percentage', 'level', 'categoryAnalysis'));
-    }
-    
-    private function getLevel($percentage)
-    {
-        // 6단계 시스템 - 역전된 값 기준 (높을수록 좋음)
-        if ($percentage >= 83.33) {
-            return ['name' => '최적', 'color' => 'darkgreen'];
-        } elseif ($percentage >= 66.67) {
-            return ['name' => '우수', 'color' => 'darkgreen'];
-        } elseif ($percentage >= 50) {
-            return ['name' => '양호', 'color' => 'green'];
-        } elseif ($percentage >= 33.33) {
-            return ['name' => '주의', 'color' => 'orange'];
-        } elseif ($percentage >= 16.67) {
-            return ['name' => '위험', 'color' => 'red'];
-        } else {
-            return ['name' => '붕괴', 'color' => 'darkred'];
-        }
+        // 뷰로 전달 (percentage는 뷰에서 직접 계산)
+        return view('surveys.results', compact('survey', 'response', 'categoryAnalysis'));
     }
     
     private function analyzeCategoriesForSurvey($survey, $response)

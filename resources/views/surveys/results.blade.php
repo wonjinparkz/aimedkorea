@@ -11,108 +11,129 @@
             <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
                 <div class="max-w-lg mx-auto">
                     @php
-                        // 6개 구간 정의
-                        $segments = [
-                            ['name' => '붕괴', 'color' => '#991b1b', 'lightColor' => '#fecaca', 'start' => 0, 'end' => 16.67],
-                            ['name' => '위험', 'color' => '#dc2626', 'lightColor' => '#fecaca', 'start' => 16.67, 'end' => 33.33],
-                            ['name' => '주의', 'color' => '#f59e0b', 'lightColor' => '#fed7aa', 'start' => 33.33, 'end' => 50],
-                            ['name' => '양호', 'color' => '#10b981', 'lightColor' => '#bbf7d0', 'start' => 50, 'end' => 66.67],
-                            ['name' => '우수', 'color' => '#059669', 'lightColor' => '#a7f3d0', 'start' => 66.67, 'end' => 83.33],
-                            ['name' => '최적', 'color' => '#047857', 'lightColor' => '#86efac', 'start' => 83.33, 'end' => 100]
+                        // 실제 점수와 최대 점수 계산
+                        $actualScore = $response->total_score;
+                        $maxPossibleScore = count($survey->questions) * 4;
+                        $rawPercentage = round(($actualScore / $maxPossibleScore) * 100);
+                        
+                        // 계기판용 역전 백분율 (낮은 점수가 좋은 상태)
+                        $gaugePercentage = 100 - $rawPercentage;
+                        
+                        // 디버깅 정보
+                        $debugInfo = [
+                            'actualScore' => $actualScore,
+                            'maxPossibleScore' => $maxPossibleScore,
+                            'rawPercentage' => $rawPercentage,
+                            'gaugePercentage' => $gaugePercentage
                         ];
                         
-                        // 현재 퍼센트가 속한 구간 찾기
-                        $activeSegment = 0;
+                        // 6개 구간 정의
+                        $segments = [
+                            ['name' => '붕괴', 'color' => '#991b1b', 'min' => 0, 'max' => 16.67],
+                            ['name' => '위험', 'color' => '#dc2626', 'min' => 16.67, 'max' => 33.33],
+                            ['name' => '주의', 'color' => '#f59e0b', 'min' => 33.33, 'max' => 50],
+                            ['name' => '양호', 'color' => '#10b981', 'min' => 50, 'max' => 66.67],
+                            ['name' => '우수', 'color' => '#059669', 'min' => 66.67, 'max' => 83.33],
+                            ['name' => '최적', 'color' => '#047857', 'min' => 83.33, 'max' => 100]
+                        ];
+                        
+                        // 현재 구간 찾기
+                        $currentSegmentIndex = 0;
                         foreach ($segments as $index => $segment) {
-                            if ($percentage >= $segment['start'] && $percentage <= $segment['end']) {
-                                $activeSegment = $index;
+                            if ($gaugePercentage >= $segment['min'] && $gaugePercentage <= $segment['max']) {
+                                $currentSegmentIndex = $index;
                                 break;
                             }
                         }
+                        $currentSegment = $segments[$currentSegmentIndex];
+                        
+                        // 바늘 각도 계산 (-90도에서 90도)
+                        $needleAngle = -90 + ($gaugePercentage * 1.8);
                     @endphp
                     
-                    <!-- 게이지 차트 -->
-                    <div class="relative mx-auto" style="width: 100%; max-width: 400px; height: 220px;">
-                        @php
-                            $centerX = 150;
-                            $centerY = 130;
-                            $radius = 100;
-                        @endphp
-                        
-                        <!-- SVG 게이지 -->
-                        <svg viewBox="0 0 300 160" style="width: 100%; height: 100%;">
-                            <!-- 배경 반원 -->
-                            <path d="M 50 130 A 100 100 0 0 1 250 130" 
-                                  fill="none" 
-                                  stroke="#e5e7eb" 
-                                  stroke-width="20" 
-                                  stroke-linecap="round" />
-                            
-                            <!-- 6개 구간 -->
-                            @foreach($segments as $index => $segment)
-                                @php
-                                    // 각 구간의 시작과 끝 각도 (180도를 6등분)
-                                    $startAngle = 180 - ($index * 30);
-                                    $endAngle = 180 - (($index + 1) * 30);
-                                    
-                                    // 라디안으로 변환
-                                    $startRad = deg2rad($startAngle);
-                                    $endRad = deg2rad($endAngle);
-                                    
-                                    // 좌표 계산
-                                    $x1 = $centerX + $radius * cos($startRad);
-                                    $y1 = $centerY - $radius * sin($startRad);
-                                    $x2 = $centerX + $radius * cos($endRad);
-                                    $y2 = $centerY - $radius * sin($endRad);
-                                @endphp
-                                <path d="M {{ number_format($x1, 1) }} {{ number_format($y1, 1) }} A {{ $radius }} {{ $radius }} 0 0 0 {{ number_format($x2, 1) }} {{ number_format($y2, 1) }}" 
+                    <!-- 계기판 컨테이너 -->
+                    <div class="relative mx-auto" style="width: 100%; max-width: 400px; height: 250px;">
+                        <!-- 계기판 배경 -->
+                        <div class="absolute inset-0">
+                            <svg viewBox="0 0 200 100" style="width: 100%; height: 100%;">
+                                <!-- 배경 반원 -->
+                                <path d="M 20 90 A 70 70 0 0 1 180 90" 
                                       fill="none" 
-                                      stroke="{{ $segment['color'] }}" 
-                                      stroke-width="20"
-                                      stroke-linecap="butt"
-                                      opacity="{{ $activeSegment === $index ? '1' : '0.2' }}" />
-                            @endforeach
-                            
-                            <!-- 구분선 -->
-                            @for($i = 1; $i < 6; $i++)
-                                @php
-                                    $angle = 180 - ($i * 30);
-                                    $rad = deg2rad($angle);
-                                    $x1 = $centerX + ($radius - 10) * cos($rad);
-                                    $y1 = $centerY - ($radius - 10) * sin($rad);
-                                    $x2 = $centerX + ($radius + 10) * cos($rad);
-                                    $y2 = $centerY - ($radius + 10) * sin($rad);
-                                @endphp
-                                <line x1="{{ number_format($x1, 1) }}" y1="{{ number_format($y1, 1) }}" 
-                                      x2="{{ number_format($x2, 1) }}" y2="{{ number_format($y2, 1) }}" 
-                                      stroke="white" 
-                                      stroke-width="3" />
-                            @endfor
-                            
-                            <!-- 포인터 -->
-                            @php
-                                $pointerAngle = 180 - ($percentage * 1.8);
-                                $pointerRad = deg2rad($pointerAngle);
-                                $pointerX = $centerX + ($radius - 20) * cos($pointerRad);
-                                $pointerY = $centerY - ($radius - 20) * sin($pointerRad);
-                            @endphp
-                            <line x1="{{ $centerX }}" y1="{{ $centerY }}" 
-                                  x2="{{ number_format($pointerX, 1) }}" y2="{{ number_format($pointerY, 1) }}" 
-                                  stroke="#1f2937" 
-                                  stroke-width="4"
-                                  stroke-linecap="round" />
-                            <circle cx="{{ $centerX }}" cy="{{ $centerY }}" r="8" fill="#1f2937" />
-                            
-                            <!-- 중앙 텍스트 -->
-                            <text x="{{ $centerX }}" y="115" text-anchor="middle" class="text-4xl font-bold fill-gray-800">
-                                {{ $percentage }}%
-                            </text>
-                        </svg>
+                                      stroke="#e5e7eb" 
+                                      stroke-width="15" />
+                                
+                                <!-- 색상 구간들 -->
+                                @foreach($segments as $index => $segment)
+                                    @php
+                                        $startAngle = -90 + ($segment['min'] * 1.8);
+                                        $endAngle = -90 + ($segment['max'] * 1.8);
+                                        $startRad = deg2rad($startAngle);
+                                        $endRad = deg2rad($endAngle);
+                                        
+                                        $x1 = 100 + 70 * cos($startRad);
+                                        $y1 = 90 + 70 * sin($startRad);
+                                        $x2 = 100 + 70 * cos($endRad);
+                                        $y2 = 90 + 70 * sin($endRad);
+                                        
+                                        $largeArc = ($segment['max'] - $segment['min']) > 50 ? 1 : 0;
+                                    @endphp
+                                    <path d="M {{ $x1 }} {{ $y1 }} A 70 70 0 {{ $largeArc }} 1 {{ $x2 }} {{ $y2 }}"
+                                          fill="none"
+                                          stroke="{{ $segment['color'] }}"
+                                          stroke-width="15"
+                                          opacity="{{ $currentSegmentIndex === $index ? '1' : '0.3' }}"
+                                          class="transition-opacity duration-500" />
+                                @endforeach
+                                
+                                <!-- 눈금 표시 -->
+                                @for($i = 0; $i <= 100; $i += 20)
+                                    @php
+                                        $tickAngle = -90 + ($i * 1.8);
+                                        $tickRad = deg2rad($tickAngle);
+                                        $x1 = 100 + 60 * cos($tickRad);
+                                        $y1 = 90 + 60 * sin($tickRad);
+                                        $x2 = 100 + 80 * cos($tickRad);
+                                        $y2 = 90 + 80 * sin($tickRad);
+                                        $textX = 100 + 50 * cos($tickRad);
+                                        $textY = 90 + 50 * sin($tickRad);
+                                    @endphp
+                                    <line x1="{{ $x1 }}" y1="{{ $y1 }}" 
+                                          x2="{{ $x2 }}" y2="{{ $y2 }}" 
+                                          stroke="#9ca3af" 
+                                          stroke-width="2" />
+                                    <text x="{{ $textX }}" y="{{ $textY }}" 
+                                          text-anchor="middle" 
+                                          dominant-baseline="middle"
+                                          fill="#6b7280"
+                                          font-size="10">{{ $i }}</text>
+                                @endfor
+                                
+                                <!-- 바늘 -->
+                                <g transform="translate(100, 90)" id="gauge-needle">
+                                    <line x1="0" y1="0" 
+                                          x2="0" y2="-55" 
+                                          stroke="#1f2937" 
+                                          stroke-width="3"
+                                          stroke-linecap="round"
+                                          transform="rotate({{ $needleAngle }})"
+                                          class="transition-transform duration-1000 ease-out" />
+                                    <circle cx="0" cy="0" r="6" fill="#1f2937" />
+                                </g>
+                            </svg>
+                        </div>
                         
-                        <!-- 레벨 라벨들 -->
-                        <div class="absolute bottom-0 left-0 right-0 flex justify-between px-1">
-                            @foreach($segments as $index => $segment)
-                                <div class="text-xs font-medium {{ $activeSegment === $index ? 'text-gray-900 font-bold' : 'text-gray-400' }} transition-all duration-500">
+                        <!-- 중앙 표시 -->
+                        <div class="absolute inset-0 flex items-end justify-center pb-8">
+                            <div class="text-center">
+                                <div class="text-4xl font-bold text-gray-800">{{ round($gaugePercentage) }}%</div>
+                                <div class="text-sm text-gray-500">건강 지수</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 라벨 -->
+                        <div class="absolute bottom-0 left-0 right-0 flex justify-between px-2">
+                            @foreach($segments as $segment)
+                                <div class="text-xs {{ $currentSegment['name'] === $segment['name'] ? 'font-bold text-gray-800' : 'text-gray-400' }}">
                                     {{ $segment['name'] }}
                                 </div>
                             @endforeach
@@ -122,15 +143,21 @@
                     <!-- 점수 정보 -->
                     <div class="text-center mt-8">
                         <div class="mb-4">
-                            <p class="text-2xl font-bold text-gray-800">노화 전환 임계</p>
-                            <p class="text-sm text-gray-500 mt-1">(0% 불과 ~ 50% 양호 ~ 100% 확적)</p>
+                            <p class="text-2xl font-bold text-gray-800">종합 건강 지수</p>
+                            <p class="text-sm text-gray-500 mt-1">
+                                실제 점수: {{ $actualScore }}점 / {{ $maxPossibleScore }}점
+                            </p>
+                            <!-- 디버깅 정보 (개발 중에만 표시) -->
+                            @if(config('app.debug'))
+                                <div class="mt-2 p-2 bg-gray-100 rounded text-xs text-gray-600">
+                                    <p>원점수: {{ $rawPercentage }}% (높을수록 나쁨)</p>
+                                    <p>역전점수: {{ $gaugePercentage }}% (높을수록 좋음)</p>
+                                </div>
+                            @endif
                         </div>
                         
                         <!-- 현재 상태 표시 -->
                         <div class="mb-6">
-                            @php
-                                $currentSegment = $segments[$activeSegment] ?? $segments[0];
-                            @endphp
                             <span class="inline-flex items-center px-8 py-4 rounded-full text-xl font-bold shadow-lg bg-gradient-to-r from-gray-50 to-gray-100 border-2" 
                                   style="border-color: {{ $currentSegment['color'] }}; color: {{ $currentSegment['color'] }}">
                                 {{ $currentSegment['name'] }} 상태
@@ -140,15 +167,15 @@
                         <!-- 상태별 설명 -->
                         <div class="bg-gray-50 rounded-xl p-6">
                             <p class="text-gray-700 leading-relaxed">
-                                @if($activeSegment === 5)
+                                @if($gaugePercentage >= 83.33)
                                     <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">최적의 상태입니다!</span> 현재의 우수한 컨디션을 계속 유지하시기 바랍니다.
-                                @elseif($activeSegment === 4)
+                                @elseif($gaugePercentage >= 66.67)
                                     <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">우수한 상태입니다.</span> 조금만 더 노력하면 최적 상태에 도달할 수 있습니다.
-                                @elseif($activeSegment === 3)
+                                @elseif($gaugePercentage >= 50)
                                     <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">양호한 상태입니다.</span> 지속적인 관리로 더 나은 상태를 만들어보세요.
-                                @elseif($activeSegment === 2)
+                                @elseif($gaugePercentage >= 33.33)
                                     <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">주의가 필요한 상태입니다.</span> 생활 습관 개선이 시급합니다.
-                                @elseif($activeSegment === 1)
+                                @elseif($gaugePercentage >= 16.67)
                                     <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">위험한 상태입니다.</span> 즉시 전문가의 도움을 받으시기 바랍니다.
                                 @else
                                     <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">매우 심각한 상태입니다.</span> 반드시 전문의와 상담하여 적극적인 치료를 받으세요.
@@ -186,7 +213,7 @@
                                 </div>
                                 @if(isset($category['score']) && isset($category['max_score']))
                                     <div class="text-xs text-gray-500 mt-1 text-right">
-                                        득점: {{ $category['score'] }}/{{ $category['max_score'] }}점
+                                        원점수: {{ $category['score'] }}/{{ $category['max_score'] }}점
                                     </div>
                                 @endif
                             </div>
@@ -207,7 +234,7 @@
             @endif
 
             <!-- 액션 버튼 -->
-            <div class="flex justify-center space-x-4">
+            <div class="flex justify-center space-x-4 no-print">
                 <a href="{{ route('surveys.index') }}" 
                    class="inline-flex items-center px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,10 +264,22 @@
 
     @push('scripts')
     <script>
-        // 페이지 로드 시 애니메이션 효과
+        // 페이지 로드 시 애니메이션
         document.addEventListener('DOMContentLoaded', function() {
+            // 바늘 애니메이션을 위한 초기 설정
+            const needle = document.querySelector('#gauge-needle line');
+            if (needle) {
+                // 초기 위치를 -90도로 설정
+                needle.style.transform = 'rotate(-90deg)';
+                
+                // 약간의 지연 후 목표 각도로 회전
+                setTimeout(() => {
+                    needle.style.transform = 'rotate({{ $needleAngle }}deg)';
+                }, 100);
+            }
+            
             // 카테고리별 진행도 바 애니메이션
-            const progressBars = document.querySelectorAll('[style*="width"]');
+            const progressBars = document.querySelectorAll('.space-y-4 [style*="width"]');
             progressBars.forEach(bar => {
                 const width = bar.style.width;
                 bar.style.width = '0%';
@@ -263,6 +302,12 @@
                 print-color-adjust: exact;
                 -webkit-print-color-adjust: exact;
             }
+        }
+        
+        /* 부드러운 전환 효과 */
+        #gauge-needle line {
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
         }
     </style>
     @endpush
