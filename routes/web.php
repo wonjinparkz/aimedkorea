@@ -10,7 +10,6 @@ Route::get('/', function () {
     
     // 특징 게시물 - featured 타입의 가장 최신 게시물 1개
     $featuredPost = Post::where('type', 'featured')
-        ->where('is_published', true)
         ->latest()
         ->first();
     
@@ -25,7 +24,6 @@ Route::get('/', function () {
         ->get();
     
     $tabPosts = Post::where('type', 'tab')
-        ->where('is_published', true)
         ->orderBy('created_at', 'desc')
         ->get();
     
@@ -74,7 +72,6 @@ Route::get('/{type}', function ($type) {
     }
     
     $posts = Post::where('type', $type)
-        ->where('is_published', true)
         ->latest()
         ->paginate(9);
     
