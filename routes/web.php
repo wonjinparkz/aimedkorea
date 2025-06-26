@@ -62,30 +62,51 @@ Route::middleware([
     })->name('dashboard');
 });
 
-// 게시물 타입별 리스트 페이지 (가장 마지막에 위치)
-Route::get('/{type}', function ($type) {
-    // 허용된 타입 검증
-    $allowedTypes = ['news', 'blog', 'routine', 'featured'];
-    
-    if (!in_array($type, $allowedTypes)) {
-        abort(404);
-    }
-    
-    $posts = Post::where('type', $type)
+// 명시적 라우트 추가 (웹서버 설정 문제 해결)
+Route::get('/news', function () {
+    $posts = Post::where('type', 'news')
         ->latest()
         ->paginate(9);
     
-    // 타입별 제목 설정
-    $titles = [
-        'news' => 'News',
-        'blog' => 'Blog',
-        'routine' => 'Routines',  
-        'featured' => 'Featured'
-    ];
+    return view('posts.list', [
+        'posts' => $posts,
+        'title' => 'News',
+        'type' => 'news'
+    ]);
+})->name('posts.news.index');
+
+Route::get('/blog', function () {
+    $posts = Post::where('type', 'blog')
+        ->latest()
+        ->paginate(9);
     
     return view('posts.list', [
         'posts' => $posts,
-        'title' => $titles[$type] ?? ucfirst($type),
-        'type' => $type
+        'title' => 'Blog',
+        'type' => 'blog'
     ]);
-})->name('posts.type.index')->where('type', 'news|blog|routine|featured');
+})->name('posts.blog.index');
+
+Route::get('/routine', function () {
+    $posts = Post::where('type', 'routine')
+        ->latest()
+        ->paginate(9);
+    
+    return view('posts.list', [
+        'posts' => $posts,
+        'title' => 'Routines',
+        'type' => 'routine'
+    ]);
+})->name('posts.routine.index');
+
+Route::get('/featured', function () {
+    $posts = Post::where('type', 'featured')
+        ->latest()
+        ->paginate(9);
+    
+    return view('posts.list', [
+        'posts' => $posts,
+        'title' => 'Featured',
+        'type' => 'featured'
+    ]);
+})->name('posts.featured.index');
