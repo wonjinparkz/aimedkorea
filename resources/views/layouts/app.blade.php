@@ -7,7 +7,7 @@
 
         <script src="https://cdn.tailwindcss.com"></script>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>@yield('title', config('app.name', 'Laravel'))</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -18,6 +18,7 @@
 
         <!-- Styles -->
         @livewireStyles
+        @stack('styles')
     </head>
     <body class="font-sans antialiased">
         <x-banner />
@@ -46,5 +47,6 @@
         @stack('modals')
 
         @livewireScripts
+        @stack('scripts')
     </body>
 </html>

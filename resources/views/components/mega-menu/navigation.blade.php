@@ -2,29 +2,48 @@
     // project_options에서 헤더 메뉴 가져오기
     $headerMenuItems = get_option('header_menu', []);
     
+    // 현재 언어 설정 가져오기 (기본값: kor)
+    $currentLang = session('locale', 'kor');
+    
+    // 언어별 필드 매핑
+    $langFieldMap = [
+        'kor' => 'label',
+        'eng' => 'label_eng',
+        'chn' => 'label_chn',
+        'hin' => 'label_hin',
+        'arb' => 'label_arb',
+    ];
+    
+    $langField = $langFieldMap[$currentLang] ?? 'label';
+    
     // 메뉴 객체 형태로 변환
     $menuData = new \stdClass();
-    $menuData->items = collect($headerMenuItems)->map(function ($item) {
+    $menuData->items = collect($headerMenuItems)->map(function ($item) use ($langField) {
         $menuItem = new \stdClass();
-        $menuItem->title = $item['label'] ?? '';
+        // 현재 언어의 라벨 사용, 없으면 기본 라벨 사용
+        $menuItem->title = $item[$langField] ?? $item['label'] ?? '';
         $menuItem->url = $item['url'] ?? '';
         $menuItem->full_url = $item['url'] ?? '';
         $menuItem->target = '_self';
         $menuItem->css_class = '';
         $menuItem->icon = null;
-        $menuItem->is_active = true;
+        $menuItem->is_active = $item['active'] ?? true;
         $menuItem->description = '';
         
         // 메뉴 타입에 따른 처리
         if ($item['type'] === 'mega') {
             $menuItem->is_mega_menu = true;
             $menuItem->mega_menu_content = [
-                'columns' => collect($item['groups'] ?? [])->map(function ($group) {
+                'columns' => collect($item['groups'] ?? [])->map(function ($group) use ($langField) {
+                    // 그룹 라벨도 현재 언어에 맞게 설정
+                    $groupLangField = str_replace('label', 'group_label', $langField);
+                    $groupTitle = $group[$groupLangField] ?? $group['group_label'] ?? $group['label'] ?? '';
+                    
                     return [
-                        'title' => $group['group_label'] ?? '',
-                        'items' => collect($group['items'] ?? [])->map(function ($groupItem) {
+                        'title' => $groupTitle,
+                        'items' => collect($group['items'] ?? [])->map(function ($groupItem) use ($langField) {
                             return [
-                                'title' => $groupItem['label'] ?? '',
+                                'title' => $groupItem[$langField] ?? $groupItem['label'] ?? '',
                                 'url' => $groupItem['url'] ?? '',
                                 'description' => ''
                             ];
@@ -33,11 +52,12 @@
                 })->toArray()
             ];
             $menuItem->activeChildren = collect([]);
-        } elseif ($item['type'] === 'dropdown') {
+        } elseif ($item['type'] === 'dropdown' || !empty($item['children'])) {
             $menuItem->is_mega_menu = false;
-            $menuItem->activeChildren = collect($item['children'] ?? [])->map(function ($child) {
+            $menuItem->activeChildren = collect($item['children'] ?? [])->map(function ($child) use ($langField) {
                 $childItem = new \stdClass();
-                $childItem->title = $child['label'] ?? '';
+                // 하위 메뉴도 현재 언어의 라벨 사용
+                $childItem->title = $child[$langField] ?? $child['label'] ?? '';
                 $childItem->url = $child['url'] ?? '';
                 $childItem->full_url = $child['url'] ?? '';
                 $childItem->target = '_self';
@@ -52,6 +72,9 @@
         $menuItem->id = uniqid();
         
         return $menuItem;
+    })->filter(function ($item) {
+        // 활성화된 메뉴만 표시
+        return $item->is_active;
     });
 @endphp
 
@@ -236,10 +259,37 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
                         </button>
 
                         <!-- Language Selector -->
-                        <select class="text-sm border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500">
-                            <option>KOR</option>
-                            <option>ENG</option>
+                        <select 
+                            class="text-sm border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500"
+                            onchange="changeLanguage(this.value)"
+                        >
+                            <option value="kor" {{ $currentLang == 'kor' ? 'selected' : '' }}>KOR</option>
+                            <option value="eng" {{ $currentLang == 'eng' ? 'selected' : '' }}>ENG</option>
+                            <option value="chn" {{ $currentLang == 'chn' ? 'selected' : '' }}>CHN</option>
+                            <option value="hin" {{ $currentLang == 'hin' ? 'selected' : '' }}>HIN</option>
+                            <option value="arb" {{ $currentLang == 'arb' ? 'selected' : '' }}>ARB</option>
                         </select>
+                        
+                        <script>
+                            function changeLanguage(lang) {
+                                // AJAX 요청으로 언어 변경
+                                fetch('/change-language', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                    },
+                                    body: JSON.stringify({ language: lang })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        // 페이지 새로고침하여 변경된 언어 적용
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                        </script>
 
                         <!-- Desktop Mega Menu Button -->
                         <button @click="toggleMegaMenu()" class="p-2 text-gray-700 hover:text-gray-900 transition-colors">

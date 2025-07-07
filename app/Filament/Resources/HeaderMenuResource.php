@@ -9,8 +9,9 @@ use Filament\Resources\Resource;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Placeholder;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Str;
 
@@ -32,131 +33,144 @@ class HeaderMenuResource extends Resource
     {
         return $form
             ->schema([
+                // 안내 메시지
+                Section::make()
+                    ->schema([
+                        Placeholder::make('guide')
+                            ->label('')
+                            ->content('🔍 메뉴를 추가하고 드래그하여 순서를 변경할 수 있습니다. 하위 메뉴가 있으면 자동으로 드롭다운 메뉴가 됩니다.')
+                    ]),
+                    
                 Section::make('헤더 메뉴 설정')
-                    ->description('웹사이트 상단에 표시되는 메뉴를 관리합니다. 드래그하여 순서를 변경할 수 있습니다.')
+                    ->description('웹사이트 상단에 표시되는 메뉴를 관리합니다.')
                     ->schema([
                         Repeater::make('menu_items')
-                            ->label('메인 메뉴')
+                            ->label('메뉴 목록')
                             ->schema([
-                                Grid::make(2)
+                                // 다국어 메뉴 이름
+                                Section::make('메뉴 이름 (다국어)')
                                     ->schema([
-                                        TextInput::make('label')
-                                            ->label('메뉴 이름')
-                                            ->required()
-                                            ->placeholder('예: 회사소개')
-                                            ->helperText('메뉴에 표시될 이름을 입력하세요')
-                                            ->reactive()
-                                            ->afterStateUpdated(fn ($state, Forms\Set $set) => 
-                                                $set('slug', Str::slug($state))
-                                            ),
-                                        
-                                        TextInput::make('url')
-                                            ->label('링크 주소')
-                                            ->placeholder('예: /about 또는 https://...')
-                                            ->helperText('페이지 주소를 입력하세요 (하위 메뉴가 있으면 비워두세요)')
-                                            ->reactive(),
-                                    ]),
-                                
-                                Select::make('type')
-                                    ->label('메뉴 유형')
-                                    ->options([
-                                        'link' => '일반 링크',
-                                        'dropdown' => '드롭다운 메뉴 (하위 메뉴 있음)',
-                                        'mega' => '메가 메뉴 (그룹으로 구성)'
-                                    ])
-                                    ->default('link')
-                                    ->reactive()
-                                    ->helperText('메뉴의 종류를 선택하세요'),
-                                
-                                // 일반 드롭다운 메뉴
-                                Repeater::make('children')
-                                    ->label('하위 메뉴')
-                                    ->schema([
-                                        TextInput::make('label')
-                                            ->label('하위 메뉴 이름')
-                                            ->required()
-                                            ->placeholder('예: 인사말'),
-                                        
-                                        TextInput::make('url')
-                                            ->label('링크 주소')
-                                            ->required()
-                                            ->placeholder('예: /about/greeting'),
-                                    ])
-                                    ->visible(fn (Forms\Get $get) => $get('type') === 'dropdown')
-                                    ->collapsed()
-                                    ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
-                                    ->addActionLabel('하위 메뉴 추가')
-                                    ->reorderable()
-                                    ->collapsible(),
-                                
-                                // 메가 메뉴 (그룹)
-                                Repeater::make('groups')
-                                    ->label('메뉴 그룹')
-                                    ->schema([
-                                        TextInput::make('group_label')
-                                            ->label('그룹 이름')
-                                            ->required()
-                                            ->placeholder('예: 회사 정보')
-                                            ->helperText('그룹의 제목을 입력하세요'),
-                                        
-                                        Repeater::make('items')
-                                            ->label('그룹 내 메뉴')
+                                        Grid::make(5)
                                             ->schema([
                                                 TextInput::make('label')
-                                                    ->label('메뉴 이름')
+                                                    ->label('🇰🇷 한국어')
                                                     ->required()
-                                                    ->placeholder('예: CEO 인사말'),
+                                                    ->placeholder('예: 회사소개'),
                                                 
-                                                TextInput::make('url')
-                                                    ->label('링크 주소')
-                                                    ->required()
-                                                    ->placeholder('예: /about/ceo'),
-                                            ])
-                                            ->collapsed()
-                                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
-                                            ->addActionLabel('메뉴 추가')
-                                            ->reorderable()
-                                            ->collapsible(),
+                                                TextInput::make('label_eng')
+                                                    ->label('🇬🇧 English')
+                                                    ->placeholder('ex: About Us'),
+                                                
+                                                TextInput::make('label_chn')
+                                                    ->label('🇨🇳 中文')
+                                                    ->placeholder('例: 关于我们'),
+                                                
+                                                TextInput::make('label_hin')
+                                                    ->label('🇮🇳 हिन्दी')
+                                                    ->placeholder('उदा: हमारे बारे में'),
+                                                
+                                                TextInput::make('label_arb')
+                                                    ->label('🇸🇦 العربية')
+                                                    ->placeholder('مثال: معلومات عنا'),
+                                            ]),
                                     ])
-                                    ->visible(fn (Forms\Get $get) => $get('type') === 'mega')
-                                    ->collapsed()
-                                    ->itemLabel(fn (array $state): ?string => $state['group_label'] ?? null)
-                                    ->addActionLabel('그룹 추가')
-                                    ->reorderable()
-                                    ->maxItems(4)
                                     ->collapsible(),
+                                
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('url')
+                                            ->label('🔗 링크 주소')
+                                            ->placeholder('/about')
+                                            ->helperText('하위 메뉴가 있으면 비워두세요')
+                                            ->reactive()
+                                            ->extraAttributes([
+                                                'style' => 'font-size: 1.1rem;'
+                                            ]),
+                                            
+                                        Toggle::make('active')
+                                            ->label('활성화')
+                                            ->default(true)
+                                            ->inline()
+                                            ->helperText('메뉴 표시 여부'),
+                                    ]),
+                                
+                                // 하위 메뉴 (단순화)
+                                Repeater::make('children')
+                                    ->label('📂 하위 메뉴')
+                                    ->schema([
+                                        Section::make('하위 메뉴 이름 (다국어)')
+                                            ->schema([
+                                                Grid::make(5)
+                                                    ->schema([
+                                                        TextInput::make('label')
+                                                            ->label('🇰🇷 한국어')
+                                                            ->required()
+                                                            ->placeholder('예: CEO 인사말'),
+                                                        
+                                                        TextInput::make('label_eng')
+                                                            ->label('🇬🇧 English')
+                                                            ->placeholder('ex: CEO Message'),
+                                                        
+                                                        TextInput::make('label_chn')
+                                                            ->label('🇨🇳 中文')
+                                                            ->placeholder('例: CEO致辞'),
+                                                        
+                                                        TextInput::make('label_hin')
+                                                            ->label('🇮🇳 हिन्दी')
+                                                            ->placeholder('उदा: CEO संदेश'),
+                                                        
+                                                        TextInput::make('label_arb')
+                                                            ->label('🇸🇦 العربية')
+                                                            ->placeholder('مثال: رسالة الرئيس'),
+                                                    ]),
+                                            ])
+                                            ->compact(),
+                                        
+                                        TextInput::make('url')
+                                            ->label('링크 주소')
+                                            ->required()
+                                            ->placeholder('/about/ceo')
+                                            ->extraAttributes([
+                                                'style' => 'font-size: 1.05rem;'
+                                            ]),
+                                    ])
+                                    ->collapsed()
+                                    ->itemLabel(fn (array $state): ?string => '└─ ' . ($state['label'] ?? '하위 메뉴'))
+                                    ->addActionLabel('➕ 하위 메뉴 추가')
+                                    ->reorderable()
+                                    ->collapsible()
+                                    ->helperText('하위 메뉴를 추가하면 자동으로 드롭다운 메뉴가 됩니다'),
                             ])
                             ->collapsed()
-                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? null)
-                            ->addActionLabel('메인 메뉴 추가')
+                            ->itemLabel(function (array $state): ?string {
+                                $label = $state['label'] ?? '새 메뉴';
+                                $childCount = count($state['children'] ?? []);
+                                return $childCount > 0 
+                                    ? "📁 {$label} ({$childCount}개 하위메뉴)" 
+                                    : "📄 {$label}";
+                            })
+                            ->addActionLabel('➕ 메인 메뉴 추가')
                             ->reorderable()
-                            ->maxItems(8)
+                            ->maxItems(10)
                             ->defaultItems(0)
-                            ->collapsible(),
-                    ])
-                    ->collapsible(false),
+                            ->collapsible()
+                            ->extraAttributes([
+                                'class' => 'menu-repeater'
+                            ]),
+                    ]),
             ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageHeaderMenus::route('/'),
+            'index' => Pages\CustomManageHeaderMenus::route('/'),
         ];
     }
     
     public static function getNavigationBadge(): ?string
     {
-        return null;
-    }
-    
-    public static function getNavigationUrl(): string
-    {
-        return static::getUrl('index');
-    }
-    
-    public static function shouldRegisterNavigation(): bool
-    {
-        return true;
+        $menuItems = get_option('header_menu', []);
+        return count($menuItems) > 0 ? count($menuItems) : null;
     }
 }

@@ -14,12 +14,17 @@ class SurveyResponse extends Model
         'user_id',
         'responses_data',
         'total_score',
+        'recovery_score',
+        'recovery_data',
+        'last_viewed_at',
         'ip_address',
         'user_agent',
     ];
 
     protected $casts = [
         'responses_data' => 'array',
+        'recovery_data' => 'array',
+        'last_viewed_at' => 'datetime',
     ];
 
     public function survey()

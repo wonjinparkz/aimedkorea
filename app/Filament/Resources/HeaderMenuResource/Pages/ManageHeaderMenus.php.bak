@@ -1,0 +1,296 @@
+<?php
+
+namespace App\Filament\Resources\HeaderMenuResource\Pages;
+
+use App\Filament\Resources\HeaderMenuResource;
+use Filament\Resources\Pages\Page;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Actions\Action;
+use Illuminate\Contracts\View\View;
+use Filament\Forms\Form;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Actions;
+use Illuminate\Support\Str;
+
+class ManageHeaderMenus extends Page implements HasForms
+{
+    use InteractsWithForms;
+
+    protected static string $resource = HeaderMenuResource::class;
+
+    protected static string $view = 'filament.resources.header-menu-resource.pages.manage-header-menus';
+    
+    protected static ?string $title = '헤더 메뉴 편집';
+    
+    public ?array $data = [];
+    
+    public function mount(): void
+    {
+        // project_options에서 헤더 메뉴 데이터 가져오기
+        $headerMenu = get_option('header_menu', []);
+        
+        $this->form->fill([
+            'menu_items' => $headerMenu
+        ]);
+    }
+    
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                // 안내 메시지
+                Section::make()
+                    ->schema([
+                        Placeholder::make('guide')
+                            ->label('')
+                            ->content('🔍 메뉴를 추가하고 드래그하여 순서를 변경할 수 있습니다. 하위 메뉴가 있으면 자동으로 드롭다운 메뉴가 됩니다.')
+                    ]),
+                    
+                Section::make('헤더 메뉴 설정')
+                    ->description('웹사이트 상단에 표시되는 메뉴를 관리합니다.')
+                    ->schema([
+                        Repeater::make('menu_items')
+                            ->label('메뉴 목록')
+                            ->schema([
+                                Grid::make(3)
+                                    ->schema([
+                                        TextInput::make('label')
+                                            ->label('📝 메뉴 이름')
+                                            ->required()
+                                            ->placeholder('예: 회사소개')
+                                            ->helperText('메뉴에 표시될 이름')
+                                            ->extraAttributes([
+                                                'style' => 'font-size: 1.1rem;'
+                                            ]),
+                                        
+                                        TextInput::make('url')
+                                            ->label('🔗 링크 주소')
+                                            ->placeholder('/about')
+                                            ->helperText('하위 메뉴가 있으면 비워두세요')
+                                            ->reactive()
+                                            ->extraAttributes([
+                                                'style' => 'font-size: 1.1rem;'
+                                            ]),
+                                            
+                                        Toggle::make('active')
+                                            ->label('활성화')
+                                            ->default(true)
+                                            ->inline()
+                                            ->helperText('메뉴 표시 여부'),
+                                    ]),
+                                
+                                // 하위 메뉴 (단순화)
+                                Repeater::make('children')
+                                    ->label('📂 하위 메뉴')
+                                    ->schema([
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextInput::make('label')
+                                                    ->label('하위 메뉴 이름')
+                                                    ->required()
+                                                    ->placeholder('예: CEO 인사말')
+                                                    ->extraAttributes([
+                                                        'style' => 'font-size: 1.05rem;'
+                                                    ]),
+                                                
+                                                TextInput::make('url')
+                                                    ->label('링크 주소')
+                                                    ->required()
+                                                    ->placeholder('/about/ceo')
+                                                    ->extraAttributes([
+                                                        'style' => 'font-size: 1.05rem;'
+                                                    ]),
+                                            ]),
+                                    ])
+                                    ->collapsed()
+                                    ->itemLabel(fn (array $state): ?string => '└─ ' . ($state['label'] ?? '하위 메뉴'))
+                                    ->addActionLabel('➕ 하위 메뉴 추가')
+                                    ->reorderable()
+                                    ->collapsible()
+                                    ->helperText('하위 메뉴를 추가하면 자동으로 드롭다운 메뉴가 됩니다'),
+                            ])
+                            ->collapsed()
+                            ->itemLabel(function (array $state): ?string {
+                                $label = $state['label'] ?? '새 메뉴';
+                                $childCount = count($state['children'] ?? []);
+                                if (!($state['active'] ?? true)) {
+                                    $label = "🔴 {$label}";
+                                }
+                                return $childCount > 0 
+                                    ? "📁 {$label} ({$childCount}개 하위메뉴)" 
+                                    : "📄 {$label}";
+                            })
+                            ->addActionLabel('➕ 메인 메뉴 추가')
+                            ->reorderable()
+                            ->maxItems(10)
+                            ->defaultItems(0)
+                            ->collapsible()
+                            ->extraAttributes([
+                                'class' => 'menu-repeater'
+                            ]),
+                    ]),
+                    
+                // 자주 사용하는 메뉴 템플릿
+                Section::make('빠른 템플릿')
+                    ->description('자주 사용하는 메뉴 구조를 빠르게 추가할 수 있습니다')
+                    ->collapsed()
+                    ->schema([
+                        Actions::make([
+                            Actions\Action::make('add_company_menu')
+                                ->label('🏢 회사소개 메뉴 추가')
+                                ->action(function ($livewire) {
+                                    $currentData = $livewire->data['menu_items'] ?? [];
+                                    $companyMenu = [
+                                        'label' => '회사소개',
+                                        'url' => '',
+                                        'active' => true,
+                                        'children' => [
+                                            ['label' => 'CEO 인사말', 'url' => '/about/ceo'],
+                                            ['label' => '회사 연혁', 'url' => '/about/history'],
+                                            ['label' => '조직도', 'url' => '/about/organization'],
+                                            ['label' => '오시는 길', 'url' => '/about/location'],
+                                        ]
+                                    ];
+                                    $currentData[] = $companyMenu;
+                                    $livewire->data['menu_items'] = $currentData;
+                                    
+                                    Notification::make()
+                                        ->title('회사소개 메뉴가 추가되었습니다')
+                                        ->success()
+                                        ->send();
+                                })
+                                ->color('gray')
+                                ->size('lg'),
+                                
+                            Actions\Action::make('add_service_menu')
+                                ->label('💼 서비스 메뉴 추가')
+                                ->action(function ($livewire) {
+                                    $currentData = $livewire->data['menu_items'] ?? [];
+                                    $serviceMenu = [
+                                        'label' => '서비스',
+                                        'url' => '',
+                                        'active' => true,
+                                        'children' => [
+                                            ['label' => '서비스 소개', 'url' => '/service/intro'],
+                                            ['label' => '이용 안내', 'url' => '/service/guide'],
+                                            ['label' => '요금 안내', 'url' => '/service/pricing'],
+                                        ]
+                                    ];
+                                    $currentData[] = $serviceMenu;
+                                    $livewire->data['menu_items'] = $currentData;
+                                    
+                                    Notification::make()
+                                        ->title('서비스 메뉴가 추가되었습니다')
+                                        ->success()
+                                        ->send();
+                                })
+                                ->color('gray')
+                                ->size('lg'),
+                                
+                            Actions\Action::make('add_support_menu')
+                                ->label('📞 고객지원 메뉴 추가')
+                                ->action(function ($livewire) {
+                                    $currentData = $livewire->data['menu_items'] ?? [];
+                                    $supportMenu = [
+                                        'label' => '고객지원',
+                                        'url' => '',
+                                        'active' => true,
+                                        'children' => [
+                                            ['label' => '공지사항', 'url' => '/support/notice'],
+                                            ['label' => 'FAQ', 'url' => '/support/faq'],
+                                            ['label' => '1:1 문의', 'url' => '/support/contact'],
+                                            ['label' => '자료실', 'url' => '/support/downloads'],
+                                        ]
+                                    ];
+                                    $currentData[] = $supportMenu;
+                                    $livewire->data['menu_items'] = $currentData;
+                                    
+                                    Notification::make()
+                                        ->title('고객지원 메뉴가 추가되었습니다')
+                                        ->success()
+                                        ->send();
+                                })
+                                ->color('gray')
+                                ->size('lg'),
+                        ])->columns(3),
+                    ]),
+            ])
+            ->statePath('data');
+    }
+    
+    public function save(): void
+    {
+        $data = $this->form->getState();
+        
+        // project_options에 저장
+        update_option('header_menu', $data['menu_items'] ?? []);
+        
+        // 성공 메시지
+        Notification::make()
+            ->title('✅ 메뉴가 성공적으로 저장되었습니다!')
+            ->body('변경사항이 웹사이트에 적용되었습니다.')
+            ->success()
+            ->duration(5000)
+            ->send();
+            
+        // 페이지 새로고침하여 최신 데이터 표시
+        $this->redirect(static::getUrl());
+    }
+    
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('custom')
+                ->label('🎨 시각적 편집기')
+                ->url(fn () => static::getResource()::getUrl('custom'))
+                ->color('success')
+                ->icon('heroicon-o-paint-brush')
+                ->size('lg'),
+                
+            Action::make('preview')
+                ->label('👁 미리보기')
+                ->action(fn () => $this->dispatch('open-preview-modal'))
+                ->color('gray')
+                ->icon('heroicon-o-eye')
+                ->size('lg'),
+                
+            Action::make('save')
+                ->label('💾 메뉴 저장')
+                ->action('save')
+                ->color('primary')
+                ->icon('heroicon-o-check')
+                ->size('lg')
+                ->extraAttributes([
+                    'class' => 'text-lg'
+                ]),
+        ];
+    }
+    
+    public function getTitle(): string
+    {
+        return '헤더 메뉴 편집';
+    }
+    
+    public function getHeading(): string
+    {
+        return '🔧 헤더 메뉴 관리';
+    }
+    
+    public function getSubheading(): ?string
+    {
+        return '웹사이트 상단 메뉴를 쉽게 편집할 수 있습니다. 변경사항은 저장 버튼을 클릭해야 적용됩니다.';
+    }
+    
+    // 미리보기용 메뉴 데이터 가져오기
+    public function getPreviewData(): array
+    {
+        return $this->data['menu_items'] ?? [];
+    }
+}
