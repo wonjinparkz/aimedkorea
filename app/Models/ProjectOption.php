@@ -35,12 +35,19 @@ class ProjectOption extends Model
             return $default;
         }
 
-        // JSON 디코딩 시도
-        $decoded = json_decode($option->option_value, true);
-        
-        // JSON이 유효한 경우 디코딩된 값 반환
-        if (json_last_error() === JSON_ERROR_NONE) {
-            return $decoded;
+        // 이미 배열인 경우 그대로 반환
+        if (is_array($option->option_value)) {
+            return $option->option_value;
+        }
+
+        // 문자열인 경우에만 JSON 디코딩 시도
+        if (is_string($option->option_value)) {
+            $decoded = json_decode($option->option_value, true);
+            
+            // JSON이 유효한 경우 디코딩된 값 반환
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $decoded;
+            }
         }
         
         // JSON이 아닌 경우 원본 값 반환
