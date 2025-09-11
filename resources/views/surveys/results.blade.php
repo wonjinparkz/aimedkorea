@@ -4,40 +4,54 @@
             <!-- 헤더 -->
             <div class="text-center mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-3">{{ $survey->title }}</h1>
-                <p class="text-xl text-gray-600">귀하의 전반적인 상태를 나타내는 종합 지수입니다.</p>
+                <p class="text-xl text-gray-600">귀하의 디지털 노화 상태를 나타내는 노화지수입니다.</p>
+                
+                @php
+                    $currentLang = session('locale', 'kor');
+                    // 노화지수 계산
+                    $actualScore = $response->total_score;
+                    $maxPossibleScore = count($survey->questions) * 4;
+                    $agingIndex = round(($actualScore / $maxPossibleScore) * 100);
+                    
+                    // 노화지수에 따른 결과 해설 가져오기
+                    $resultCommentary = $survey->getResultCommentary($currentLang, $agingIndex);
+                @endphp
+                
+                @if($resultCommentary)
+                    <div class="mt-6 p-6 bg-blue-50 rounded-xl border border-blue-200">
+                        <div class="prose prose-blue mx-auto">
+                            {!! $resultCommentary !!}
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- 계기판 스타일 점수 표시 -->
             <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
                 <div class="max-w-lg mx-auto">
                     @php
-                        // 실제 점수와 최대 점수 계산
-                        $actualScore = $response->total_score;
-                        $maxPossibleScore = count($survey->questions) * 4;
-                        $rawPercentage = round(($actualScore / $maxPossibleScore) * 100);
-                        
-                        // 계기판용 역전 백분율 (낮은 점수가 좋은 상태)
-                        $gaugePercentage = 100 - $rawPercentage;
-                        
-                        // 6개 구간 정의
+                        // 노화지수 기준 6개 구간 정의 (역순으로 표시하기 위해)
                         $segments = [
-                            ['name' => '붕괴', 'color' => '#991b1b', 'range' => [0, 16.67]],
-                            ['name' => '위험', 'color' => '#dc2626', 'range' => [16.67, 33.33]],
-                            ['name' => '주의', 'color' => '#f59e0b', 'range' => [33.33, 50]],
-                            ['name' => '양호', 'color' => '#10b981', 'range' => [50, 66.67]],
-                            ['name' => '우수', 'color' => '#059669', 'range' => [66.67, 83.33]],
-                            ['name' => '최적', 'color' => '#047857', 'range' => [83.33, 100]]
+                            ['name' => '최적', 'color' => '#047857', 'range' => [0, 15]],      // 0~15%
+                            ['name' => '우수', 'color' => '#059669', 'range' => [16, 30]],     // 16~30%
+                            ['name' => '양호', 'color' => '#10b981', 'range' => [31, 50]],     // 31~50%
+                            ['name' => '주의', 'color' => '#f59e0b', 'range' => [51, 70]],     // 51~70%
+                            ['name' => '위험', 'color' => '#dc2626', 'range' => [71, 85]],     // 71~85%
+                            ['name' => '붕괴', 'color' => '#991b1b', 'range' => [86, 100]]     // 86~100%
                         ];
                         
-                        // 현재 구간 찾기
-                        $currentSegmentIndex = 0;
+                        // 현재 구간 찾기 (노화지수 기준)
+                        $currentSegmentIndex = 5; // 기본값: 붕괴
                         foreach ($segments as $index => $segment) {
-                            if ($gaugePercentage >= $segment['range'][0] && $gaugePercentage <= $segment['range'][1]) {
+                            if ($agingIndex >= $segment['range'][0] && $agingIndex <= $segment['range'][1]) {
                                 $currentSegmentIndex = $index;
                                 break;
                             }
                         }
                         $currentSegment = $segments[$currentSegmentIndex];
+                        
+                        // 게이지 표시를 위한 역전된 백분율 (시각적 표현용)
+                        $gaugePercentage = 100 - $agingIndex;
                     @endphp
                     
                     <!-- Chart.js 게이지 차트 컨테이너 -->
@@ -47,8 +61,8 @@
                         <!-- 중앙 텍스트 (하단 위치) -->
                         <div class="absolute bottom-0 left-0 right-0 flex justify-center pb-12">
                             <div class="text-center">
-                                <div class="text-5xl font-bold text-gray-800">{{ round($gaugePercentage) }}%</div>
-                                <div class="text-sm text-gray-500 mt-1">건강 지수</div>
+                                <div class="text-5xl font-bold text-gray-800">{{ $agingIndex }}%</div>
+                                <div class="text-sm text-gray-500 mt-1">노화지수</div>
                             </div>
                         </div>
                     </div>
@@ -65,16 +79,13 @@
                     <!-- 점수 정보 -->
                     <div class="text-center mt-8">
                         <div class="mb-4">
-                            <p class="text-2xl font-bold text-gray-800">종합 건강 지수</p>
+                            <p class="text-2xl font-bold text-gray-800">디지털 노화지수</p>
                             <p class="text-sm text-gray-500 mt-1">
-                                실제 점수: {{ $actualScore }}점 / {{ $maxPossibleScore }}점
+                                실제 점수: {{ $actualScore }}점 / {{ $maxPossibleScore }}점 ({{ $agingIndex }}%)
                             </p>
-                            @if(config('app.debug'))
-                                <div class="mt-2 p-2 bg-gray-100 rounded text-xs text-gray-600">
-                                    <p>원점수: {{ $rawPercentage }}% (높을수록 나쁨)</p>
-                                    <p>건강지수: {{ $gaugePercentage }}% (높을수록 좋음)</p>
-                                </div>
-                            @endif
+                            <p class="text-xs text-gray-400 mt-1">
+                                낮은 노화지수일수록 좋은 상태입니다
+                            </p>
                         </div>
                         
                         <!-- 현재 상태 표시 -->
@@ -88,18 +99,18 @@
                         <!-- 상태별 설명 -->
                         <div class="bg-gray-50 rounded-xl p-6">
                             <p class="text-gray-700 leading-relaxed">
-                                @if($gaugePercentage >= 83.33)
-                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">최적의 상태입니다!</span> 현재의 우수한 컨디션을 계속 유지하시기 바랍니다.
-                                @elseif($gaugePercentage >= 66.67)
-                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">우수한 상태입니다.</span> 조금만 더 노력하면 최적 상태에 도달할 수 있습니다.
-                                @elseif($gaugePercentage >= 50)
-                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">양호한 상태입니다.</span> 지속적인 관리로 더 나은 상태를 만들어보세요.
-                                @elseif($gaugePercentage >= 33.33)
-                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">주의가 필요한 상태입니다.</span> 생활 습관 개선이 시급합니다.
-                                @elseif($gaugePercentage >= 16.67)
-                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">위험한 상태입니다.</span> 즉시 전문가의 도움을 받으시기 바랍니다.
+                                @if($agingIndex <= 15)
+                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">최적의 상태입니다!</span> 디지털 노화가 거의 진행되지 않은 매우 좋은 상태입니다.
+                                @elseif($agingIndex <= 30)
+                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">우수한 상태입니다.</span> 디지털 노화가 경미한 수준이며, 조금만 더 관리하면 최적 상태를 유지할 수 있습니다.
+                                @elseif($agingIndex <= 50)
+                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">양호한 상태입니다.</span> 디지털 노화가 진행되고 있지만 관리 가능한 수준입니다.
+                                @elseif($agingIndex <= 70)
+                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">주의가 필요한 상태입니다.</span> 디지털 노화가 상당히 진행되어 적극적인 관리가 필요합니다.
+                                @elseif($agingIndex <= 85)
+                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">위험한 상태입니다.</span> 디지털 노화가 심각한 수준으로 즉시 전문가의 도움이 필요합니다.
                                 @else
-                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">매우 심각한 상태입니다.</span> 반드시 전문의와 상담하여 적극적인 치료를 받으세요.
+                                    <span class="font-semibold" style="color: {{ $currentSegment['color'] }}">매우 심각한 상태입니다.</span> 디지털 노화가 극심한 수준으로 반드시 전문의와 상담하여 적극적인 치료를 받으세요.
                                 @endif
                             </p>
                         </div>
@@ -111,6 +122,18 @@
             @if(!empty($categoryAnalysis))
                 <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">카테고리별 분석</h2>
+                    
+                    @php
+                        $categoryAnalysisDescription = $survey->getCategoryAnalysisDescription($currentLang);
+                    @endphp
+                    
+                    @if($categoryAnalysisDescription)
+                        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <div class="prose prose-gray mx-auto">
+                                {!! $categoryAnalysisDescription !!}
+                            </div>
+                        </div>
+                    @endif
                     
                     <div class="space-y-4">
                         @foreach($categoryAnalysis as $category)
@@ -126,15 +149,42 @@
                                     </div>
                                     <span class="text-gray-600 font-semibold">{{ $category['percentage'] }}%</span>
                                 </div>
+                                
+                                @if(!empty($category['description']))
+                                    <p class="text-sm text-gray-600 mb-2">{{ $category['description'] }}</p>
+                                @endif
                                 <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
-                                    <div class="h-full rounded-full transition-all duration-1000 ease-out relative {{ $category['percentage'] >= 70 ? 'bg-gradient-to-r from-green-500 to-green-600' : ($category['percentage'] >= 50 ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' : ($category['percentage'] >= 30 ? 'bg-gradient-to-r from-orange-500 to-orange-600' : 'bg-gradient-to-r from-red-500 to-red-600')) }}" 
+                                    @php
+                                        // 카테고리별 노화지수에 따른 색상 결정 (역전된 백분율 사용)
+                                        $categoryAgingIndex = 100 - $category['percentage'];
+                                        if ($categoryAgingIndex <= 15) {
+                                            $barColor = 'bg-gradient-to-r from-green-500 to-green-600'; // 최적
+                                        } elseif ($categoryAgingIndex <= 30) {
+                                            $barColor = 'bg-gradient-to-r from-blue-500 to-blue-600'; // 우수
+                                        } elseif ($categoryAgingIndex <= 50) {
+                                            $barColor = 'bg-gradient-to-r from-yellow-500 to-yellow-600'; // 양호
+                                        } elseif ($categoryAgingIndex <= 70) {
+                                            $barColor = 'bg-gradient-to-r from-orange-500 to-orange-600'; // 주의
+                                        } elseif ($categoryAgingIndex <= 85) {
+                                            $barColor = 'bg-gradient-to-r from-red-500 to-red-600'; // 위험
+                                        } else {
+                                            $barColor = 'bg-gradient-to-r from-red-800 to-red-900'; // 붕괴
+                                        }
+                                    @endphp
+                                    <div class="h-full rounded-full transition-all duration-1000 ease-out relative {{ $barColor }}" 
                                          style="width: {{ $category['percentage'] }}%">
                                         <div class="absolute inset-0 bg-white bg-opacity-20"></div>
                                     </div>
                                 </div>
                                 @if(isset($category['score']) && isset($category['max_score']))
                                     <div class="text-xs text-gray-500 mt-1 text-right">
-                                        원점수: {{ $category['score'] }}/{{ $category['max_score'] }}점
+                                        노화지수: {{ round((100 - $category['percentage'])) }}% ({{ $category['score'] }}/{{ $category['max_score'] }}점)
+                                    </div>
+                                @endif
+                                
+                                @if(!empty($category['result_description']))
+                                    <div class="mt-2 p-3 bg-gray-50 rounded text-sm text-gray-700">
+                                        {{ $category['result_description'] }}
                                     </div>
                                 @endif
                             </div>
@@ -142,15 +192,25 @@
                     </div>
                     
                     <!-- 카테고리 분석 설명 -->
-                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                        <p class="text-sm text-gray-600">
-                            <span class="font-semibold">카테고리별 점수 해석:</span><br>
-                            70% 이상: 우수한 상태입니다.<br>
-                            50-69%: 양호한 상태이나 개선의 여지가 있습니다.<br>
-                            30-49%: 주의가 필요한 상태입니다.<br>
-                            30% 미만: 즉각적인 개선이 필요합니다.
-                        </p>
-                    </div>
+                    @if($categoryAnalysisDescription)
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <div class="prose prose-sm prose-gray max-w-none">
+                                {!! $categoryAnalysisDescription !!}
+                            </div>
+                        </div>
+                    @else
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <p class="text-sm text-gray-600">
+                                <span class="font-semibold">카테고리별 노화지수 해석:</span><br>
+                                <span class="text-green-600 font-medium">0-15%</span>: 최적 상태 - 디지털 노화가 거의 진행되지 않았습니다.<br>
+                                <span class="text-blue-600 font-medium">16-30%</span>: 우수 상태 - 디지털 노화가 경미한 수준입니다.<br>
+                                <span class="text-yellow-600 font-medium">31-50%</span>: 양호 상태 - 디지털 노화가 진행되고 있지만 관리 가능합니다.<br>
+                                <span class="text-orange-600 font-medium">51-70%</span>: 주의 필요 - 디지털 노화가 상당히 진행되어 관리가 필요합니다.<br>
+                                <span class="text-red-600 font-medium">71-85%</span>: 위험 상태 - 디지털 노화가 심각한 수준입니다.<br>
+                                <span class="text-red-800 font-medium">86% 이상</span>: 붕괴 레벨 - 즉각적인 전문적 개입이 필요합니다.
+                            </p>
+                        </div>
+                    @endif
                 </div>
             @endif
 

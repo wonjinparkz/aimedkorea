@@ -6,11 +6,7 @@
             <div class="lg:col-span-2 lg:px-8">
                 <h3 class="text-xl font-bold mb-4">{{ $siteTitle }}</h3>
                 <p class="text-gray-600 mb-6 leading-relaxed">
-                    @if(!empty($footerSettings['footer_description']))
-                        {{ $footerSettings['footer_description'] }}
-                    @else
-                        {{ $siteTagline }}
-                    @endif
+                    {{ $this->getLocalizedDescription() ?: $siteTagline }}
                 </p>
                 
                 <!-- Feature Image -->
@@ -88,8 +84,8 @@
                                         {!! $iconMap[$card['icon']] ?? $iconMap['heroicon-o-question-mark-circle'] !!}
                                     </svg>
                                 </div>
-                                <h4 class="font-semibold text-gray-900 mb-2 text-base">{{ $card['title'] }}</h4>
-                                <p class="text-sm text-gray-600 leading-relaxed">{{ $card['description'] }}</p>
+                                <h4 class="font-semibold text-gray-900 mb-2 text-base">{{ $this->getLocalizedCardTitle($card) }}</h4>
+                                <p class="text-sm text-gray-600 leading-relaxed">{{ $this->getLocalizedCardDescription($card) }}</p>
                             </div>
                         </a>
                     @endforeach

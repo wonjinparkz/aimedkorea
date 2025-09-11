@@ -69,7 +69,7 @@
             @endif
             
             <span class="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center">
-                {{ $post->read_more_text }}
+                {{ __('read_more') }}
             </span>
         </div>
     </a>

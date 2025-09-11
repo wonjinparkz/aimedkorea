@@ -10,24 +10,55 @@ class SurveyController extends Controller
 {
     public function index()
     {
+        $currentLang = session('locale', 'kor');
+        
+        // 설문들을 가져오기
         $surveys = Survey::all();
+        
+        // 각 설문의 데이터를 현재 언어에 맞게 변환
+        $surveys = $surveys->map(function($survey) use ($currentLang) {
+            // 기존 객체의 속성들을 현재 언어에 맞게 업데이트
+            $survey->title = $survey->getTitle($currentLang);
+            $survey->description = $survey->getDescription($currentLang);
+            $survey->questions = $survey->getQuestions($currentLang);
+            $survey->checklist_items = $survey->getChecklistItems($currentLang);
+            $survey->frequency_items = $survey->getFrequencyItems($currentLang);
+            // survey_image는 그대로 유지 (언어별 변환 불필요)
+            
+            return $survey;
+        });
+                        
         return view('surveys.index', compact('surveys'));
     }
 
     public function show(Survey $survey)
     {
+        $currentLang = session('locale', 'kor');
+        
+        // 설문 데이터를 현재 언어에 맞게 변환
+        $survey->title = $survey->getTitle($currentLang);
+        $survey->description = $survey->getDescription($currentLang);
+        $survey->questions = $survey->getQuestions($currentLang);
+        $survey->checklist_items = $survey->getChecklistItems($currentLang);
+        $survey->frequency_items = $survey->getFrequencyItems($currentLang);
+        
         return view('surveys.show', compact('survey'));
     }
 
     public function store(Request $request, Survey $survey)
     {
         $responses = $request->input('responses');
+        $frequencyResponses = $request->input('frequency_responses', []);
+        $analysisType = $request->input('analysis_type', 'simple');
+        $currentLang = session('locale', 'kor');
         $totalScore = 0;
         
         // 응답 데이터 구성
         $responsesData = [];
+        $questions = $survey->getQuestions($currentLang);
+        
         foreach ($responses as $index => $response) {
-            $question = $survey->questions[$index];
+            $question = $questions[$index];
             
             if (isset($question['has_specific_checklist']) && $question['has_specific_checklist']) {
                 // 개별 체크리스트가 있는 경우
@@ -40,14 +71,25 @@ class SurveyController extends Controller
                     'question_original_index' => $index,
                 ];
             } else {
-                // 기본 체크리스트 사용
-                $selectedItem = $survey->checklist_items[$response];
+                // 현재 언어에 맞는 체크리스트 항목 사용
+                $options = $survey->getChecklistItems($currentLang);
+                $selectedItem = $options[$response];
                 $responsesData[$index] = [
                     'checklist_type' => 'default',
                     'question_label' => $question['label'],
                     'selected_label' => $selectedItem['label'],
                     'selected_score' => $selectedItem['score'],
                     'question_original_index' => $index,
+                ];
+            }
+            
+            // 심층 분석인 경우 빈도 평가 응답도 저장
+            if ($analysisType === 'detailed' && isset($frequencyResponses[$index])) {
+                $frequencyOptions = $survey->getFrequencyItems($currentLang);
+                $frequencyItem = $frequencyOptions[$frequencyResponses[$index]];
+                $responsesData[$index]['frequency_response'] = [
+                    'selected_label' => $frequencyItem['label'],
+                    'selected_score' => $frequencyItem['score'],
                 ];
             }
             
@@ -62,6 +104,7 @@ class SurveyController extends Controller
             'total_score' => $totalScore,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            'analysis_type' => $analysisType,
         ]);
         
         return redirect()->route('surveys.results', [
@@ -89,16 +132,24 @@ class SurveyController extends Controller
             return $this->analyzeDefaultCategories($survey, $response);
         }
         
+        // 현재 언어에 맞는 카테고리 정보 가져오기
+        $currentLang = session('locale', 'kor');
+        $categoryData = $survey->getCategories($currentLang);
+        
         // 카테고리별 점수를 역전하여 반환 (높은 점수가 좋은 상태)
         $categories = [];
-        foreach ($categoryScores as $categoryScore) {
+        foreach ($categoryScores as $index => $categoryScore) {
+            $categoryInfo = $categoryData[$index] ?? null;
+            
             $categories[] = [
                 'name' => $categoryScore['name'],
                 'percentage' => 100 - $categoryScore['percentage'], // 역전: 낮은 점수가 좋은 상태
                 'score' => $categoryScore['score'],
                 'max_score' => $categoryScore['max_score'],
                 'question_count' => $categoryScore['question_count'],
-                'answered_count' => $categoryScore['answered_count']
+                'answered_count' => $categoryScore['answered_count'],
+                'description' => $categoryInfo['description'] ?? '',
+                'result_description' => $categoryInfo['result_description'] ?? ''
             ];
         }
         

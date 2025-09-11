@@ -20,14 +20,14 @@
                 {{-- 왼쪽 필터 섹션 --}}
                 <div class="lg:w-1/4">
                     <div class="bg-gray-50 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">필터</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('filters') }}</h3>
                         
                         {{-- 발행기관 필터 --}}
                         <div class="border-b border-gray-200 pb-4 mb-4">
                             <button type="button" 
                                     class="w-full flex items-center justify-between text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none py-2"
                                     onclick="toggleFilter('publisher')">
-                                <span>발행기관</span>
+                                <span>{{ __('publisher') }}</span>
                                 <svg class="w-4 h-4 transition-transform duration-200" id="publisher-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -47,7 +47,7 @@
                             <button type="button" 
                                     class="w-full flex items-center justify-between text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none py-2"
                                     onclick="toggleFilter('year')">
-                                <span>연도</span>
+                                <span>{{ __('year') }}</span>
                                 <svg class="w-4 h-4 transition-transform duration-200" id="year-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -64,7 +64,7 @@
 
                         {{-- 필터 초기화 버튼 --}}
                         <button type="button" class="w-full text-sm text-blue-600 hover:text-blue-700 font-medium">
-                            필터 초기화
+                            {{ __('reset_filters') }}
                         </button>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                                         {{-- 저자 --}}
                                         @if($paper->authors)
                                             <div class="text-base leading-relaxed">
-                                                <span class="font-medium">저자</span>
+                                                <span class="font-medium">{{ __('author') }}</span>
                                                 <span class="mx-2 text-gray-400">|</span>
                                                 @if(is_array($paper->authors))
                                                     {{ implode(', ', $paper->authors) }}
@@ -100,7 +100,7 @@
                                         {{-- 출판사 --}}
                                         @if($paper->publisher)
                                             <div class="text-base leading-relaxed">
-                                                <span class="font-medium">발행기관</span>
+                                                <span class="font-medium">{{ __('publisher') }}</span>
                                                 <span class="mx-2 text-gray-400">|</span>
                                                 {{ $paper->publisher }}
                                             </div>
@@ -109,7 +109,7 @@
                                         {{-- 날짜 --}}
                                         @if($paper->published_at)
                                             <div class="text-base leading-relaxed">
-                                                <span class="font-medium">발행일</span>
+                                                <span class="font-medium">{{ __('published_date') }}</span>
                                                 <span class="mx-2 text-gray-400">|</span>
                                                 {{ $paper->published_at->format('Y.m.d') }}
                                             </div>
@@ -126,7 +126,7 @@
                                     {{-- 더 보기 버튼 --}}
                                     <a href="{{ route('papers.show', $paper->slug) }}" 
                                        class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm">
-                                        더 보기
+                                        {{ __('read_more') }}
                                         <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                         </svg>
@@ -146,7 +146,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                             <h3 class="text-lg font-medium text-gray-900 mb-2">논문이 없습니다</h3>
-                            <p class="text-gray-500">아직 등록된 논문요약이 없습니다.</p>
+                            <p class="text-gray-500">{{ __('no_papers_yet') }}</p>
                         </div>
                     @endif
                 </div>

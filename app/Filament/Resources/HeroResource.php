@@ -250,16 +250,46 @@ class HeroResource extends Resource
                 
                 // 제목 섹션
                 Forms\Components\Section::make('제목 설정')
-                    ->description('슬라이드의 메인 제목을 입력하고 스타일을 설정하세요')
+                    ->description('슬라이드의 메인 제목을 다국어로 입력하고 스타일을 설정하세요')
                     ->schema([
-                        Forms\Components\Grid::make(4)
+                        // 한국어 제목
+                        Forms\Components\TextInput::make('title_translations.kor')
+                            ->label('제목 (한국어)')
+                            ->required()
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 영어 제목
+                        Forms\Components\TextInput::make('title_translations.eng')
+                            ->label('Title (English)')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 중국어 제목
+                        Forms\Components\TextInput::make('title_translations.chn')
+                            ->label('标题 (中文)')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 힌디어 제목
+                        Forms\Components\TextInput::make('title_translations.hin')
+                            ->label('शीर्षक (हिन्दी)')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 아랍어 제목
+                        Forms\Components\TextInput::make('title_translations.arb')
+                            ->label('العنوان (العربية)')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('title')
-                                    ->label('제목 텍스트')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->reactive()
-                                    ->columnSpan(2),
                                 Forms\Components\ColorPicker::make('hero_settings.title.color')
                                     ->label('글자 색상')
                                     ->default('#FFFFFF')
@@ -279,15 +309,45 @@ class HeroResource extends Resource
                 
                 // 부제목 섹션
                 Forms\Components\Section::make('부제목 설정')
-                    ->description('선택사항: 제목 위나 아래에 표시될 작은 텍스트')
+                    ->description('선택사항: 제목 위나 아래에 표시될 작은 텍스트를 다국어로 입력하세요')
                     ->schema([
-                        Forms\Components\Grid::make(4)
+                        // 한국어 부제목
+                        Forms\Components\TextInput::make('subtitle_translations.kor')
+                            ->label('부제목 (한국어)')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 영어 부제목
+                        Forms\Components\TextInput::make('subtitle_translations.eng')
+                            ->label('Subtitle (English)')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 중국어 부제목
+                        Forms\Components\TextInput::make('subtitle_translations.chn')
+                            ->label('副标题 (中文)')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 힌디어 부제목
+                        Forms\Components\TextInput::make('subtitle_translations.hin')
+                            ->label('उपशीर्षक (हिन्दी)')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 아랍어 부제목
+                        Forms\Components\TextInput::make('subtitle_translations.arb')
+                            ->label('العنوان الفرعي (العربية)')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('subtitle')
-                                    ->label('부제목 텍스트')
-                                    ->maxLength(255)
-                                    ->reactive()
-                                    ->columnSpan(2),
                                 Forms\Components\ColorPicker::make('hero_settings.subtitle.color')
                                     ->label('글자 색상')
                                     ->default('#E5E7EB')
@@ -317,12 +377,43 @@ class HeroResource extends Resource
                 
                 // 설명 섹션
                 Forms\Components\Section::make('설명 설정')
-                    ->description('선택사항: 제목 아래에 표시될 상세 설명')
+                    ->description('선택사항: 제목 아래에 표시될 상세 설명을 다국어로 입력하세요')
                     ->schema([
-                        Forms\Components\Textarea::make('description')
-                            ->label('설명 텍스트')
+                        // 한국어 설명
+                        Forms\Components\Textarea::make('description_translations.kor')
+                            ->label('설명 (한국어)')
                             ->rows(3)
-                            ->reactive(),
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 영어 설명
+                        Forms\Components\Textarea::make('description_translations.eng')
+                            ->label('Description (English)')
+                            ->rows(3)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 중국어 설명
+                        Forms\Components\Textarea::make('description_translations.chn')
+                            ->label('描述 (中文)')
+                            ->rows(3)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 힌디어 설명
+                        Forms\Components\Textarea::make('description_translations.hin')
+                            ->label('विवरण (हिन्दी)')
+                            ->rows(3)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 아랍어 설명
+                        Forms\Components\Textarea::make('description_translations.arb')
+                            ->label('الوصف (العربية)')
+                            ->rows(3)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\ColorPicker::make('hero_settings.description.color')
@@ -345,26 +436,59 @@ class HeroResource extends Resource
                 
                 // 버튼 섹션
                 Forms\Components\Section::make('버튼 설정')
-                    ->description('선택사항: 클릭 가능한 버튼 추가')
+                    ->description('선택사항: 클릭 가능한 버튼 텍스트를 다국어로 입력하세요')
                     ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\TextInput::make('button_text')
-                                    ->label('버튼 텍스트')
-                                    ->placeholder('예: 자세히 보기')
-                                    ->maxLength(255)
-                                    ->reactive(),
-                                Forms\Components\Select::make('button_post_id')
-                                    ->label('버튼 링크 (배너 포스트 선택)')
-                                    ->relationship('buttonPost', 'title')
-                                    ->options(function () {
-                                        return Post::where('type', Post::TYPE_BANNER)
-                                            ->where('is_published', true)
-                                            ->pluck('title', 'id');
-                                    })
-                                    ->searchable()
-                                    ->placeholder('배너 포스트를 선택하세요'),
-                            ]),
+                        // 한국어 버튼 텍스트
+                        Forms\Components\TextInput::make('button_text_translations.kor')
+                            ->label('버튼 텍스트 (한국어)')
+                            ->placeholder('예: 자세히 보기')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 영어 버튼 텍스트
+                        Forms\Components\TextInput::make('button_text_translations.eng')
+                            ->label('Button Text (English)')
+                            ->placeholder('e.g. Learn More')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 중국어 버튼 텍스트
+                        Forms\Components\TextInput::make('button_text_translations.chn')
+                            ->label('按钮文本 (中文)')
+                            ->placeholder('例如：了解更多')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 힌디어 버튼 텍스트
+                        Forms\Components\TextInput::make('button_text_translations.hin')
+                            ->label('बटन टेक्स्ट (हिन्दी)')
+                            ->placeholder('जैसे: और पढ़ें')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        // 아랍어 버튼 텍스트
+                        Forms\Components\TextInput::make('button_text_translations.arb')
+                            ->label('نص الزر (العربية)')
+                            ->placeholder('مثال: اقرأ المزيد')
+                            ->maxLength(255)
+                            ->reactive()
+                            ->columnSpanFull(),
+                            
+                        Forms\Components\Select::make('button_post_id')
+                            ->label('버튼 링크 (배너 포스트 선택)')
+                            ->relationship('buttonPost', 'title')
+                            ->options(function () {
+                                return Post::where('type', Post::TYPE_BANNER)
+                                    ->where('is_published', true)
+                                    ->pluck('title', 'id');
+                            })
+                            ->searchable()
+                            ->placeholder('배너 포스트를 선택하세요')
+                            ->columnSpanFull(),
                         Forms\Components\Grid::make(3)
                             ->schema([
                                 Forms\Components\ColorPicker::make('hero_settings.button.text_color')
@@ -474,6 +598,13 @@ class HeroResource extends Resource
                             ]),
                     ])
                     ->collapsed(),
+                    
+                // 기본 필드들 (숨김 처리)
+                Forms\Components\Hidden::make('title')
+                    ->default('Hero Title'),
+                Forms\Components\Hidden::make('subtitle'),
+                Forms\Components\Hidden::make('description'),
+                Forms\Components\Hidden::make('button_text'),
             ]);
     }
 
@@ -487,10 +618,12 @@ class HeroResource extends Resource
                     ->defaultImageUrl(fn ($record) => $record->background_type === 'video' ? asset('images/video-placeholder.png') : null),
                 Tables\Columns\TextColumn::make('title')
                     ->label('제목')
+                    ->getStateUsing(fn ($record) => $record->getTitle('kor'))
                     ->searchable()
                     ->limit(30),
                 Tables\Columns\TextColumn::make('subtitle')
                     ->label('부제목')
+                    ->getStateUsing(fn ($record) => $record->getSubtitle('kor'))
                     ->searchable()
                     ->limit(30),
                 Tables\Columns\BadgeColumn::make('background_type')

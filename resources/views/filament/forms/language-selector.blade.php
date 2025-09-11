@@ -2,6 +2,10 @@
     $record = $getRecord();
     $currentLanguage = $record?->language ?? 'kor';
     $availableLanguages = $record ? $record->getAvailableLanguages() : [];
+    // Collection을 배열로 변환
+    if ($availableLanguages instanceof \Illuminate\Support\Collection) {
+        $availableLanguages = $availableLanguages->toArray();
+    }
     $baseSlug = $record?->base_slug ?? null;
 @endphp
 
@@ -19,7 +23,7 @@
         @endphp
         
         @foreach($languages as $lang)
-            @if(in_array($lang['code'], $availableLanguages) && $lang['code'] !== $currentLanguage)
+            @if(is_array($availableLanguages) && in_array($lang['code'], $availableLanguages) && $lang['code'] !== $currentLanguage)
                 @php
                     $translation = $record->getTranslation($lang['code']);
                 @endphp
@@ -40,12 +44,12 @@
                     @class([
                         'inline-flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200',
                         'bg-primary-600 text-white' => $currentLanguage === $lang['code'],
-                        'bg-gray-50 text-gray-400 border-2 border-dashed border-gray-300' => !in_array($lang['code'], $availableLanguages),
+                        'bg-gray-50 text-gray-400 border-2 border-dashed border-gray-300' => !is_array($availableLanguages) || !in_array($lang['code'], $availableLanguages),
                     ])
                 >
                     <span class="text-lg mr-2">{{ $lang['flag'] }}</span>
                     <span>{{ $lang['label'] }}</span>
-                    @if(!in_array($lang['code'], $availableLanguages))
+                    @if(!is_array($availableLanguages) || !in_array($lang['code'], $availableLanguages))
                         <span class="ml-2 text-xs">(미작성)</span>
                     @endif
                 </div>
@@ -57,7 +61,7 @@
     <div class="text-sm text-gray-600">
         @if($record)
             <p>
-                현재 <span class="font-semibold">{{ count($availableLanguages) }}</span>개 언어로 작성됨
+                현재 <span class="font-semibold">{{ is_array($availableLanguages) ? count($availableLanguages) : (is_countable($availableLanguages) ? count($availableLanguages) : 0) }}</span>개 언어로 작성됨
             </p>
         @else
             <p class="text-primary-600">

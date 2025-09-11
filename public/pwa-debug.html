@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Debug</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #ccc;
+        }
+        .success { border-left-color: #4CAF50; }
+        .error { border-left-color: #f44336; }
+        .warning { border-left-color: #ff9800; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>PWA 디버그 페이지</h1>
+    
+    <div id="status-container"></div>
+    
+    <div style="margin-top: 20px;">
+        <button onclick="testInstall()">설치 테스트</button>
+        <button onclick="checkSW()">Service Worker 확인</button>
+        <button onclick="checkManifest()">Manifest 확인</button>
+        <button onclick="clearData()">캐시 클리어</button>
+    </div>
+    
+    <pre id="log"></pre>
+    
+    <script>
+        let deferredPrompt = null;
+        const log = document.getElementById('log');
+        const statusContainer = document.getElementById('status-container');
+        
+        function addStatus(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            statusContainer.appendChild(div);
+            addLog(message);
+        }
+        
+        function addLog(message) {
+            const timestamp = new Date().toTimeString().split(' ')[0];
+            log.textContent += `[${timestamp}] ${message}\n`;
+        }
+        
+        // Check HTTPS
+        if (location.protocol === 'https:') {
+            addStatus('✓ HTTPS 연결', 'success');
+        } else {
+            addStatus('✗ HTTP 연결 - PWA는 HTTPS가 필요합니다', 'error');
+        }
+        
+        // Check browser
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isChrome = /Chrome/i.test(navigator.userAgent);
+        addStatus(`브라우저: ${navigator.userAgent.substring(0, 50)}...`, isAndroid && isChrome ? 'success' : 'warning');
+        
+        // Check standalone mode
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            addStatus('✓ 이미 PWA로 실행 중', 'success');
+        } else {
+            addStatus('브라우저 모드로 실행 중', 'warning');
+        }
+        
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            addStatus('✓ beforeinstallprompt 이벤트 수신됨', 'success');
+            addLog('설치 가능한 상태입니다');
+            
+            // Log platforms
+            if (e.platforms) {
+                addLog('지원 플랫폼: ' + e.platforms.join(', '));
+            }
+        });
+        
+        // Check Service Worker
+        async function checkSW() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        addStatus('✓ Service Worker 등록됨', 'success');
+                        addLog('Scope: ' + registration.scope);
+                        addLog('Active: ' + (registration.active ? 'Yes' : 'No'));
+                    } else {
+                        addStatus('✗ Service Worker 없음', 'error');
+                    }
+                } catch (error) {
+                    addStatus('Service Worker 확인 실패: ' + error.message, 'error');
+                }
+            } else {
+                addStatus('✗ Service Worker 지원 안 함', 'error');
+            }
+        }
+        
+        // Check Manifest
+        async function checkManifest() {
+            try {
+                const response = await fetch('/manifest.json');
+                const manifest = await response.json();
+                addStatus('✓ Manifest 로드 성공', 'success');
+                addLog('Manifest 내용:\n' + JSON.stringify(manifest, null, 2).substring(0, 500) + '...');
+                
+                // Check icons
+                if (manifest.icons && manifest.icons.length > 0) {
+                    addLog(`아이콘 개수: ${manifest.icons.length}`);
+                    for (let icon of manifest.icons.slice(0, 3)) {
+                        try {
+                            const imgResponse = await fetch(icon.src);
+                            if (imgResponse.ok) {
+                                addLog(`✓ 아이콘 확인: ${icon.src}`);
+                            } else {
+                                addLog(`✗ 아이콘 없음: ${icon.src}`);
+                            }
+                        } catch (e) {
+                            addLog(`✗ 아이콘 오류: ${icon.src}`);
+                        }
+                    }
+                }
+            } catch (error) {
+                addStatus('✗ Manifest 로드 실패: ' + error.message, 'error');
+            }
+        }
+        
+        // Test install
+        async function testInstall() {
+            addLog('설치 테스트 시작...');
+            
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                alert('이미 PWA로 설치되어 있습니다!');
+                addLog('이미 설치됨');
+                return;
+            }
+            
+            if (!deferredPrompt) {
+                alert('설치 프롬프트를 사용할 수 없습니다.\n\n수동 설치 방법:\n1. Chrome 메뉴(⋮) 클릭\n2. "앱 설치" 또는 "홈 화면에 추가" 선택');
+                addLog('deferredPrompt 없음 - 수동 설치 필요');
+                
+                // Check why prompt is not available
+                if (location.protocol !== 'https:') {
+                    addLog('원인: HTTPS가 아님');
+                }
+                
+                const reg = await navigator.serviceWorker.getRegistration();
+                if (!reg || !reg.active) {
+                    addLog('원인: Service Worker가 활성화되지 않음');
+                }
+                
+                return;
+            }
+            
+            try {
+                addLog('설치 프롬프트 표시...');
+                deferredPrompt.prompt();
+                
+                const { outcome } = await deferredPrompt.userChoice;
+                addLog(`사용자 선택: ${outcome}`);
+                
+                if (outcome === 'accepted') {
+                    addStatus('✓ 앱 설치 승인됨', 'success');
+                } else {
+                    addStatus('앱 설치 취소됨', 'warning');
+                }
+                
+                deferredPrompt = null;
+            } catch (error) {
+                addStatus('설치 오류: ' + error.message, 'error');
+            }
+        }
+        
+        // Clear data
+        async function clearData() {
+            try {
+                // Unregister service worker
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+                
+                // Clear caches
+                const cacheNames = await caches.keys();
+                for (let cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                }
+                
+                addStatus('✓ 캐시 및 Service Worker 제거됨', 'success');
+                addLog('페이지를 새로고침하세요');
+                
+                setTimeout(() => location.reload(), 2000);
+            } catch (error) {
+                addStatus('클리어 실패: ' + error.message, 'error');
+            }
+        }
+        
+        // Initial checks
+        window.addEventListener('load', () => {
+            checkSW();
+            
+            // Check for install capability after delay
+            setTimeout(() => {
+                if (!deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+                    addStatus('⚠ 30초 후에도 설치 프롬프트 없음', 'warning');
+                    addLog('Chrome 플래그 확인: chrome://flags/#bypass-app-banner-engagement-checks');
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+</html>

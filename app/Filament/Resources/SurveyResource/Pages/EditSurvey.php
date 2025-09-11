@@ -20,21 +20,23 @@ class EditSurvey extends EditRecord
     
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        // 저장된 카테고리 정보 불러오기
-        if ($this->record && $this->record->id) {
-            $optionName = 'survey_categories_' . $this->record->id;
-            $savedData = get_option($optionName);
-            
-            if ($savedData && isset($savedData['categories'])) {
-                $categories = [];
-                foreach ($savedData['categories'] as $category) {
-                    $categories[] = [
-                        'category_name' => $category['name'],
-                        'question_indices' => array_map('strval', $category['question_indices'] ?? [])
-                    ];
+        // 번역 데이터 처리
+        if ($this->record) {
+            // title_translations 처리 - 각 언어별로 분리
+            if ($this->record->title_translations) {
+                foreach ($this->record->title_translations as $lang => $title) {
+                    $data['title_translations'][$lang] = $title;
                 }
-                $data['question_categories'] = $categories;
             }
+            
+            // description_translations 처리 - 각 언어별로 분리
+            if ($this->record->description_translations) {
+                foreach ($this->record->description_translations as $lang => $description) {
+                    $data['description_translations'][$lang] = $description;
+                }
+            }
+            
+            // afterStateHydrated에서 카테고리 데이터를 처리하므로 여기서는 처리하지 않음
         }
         
         return $data;
@@ -45,31 +47,20 @@ class EditSurvey extends EditRecord
         // 카테고리 정보 저장
         $formData = $this->form->getState();
         
-        if ($this->record && $this->record->id && isset($formData['question_categories'])) {
-            $categories = $formData['question_categories'];
-            
-            // 카테고리 데이터 구성
-            $categoryData = [];
-            foreach ($categories as $category) {
-                if (!empty($category['category_name']) && !empty($category['question_indices'])) {
-                    // 인덱스를 정수로 변환하여 저장
-                    $indices = array_map(function($idx) {
-                        return intval($idx);
-                    }, $category['question_indices']);
-                    
-                    $categoryData[] = [
-                        'name' => $category['category_name'],
-                        'question_indices' => $indices
-                    ];
+        if ($this->record && $this->record->id) {
+            // 문항 카테고리 저장
+            if (isset($formData['question_categories'])) {
+                $categoryData = $formData['question_categories'];
+                
+                if (!empty($categoryData['categories'])) {
+                    $optionName = 'survey_categories_' . $this->record->id;
+                    update_option($optionName, [
+                        'survey_id' => $this->record->id,
+                        'categories' => $categoryData['categories']
+                    ]);
                 }
             }
             
-            // 옵션으로 저장
-            $optionName = 'survey_categories_' . $this->record->id;
-            update_option($optionName, [
-                'survey_id' => $this->record->id,
-                'categories' => $categoryData
-            ]);
         }
     }
 }

@@ -7,8 +7,8 @@
             @if($featuredPost)
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div class="text-center mb-12">
-                        <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">The Science of Care</h1>
-                        <p class="text-xl lg:text-2xl text-gray-600">AI로 설계하는 회복의 루틴 철학</p>
+                        <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">{{ __('the_science_of_care') }}</h1>
+                        <p class="text-xl lg:text-2xl text-gray-600">{{ __('ai_recovery_philosophy') }}</p>
                     </div>
                     <x-horizontal-post-card :post="$featuredPost" />
                 </div>
@@ -17,8 +17,8 @@
             <!-- Routines Section -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-gray-900">루틴</h2>
-                    <p class="mt-2 text-gray-600">일상적인 루틴과 관련된 최신 콘텐츠</p>
+                    <h2 class="text-3xl font-bold text-gray-900">{{ __('routines') }}</h2>
+                    <p class="mt-2 text-gray-600">{{ __('routines_description') }}</p>
                 </div>
                 
                 @if($routinePosts->count() > 0)
@@ -29,7 +29,7 @@
                     </div>
                 @else
                     <div class="text-center py-12 bg-gray-100 rounded-lg">
-                        <p class="text-gray-500">아직 등록된 루틴 게시물이 없습니다.</p>
+                        <p class="text-gray-500">{{ __('no_routines_yet') }}</p>
                     </div>
                 @endif
             </div>
@@ -37,8 +37,8 @@
             <!-- Blog Section -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-gray-900">블로그</h2>
-                    <p class="mt-2 text-gray-600">최신 블로그 포스트</p>
+                    <h2 class="text-3xl font-bold text-gray-900">{{ __('blogs') }}</h2>
+                    <p class="mt-2 text-gray-600">{{ __('latest_blog_posts') }}</p>
                 </div>
                 
                 @if($blogPosts->count() > 0)
@@ -49,7 +49,7 @@
                     </div>
                 @else
                     <div class="text-center py-12 bg-gray-100 rounded-lg">
-                        <p class="text-gray-500">아직 등록된 블로그 게시물이 없습니다.</p>
+                        <p class="text-gray-500">{{ __('no_blogs_yet') }}</p>
                     </div>
                 @endif
             </div>
@@ -58,8 +58,8 @@
             <div class="bg-white py-16">
                 <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="text-center mb-12">
-                        <h2 class="text-4xl font-bold text-gray-900">Research Areas</h2>
-                        <p class="mt-4 text-lg text-gray-600">🌿 디지털 노화 시대의 회복 언어, AI는 이제 루틴을 말합니다.</p>
+                        <h2 class="text-4xl font-bold text-gray-900">{{ __('research_areas') }}</h2>
+                        <p class="mt-4 text-lg text-gray-600">{{ __('research_areas_subtitle') }}</p>
                     </div>
                     
                     @if($tabPosts->count() > 0)
@@ -102,7 +102,7 @@
                         </div>
                     @else
                         <div class="text-center py-12 bg-white rounded-lg">
-                            <p class="text-gray-500">아직 등록된 연구 분야가 없습니다.</p>
+                            <p class="text-gray-500">{{ __('no_research_areas_yet') }}</p>
                         </div>
                     @endif
                 </div>

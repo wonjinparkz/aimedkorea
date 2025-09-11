@@ -37,6 +37,8 @@ abstract class PostResource extends Resource
                             ->default('kor'),
                         
                         Forms\Components\Hidden::make('base_slug'),
+                        Forms\Components\Hidden::make('content_group_id'),
+                        Forms\Components\Hidden::make('is_primary')->default(true),
                     ])
                     ->columns(1),
                 
@@ -100,6 +102,17 @@ abstract class PostResource extends Resource
                     ->label('요약')
                     ->limit(50),
                 
+                Tables\Columns\IconColumn::make('is_primary')
+                    ->label('주 게시글')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-star')
+                    ->falseIcon('heroicon-o-language'),
+                
+                Tables\Columns\TextColumn::make('content_group_id')
+                    ->label('그룹 ID')
+                    ->limit(20)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
                 Tables\Columns\ImageColumn::make('image')
                     ->label('이미지'),
                 
@@ -122,6 +135,21 @@ abstract class PostResource extends Resource
                     
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('중요 게시글'),
+                    
+                Tables\Filters\TernaryFilter::make('is_primary')
+                    ->label('주 게시글')
+                    ->default(true),
+                    
+                Tables\Filters\SelectFilter::make('language')
+                    ->label('언어')
+                    ->options([
+                        'kor' => '한국어 (KOR)',
+                        'eng' => '영어 (ENG)',
+                        'chn' => '중국어 (CHN)',
+                        'hin' => '힌디어 (HIN)',
+                        'arb' => '아랍어 (ARB)',
+                    ])
+                    ->default('kor'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -129,26 +157,6 @@ abstract class PostResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('change_language')
-                        ->label('언어 변경')
-                        ->icon('heroicon-o-language')
-                        ->requiresConfirmation()
-                        ->form([
-                            Forms\Components\Select::make('language')
-                                ->label('언어 선택')
-                                ->options([
-                                    'kor' => '한국어 (KOR)',
-                                    'eng' => '영어 (ENG)',
-                                    'chn' => '중국어 (CHN)',
-                                    'hin' => '힌디어 (HIN)',
-                                    'arb' => '아랍어 (ARB)',
-                                ])
-                                ->required()
-                        ])
-                        ->action(function (Collection $records, array $data): void {
-                            $records->each(fn ($record) => $record->update(['language' => $data['language']]));
-                        })
-                        ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
@@ -157,16 +165,32 @@ abstract class PostResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        // For list view, show only Korean posts
+        $query = parent::getEloquentQuery()->where('type', static::$postType);
+        
+        // For list view, show based on filters
         if (request()->routeIs('filament.admin.resources.*.index')) {
-            return parent::getEloquentQuery()
-                ->where('type', static::$postType)
-                ->where('language', 'kor');
+            // Check if 'is_primary' filter is explicitly set to false
+            $isPrimaryFilter = request()->get('tableFilters.is_primary.value');
+            // Check if 'language' filter is set
+            $languageFilter = request()->get('tableFilters.language.value');
+            
+            if ($isPrimaryFilter === null || $isPrimaryFilter === '1') {
+                // Default: show only primary posts (Korean or main posts)
+                $query->where('is_primary', true);
+            }
+            // If filter is set to '0' (false), show all posts
+            // If filter is set to '' (blank), show all posts
+            
+            // Apply language filter if specified
+            if ($languageFilter) {
+                $query->where('language', $languageFilter);
+            } else {
+                // Default: show only Korean posts
+                $query->where('language', 'kor');
+            }
         }
         
-        // For edit/view, allow all languages
-        return parent::getEloquentQuery()
-            ->where('type', static::$postType);
+        return $query;
     }
 
     public static function getPages(): array

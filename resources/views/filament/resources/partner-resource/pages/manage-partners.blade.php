@@ -122,7 +122,7 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                                    등록된 파트너사가 없습니다.
+                                    {{ __('no_partners_yet') }}
                                 </td>
                             </tr>
                         @endforelse

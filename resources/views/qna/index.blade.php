@@ -1,29 +1,17 @@
 <x-app-layout>
     <div class="min-h-screen bg-gray-50">
-        {{-- 헤더 섹션 --}}
-        <div class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div class="md:flex md:items-center md:justify-between">
-                    <div class="flex-1 min-w-0">
-                        <h1 class="text-3xl font-bold text-gray-900">Q&A</h1>
-                        <p class="mt-2 text-lg text-gray-600">자주 묻는 질문과 답변을 확인하세요</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="lg:grid lg:grid-cols-4 lg:gap-8">
                 {{-- 사이드바 --}}
                 <div class="lg:col-span-1">
                     {{-- 검색 --}}
                     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">검색</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('search') }}</h3>
                         <form method="GET" action="{{ route('qna.index') }}">
                             <input type="text" 
                                    name="search" 
                                    value="{{ request('search') }}"
-                                   placeholder="질문 검색..."
+                                   placeholder="{{ __('search_questions') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             @if(request()->has('featured'))
                                 <input type="hidden" name="featured" value="{{ request('featured') }}">
@@ -36,34 +24,34 @@
 
                     {{-- 필터 --}}
                     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">필터</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('filters') }}</h3>
                         <div class="space-y-3">
                             <a href="{{ route('qna.index', array_merge(request()->except('featured'), [])) }}" 
                                class="block px-3 py-2 rounded-md {{ !request()->has('featured') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                                전체 Q&A
+                                {{ __('all_qna') }}
                             </a>
                             <a href="{{ route('qna.index', array_merge(request()->except('featured'), ['featured' => '1'])) }}" 
                                class="block px-3 py-2 rounded-md {{ request('featured') == '1' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                                자주 묻는 질문
+                                {{ __('frequently_asked_questions') }}
                             </a>
                         </div>
                     </div>
 
                     {{-- 정렬 --}}
                     <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">정렬</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('sort') }}</h3>
                         <div class="space-y-3">
                             <a href="{{ route('qna.index', array_merge(request()->except('sort'), ['sort' => 'latest'])) }}" 
                                class="block px-3 py-2 rounded-md {{ request('sort', 'latest') == 'latest' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                                최신순
+                                {{ __('latest') }}
                             </a>
                             <a href="{{ route('qna.index', array_merge(request()->except('sort'), ['sort' => 'featured'])) }}" 
                                class="block px-3 py-2 rounded-md {{ request('sort') == 'featured' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                                자주 묻는 질문 우선
+                                {{ __('faq_first') }}
                             </a>
                             <a href="{{ route('qna.index', array_merge(request()->except('sort'), ['sort' => 'oldest'])) }}" 
                                class="block px-3 py-2 rounded-md {{ request('sort') == 'oldest' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50' }}">
-                                오래된순
+                                {{ __('oldest') }}
                             </a>
                         </div>
                     </div>
@@ -78,7 +66,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                             </svg>
-                            자주 묻는 질문
+                            {{ __('frequently_asked_questions') }}
                         </h2>
                         <div class="space-y-3">
                             @foreach($featuredQnas as $faq)
@@ -107,7 +95,7 @@
                                     <div class="ml-4 flex-1">
                                         @if($qna->is_featured)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 mb-2">
-                                            자주 묻는 질문
+                                            {{ __('frequently_asked_questions') }}
                                         </span>
                                         @endif
                                         <h2 class="text-lg font-semibold text-gray-900 mb-2">{{ $qna->title }}</h2>
@@ -133,7 +121,7 @@
                                 @if(request()->has('search'))
                                     검색 결과가 없습니다. 다른 키워드로 검색해보세요.
                                 @else
-                                    등록된 Q&A가 없습니다.
+                                    {{ __('no_qna_yet') }}
                                 @endif
                             </p>
                         </div>

@@ -27,6 +27,8 @@ class Post extends Model
         'title',
         'slug',
         'base_slug',
+        'content_group_id',
+        'is_primary',
         'type',
         'language',
         'summary',
@@ -52,6 +54,7 @@ class Post extends Model
     protected $casts = [
         'is_featured' => 'boolean',
         'is_published' => 'boolean',
+        'is_primary' => 'boolean',
         'content_sections' => 'json',
         'related_articles' => 'json',
         'authors' => 'json',
@@ -183,34 +186,35 @@ class Post extends Model
         }
     }
 
-    // Multilingual support methods
+    // Content grouping and multilingual support methods
+    public function contentGroup()
+    {
+        return static::where('content_group_id', $this->content_group_id)
+                    ->where('id', '!=', $this->id);
+    }
+
     public function translations()
     {
-        return static::where('base_slug', $this->base_slug)
-                    ->where('type', $this->type)
-                    ->where('id', '!=', $this->id);
+        return $this->contentGroup();
     }
 
     public function getTranslation($language)
     {
-        return static::where('base_slug', $this->base_slug)
-                    ->where('type', $this->type)
+        return static::where('content_group_id', $this->content_group_id)
                     ->where('language', $language)
                     ->first();
     }
 
     public function hasTranslation($language)
     {
-        return static::where('base_slug', $this->base_slug)
-                    ->where('type', $this->type)
+        return static::where('content_group_id', $this->content_group_id)
                     ->where('language', $language)
                     ->exists();
     }
 
     public function getAvailableLanguages()
     {
-        return static::where('base_slug', $this->base_slug)
-                    ->where('type', $this->type)
+        return static::where('content_group_id', $this->content_group_id)
                     ->pluck('language')
                     ->toArray();
     }
@@ -220,5 +224,43 @@ class Post extends Model
         $availableLanguages = $this->getAvailableLanguages();
         $allLanguages = ['kor', 'eng', 'chn', 'hin', 'arb'];
         return array_diff($allLanguages, $availableLanguages);
+    }
+
+    public function getPrimaryPost()
+    {
+        if ($this->is_primary) {
+            return $this;
+        }
+        
+        return static::where('content_group_id', $this->content_group_id)
+                    ->where('is_primary', true)
+                    ->first();
+    }
+
+    public function getAllVersions()
+    {
+        return static::where('content_group_id', $this->content_group_id)
+                    ->orderBy('language')
+                    ->get();
+    }
+
+    // Scope for homepage to show only primary posts
+    public function scopePrimary($query)
+    {
+        return $query->where('is_primary', true);
+    }
+
+    // Scope for specific language
+    public function scopeInLanguage($query, $language)
+    {
+        return $query->where('language', $language);
+    }
+
+    // Generate content group ID
+    public static function generateContentGroupId($type, $baseSlug = null)
+    {
+        $timestamp = now()->format('Ymd_His');
+        $random = substr(md5(uniqid()), 0, 6);
+        return $type . '_' . ($baseSlug ?: $timestamp . '_' . $random);
     }
 }

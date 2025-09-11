@@ -155,7 +155,7 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
                                                 x-transition:leave="transition ease-in duration-150"
                                                 x-transition:leave-start="opacity-100 transform translate-y-0"
                                                 x-transition:leave-end="opacity-0 transform -translate-y-2"
-                                                class="absolute left-0 w-screen max-w-screen-xl -ml-8"
+                                                class="absolute left-0 w-screen max-w-4xl -ml-8"
                                                 style="display: none;"
                                             >
                                                 <div class="mt-0 bg-white shadow-2xl overflow-hidden">
@@ -320,11 +320,11 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
 
                                 <x-slot name="content">
                                     <div class="block px-4 py-2 text-xs text-gray-400">
-                                        계정 관리
+                                        {{ __('계정 관리') }}
                                     </div>
 
                                     <x-dropdown-link href="{{ route('profile.show') }}">
-                                        프로필
+                                        {{ __('프로필') }}
                                     </x-dropdown-link>
 
                                     <div class="border-t border-gray-100"></div>
@@ -332,16 +332,16 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
                                     <form method="POST" action="{{ route('logout') }}" x-data>
                                         @csrf
                                         <x-dropdown-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                                            로그아웃
+                                            {{ __('로그아웃') }}
                                         </x-dropdown-link>
                                     </form>
                                 </x-slot>
                             </x-dropdown>
                         @else
                             <div class="flex items-center space-x-3">
-                                <a href="{{ route('login') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">로그인</a>
+                                <a href="{{ route('login') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">{{ __('로그인') }}</a>
                                 @if (Route::has('register'))
-                                    <a href="{{ route('register') }}" class="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg transition-colors">회원가입</a>
+                                    <a href="{{ route('register') }}" class="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg transition-colors">{{ __('회원가입') }}</a>
                                 @endif
                             </div>
                         @endauth
@@ -519,13 +519,13 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
 
                 <div class="mt-3 space-y-1">
                     <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
-                        프로필
+                        {{ __('프로필') }}
                     </x-responsive-nav-link>
 
                     <form method="POST" action="{{ route('logout') }}" x-data>
                         @csrf
                         <x-responsive-nav-link href="{{ route('logout') }}" @click.prevent="$root.submit();">
-                            로그아웃
+                            {{ __('로그아웃') }}
                         </x-responsive-nav-link>
                     </form>
                 </div>
@@ -534,11 +534,11 @@ class="bg-white border-b border-gray-200 shadow-sm relative z-50">
             <div class="pt-4 pb-3 border-t border-gray-200 bg-white">
                 <div class="space-y-1">
                     <x-responsive-nav-link href="{{ route('login') }}">
-                        로그인
+                        {{ __('로그인') }}
                     </x-responsive-nav-link>
                     @if (Route::has('register'))
                         <x-responsive-nav-link href="{{ route('register') }}">
-                            회원가입
+                            {{ __('회원가입') }}
                         </x-responsive-nav-link>
                     @endif
                 </div>

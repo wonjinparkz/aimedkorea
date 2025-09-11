@@ -34,8 +34,8 @@
                     <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">게시물이 없습니다</h3>
-                    <p class="text-gray-500">아직 등록된 {{ $title }} 게시물이 없습니다.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('no_posts') }}</h3>
+                    <p class="text-gray-500">{{ __('no_posts_yet', ['title' => $title]) }}</p>
                 </div>
             @endif
         </div>

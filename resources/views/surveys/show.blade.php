@@ -43,9 +43,11 @@
                             <!-- 선택지 -->
                             <div class="space-y-3">
                                 @php
-                                    $options = isset($question['has_specific_checklist']) && $question['has_specific_checklist'] 
-                                        ? $question['specific_checklist_items'] 
-                                        : $survey->checklist_items;
+                                    if (isset($question['has_specific_checklist']) && $question['has_specific_checklist']) {
+                                        $options = $question['specific_checklist_items'];
+                                    } else {
+                                        $options = $survey->frequency_items ?: $survey->checklist_items;
+                                    }
                                 @endphp
                                 
                                 @foreach($options as $optionIndex => $option)

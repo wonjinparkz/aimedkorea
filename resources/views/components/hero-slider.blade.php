@@ -54,7 +54,7 @@
                         </video>
                     @elseif($hero->background_type === 'image' && $hero->background_image)
                         <img src="{{ Storage::url($hero->background_image) }}" 
-                             alt="{{ $hero->title }}"
+                             alt="{{ $hero->getTitle() }}"
                              class="w-full h-full object-cover">
                     @endif
                     
@@ -79,33 +79,33 @@
                 <div class="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex items-center h-full {{ $contentAlignment === 'center' ? 'justify-center' : ($contentAlignment === 'right' ? 'justify-end' : 'justify-start') }}">
                         <div class="w-full md:w-2/3 lg:w-1/2 {{ $contentAlignment === 'center' ? 'text-center' : 'text-left' }}">
-                            @if($hero->subtitle && ($settings['subtitle']['position'] ?? 'above') === 'above')
+                            @if($hero->getSubtitle() && ($settings['subtitle']['position'] ?? 'above') === 'above')
                                 <p class="uppercase tracking-wider mb-2 {{ $subtitleSize }}"
                                    style="color: {{ $settings['subtitle']['color'] ?? '#E5E7EB' }}">
-                                    {{ $hero->subtitle }}
+                                    {{ $hero->getSubtitle() }}
                                 </p>
                             @endif
                             
                             <h1 class="font-bold mb-4 {{ $titleSize }}"
                                 style="color: {{ $settings['title']['color'] ?? '#FFFFFF' }}">
-                                {{ $hero->title }}
+                                {{ $hero->getTitle() }}
                             </h1>
                             
-                            @if($hero->subtitle && ($settings['subtitle']['position'] ?? 'above') === 'below')
+                            @if($hero->getSubtitle() && ($settings['subtitle']['position'] ?? 'above') === 'below')
                                 <p class="uppercase tracking-wider mb-2 {{ $subtitleSize }}"
                                    style="color: {{ $settings['subtitle']['color'] ?? '#E5E7EB' }}">
-                                    {{ $hero->subtitle }}
+                                    {{ $hero->getSubtitle() }}
                                 </p>
                             @endif
                             
-                            @if($hero->description)
+                            @if($hero->getDescription())
                                 <p class="mb-8 leading-relaxed {{ $descriptionSize }}"
                                    style="color: {{ $settings['description']['color'] ?? '#D1D5DB' }}">
-                                    {{ $hero->description }}
+                                    {{ $hero->getDescription() }}
                                 </p>
                             @endif
                             
-                            @if($hero->button_text && ($hero->button_url || $hero->button_post_id))
+                            @if($hero->getButtonText() && ($hero->button_url || $hero->button_post_id))
                                 @php
                                     // 버튼 설정 가져오기 - 다양한 키 형식 지원
                                     $buttonSettings = $settings['button'] ?? [];
@@ -140,7 +140,7 @@
                                 <a href="{{ $buttonUrl }}" 
                                    class="inline-flex items-center px-8 py-3 rounded-full transition-all duration-300 {{ $buttonClasses }} {{ $hoverStyles ?? '' }} transform hover:scale-105"
                                    style="{{ $buttonStyles }}">
-                                    {{ $hero->button_text }}
+                                    {{ $hero->getButtonText() }}
                                     <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                     </svg>

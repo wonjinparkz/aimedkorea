@@ -9,22 +9,29 @@ Route::get('/', function () {
     // Hero 슬라이드
     $heroes = Hero::active()->with('buttonPost')->get();
     
+    // 현재 언어 가져오기
+    $currentLang = session('locale', 'kor');
+    
     // 특징 게시물 - featured 타입의 가장 최신 게시물 1개
     $featuredPost = Post::where('type', 'featured')
+        ->inLanguage($currentLang)
         ->latest()
         ->first();
     
     $routinePosts = Post::where('type', 'routine')
+        ->inLanguage($currentLang)
         ->latest()
         ->take(3)
         ->get();
     
     $blogPosts = Post::where('type', 'blog')
+        ->inLanguage($currentLang)
         ->latest()
         ->take(3)
         ->get();
     
     $tabPosts = Post::where('type', 'tab')
+        ->inLanguage($currentLang)
         ->orderBy('created_at', 'desc')
         ->get();
     
@@ -72,7 +79,9 @@ Route::middleware([
 
 // 명시적 라우트 추가 (웹서버 설정 문제 해결)
 Route::get('/news', function () {
+    $currentLang = session('locale', 'kor');
     $posts = Post::where('type', 'news')
+        ->inLanguage($currentLang)
         ->latest()
         ->paginate(9);
     
@@ -84,7 +93,9 @@ Route::get('/news', function () {
 })->name('posts.news.index');
 
 Route::get('/blog', function () {
+    $currentLang = session('locale', 'kor');
     $posts = Post::where('type', 'blog')
+        ->inLanguage($currentLang)
         ->latest()
         ->paginate(9);
     
@@ -96,7 +107,9 @@ Route::get('/blog', function () {
 })->name('posts.blog.index');
 
 Route::get('/routine', function () {
+    $currentLang = session('locale', 'kor');
     $posts = Post::where('type', 'routine')
+        ->inLanguage($currentLang)
         ->latest()
         ->paginate(9);
     
@@ -108,7 +121,9 @@ Route::get('/routine', function () {
 })->name('posts.routine.index');
 
 Route::get('/featured', function () {
+    $currentLang = session('locale', 'kor');
     $posts = Post::where('type', 'featured')
+        ->inLanguage($currentLang)
         ->latest()
         ->paginate(9);
     
@@ -121,7 +136,9 @@ Route::get('/featured', function () {
 
 // 상품 페이지
 Route::get('/products', function () {
+    $currentLang = session('locale', 'kor');
     $posts = Post::where('type', 'product')
+        ->inLanguage($currentLang)
         ->latest()
         ->paginate(9);
     
@@ -134,7 +151,9 @@ Route::get('/products', function () {
 
 // 식품 페이지
 Route::get('/foods', function () {
+    $currentLang = session('locale', 'kor');
     $posts = Post::where('type', 'food')
+        ->inLanguage($currentLang)
         ->latest()
         ->paginate(9);
     
@@ -147,7 +166,9 @@ Route::get('/foods', function () {
 
 // 서비스 페이지
 Route::get('/services', function () {
+    $currentLang = session('locale', 'kor');
     $posts = Post::where('type', 'service')
+        ->inLanguage($currentLang)
         ->latest()
         ->paginate(9);
     
@@ -160,7 +181,9 @@ Route::get('/services', function () {
 
 // 홍보 페이지
 Route::get('/promotions', function () {
+    $currentLang = session('locale', 'kor');
     $posts = Post::where('type', 'promotion')
+        ->inLanguage($currentLang)
         ->latest()
         ->paginate(9);
     
@@ -187,7 +210,9 @@ Route::get('/qna/{id}', [App\Http\Controllers\QnaController::class, 'show'])->na
 
 // 영상 미디어 페이지
 Route::get('/videos', function () {
+    $currentLang = session('locale', 'kor');
     $posts = Post::where('type', 'video')
+        ->inLanguage($currentLang)
         ->where('is_published', true)
         ->whereNotNull('published_at')
         ->where('published_at', '<=', now())
@@ -219,4 +244,77 @@ Route::post('/change-language', function (Request $request) {
     session(['locale' => $language]);
     
     return response()->json(['success' => true]);
+});
+
+// PWA Offline page route
+Route::get('/offline', function () {
+    return view('offline');
+})->name('offline');
+
+// PWA 설치 페이지
+Route::get('/install', function () {
+    return view('pwa.install');
+})->name('pwa.install');
+
+// TEST ROUTE: Hero translations debug
+Route::get('/test-hero-translations', function () {
+    $hero = Hero::first();
+    
+    if (!$hero) {
+        return 'No Hero records found in database.';
+    }
+    
+    $languages = ['kor', 'eng', 'chn', 'hin', 'arb'];
+    $output = '<h1>Hero Translation Test</h1>';
+    $output .= '<h2>Hero ID: ' . $hero->id . '</h2>';
+    
+    // Show raw data
+    $output .= '<h3>Raw Database Values:</h3>';
+    $output .= '<pre>';
+    $output .= 'title: ' . htmlspecialchars($hero->title) . "\n";
+    $output .= 'subtitle: ' . htmlspecialchars($hero->subtitle) . "\n";
+    $output .= 'description: ' . htmlspecialchars($hero->description) . "\n";
+    $output .= 'button_text: ' . htmlspecialchars($hero->button_text) . "\n\n";
+    
+    $output .= 'title_translations: ' . json_encode($hero->title_translations, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
+    $output .= 'subtitle_translations: ' . json_encode($hero->subtitle_translations, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
+    $output .= 'description_translations: ' . json_encode($hero->description_translations, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
+    $output .= 'button_text_translations: ' . json_encode($hero->button_text_translations, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
+    $output .= '</pre>';
+    
+    // Test getTitle() method for each language
+    $output .= '<h3>Title by Language (using getTitle() method):</h3>';
+    $output .= '<table border="1" cellpadding="10">';
+    $output .= '<tr><th>Language</th><th>Title</th><th>Subtitle</th><th>Description</th><th>Button Text</th></tr>';
+    
+    foreach ($languages as $lang) {
+        $output .= '<tr>';
+        $output .= '<td>' . $lang . '</td>';
+        $output .= '<td>' . htmlspecialchars($hero->getTitle($lang)) . '</td>';
+        $output .= '<td>' . htmlspecialchars($hero->getSubtitle($lang)) . '</td>';
+        $output .= '<td>' . htmlspecialchars($hero->getDescription($lang)) . '</td>';
+        $output .= '<td>' . htmlspecialchars($hero->getButtonText($lang)) . '</td>';
+        $output .= '</tr>';
+    }
+    
+    $output .= '</table>';
+    
+    // Show current session locale
+    $output .= '<h3>Current Session Info:</h3>';
+    $output .= '<p>Session locale: ' . session('locale', 'not set') . '</p>';
+    $output .= '<p>App locale: ' . app()->getLocale() . '</p>';
+    
+    // Show available languages for this hero
+    $output .= '<h3>Available Languages for this Hero:</h3>';
+    $output .= '<p>' . implode(', ', $hero->getAvailableLanguages()->toArray()) . '</p>';
+    
+    // Test hasTranslation method
+    $output .= '<h3>Has Translation Check:</h3>';
+    $output .= '<ul>';
+    foreach ($languages as $lang) {
+        $output .= '<li>' . $lang . ': ' . ($hero->hasTranslation($lang) ? 'YES' : 'NO') . '</li>';
+    }
+    $output .= '</ul>';
+    
+    return $output;
 });

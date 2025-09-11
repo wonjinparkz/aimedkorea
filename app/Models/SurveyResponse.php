@@ -19,6 +19,7 @@ class SurveyResponse extends Model
         'last_viewed_at',
         'ip_address',
         'user_agent',
+        'analysis_type',
     ];
 
     protected $casts = [
