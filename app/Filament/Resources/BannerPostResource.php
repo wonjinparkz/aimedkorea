@@ -9,11 +9,11 @@ class BannerPostResource extends PostResource
 {
     protected static ?string $navigationIcon = 'heroicon-o-photo';
     
-    protected static ?string $navigationLabel = '배너';
+    protected static ?string $navigationLabel = 'Hero 콘텐츠';
     
-    protected static ?string $modelLabel = '배너';
+    protected static ?string $modelLabel = 'Hero 콘텐츠';
     
-    protected static ?string $pluralModelLabel = '배너';
+    protected static ?string $pluralModelLabel = 'Hero 콘텐츠';
     
     protected static ?string $postType = Post::TYPE_BANNER;
     

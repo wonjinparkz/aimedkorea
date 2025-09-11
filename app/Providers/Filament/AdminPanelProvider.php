@@ -11,6 +11,8 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -68,6 +70,11 @@ class AdminPanelProvider extends PanelProvider
                 '마케팅',
                 '사이트',
                 '설정',
-            ]);
+            ])
+            ->sidebarWidth('220px')
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => view('filament.components.navigation-override')
+            );
     }
 }

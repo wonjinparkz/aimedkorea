@@ -12,17 +12,17 @@ class TabPostResource extends PostResource
 {
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     
-    protected static ?string $navigationLabel = '탭';
+    protected static ?string $navigationLabel = '연구 주제';
     
-    protected static ?string $modelLabel = '탭';
+    protected static ?string $modelLabel = '연구 주제';
     
-    protected static ?string $pluralModelLabel = '탭';
+    protected static ?string $pluralModelLabel = '연구 주제';
     
     protected static ?string $postType = Post::TYPE_TAB;
     
-    protected static ?string $navigationGroup = '홈 구성';
+    protected static ?string $navigationGroup = '리서치 허브';
     
-    protected static ?int $navigationSort = 23;
+    protected static ?int $navigationSort = 42;
 
     public static function form(Form $form): Form
     {
@@ -52,13 +52,13 @@ class TabPostResource extends PostResource
                     ])
                     ->columns(2),
                 
-                Forms\Components\Section::make('컨텐츠 섹션')
-                    ->description('탭 형식으로 표시될 4개의 섹션을 입력하세요.')
+                Forms\Components\Section::make('연구 주제 섹션')
+                    ->description('연구 주제별로 표시될 4개의 섹션을 입력하세요.')
                     ->schema([
                         Forms\Components\Tabs::make('content_sections')
                             ->tabs([
                                 Forms\Components\Tabs\Tab::make('Overview')
-                                    ->label('루틴 정의')
+                                    ->label('연구 개요')
                                     ->schema([
                                         Forms\Components\RichEditor::make('content_sections.overview')
                                             ->label('')
@@ -66,7 +66,7 @@ class TabPostResource extends PostResource
                                             ->default(''),
                                     ]),
                                 Forms\Components\Tabs\Tab::make('Our Vision')
-                                    ->label('왜 루틴이 필요한가?')
+                                    ->label('연구 비전')
                                     ->schema([
                                         Forms\Components\RichEditor::make('content_sections.our_vision')
                                             ->label('')
