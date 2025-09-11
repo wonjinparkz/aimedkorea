@@ -14,6 +14,8 @@ use Filament\Forms\Set;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Post;
+use League\Csv\Writer;
+use Illuminate\Database\Eloquent\Collection;
 
 class HeroResource extends Resource
 {
@@ -650,7 +652,219 @@ class HeroResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('export')
+                        ->label('선택항목 CSV 내보내기')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(function (Collection $records) {
+                            $csv = Writer::createFromString('');
+                            $csv->setOutputBOM(Writer::BOM_UTF8);
+                            
+                            $csv->insertOne([
+                                'ID',
+                                '제목 (기본)',
+                                '부제목 (기본)',
+                                '설명 (기본)',
+                                '버튼 텍스트 (기본)',
+                                '버튼 URL',
+                                '버튼 게시물 ID',
+                                '배경 이미지',
+                                '배경 비디오',
+                                '배경 타입',
+                                '제목 (한국어)',
+                                '제목 (영어)',
+                                '제목 (중국어)',
+                                '제목 (힌디어)',
+                                '제목 (아랍어)',
+                                '부제목 (한국어)',
+                                '부제목 (영어)',
+                                '부제목 (중국어)',
+                                '부제목 (힌디어)',
+                                '부제목 (아랍어)',
+                                '설명 (한국어)',
+                                '설명 (영어)',
+                                '설명 (중국어)',
+                                '설명 (힌디어)',
+                                '설명 (아랍어)',
+                                '버튼 텍스트 (한국어)',
+                                '버튼 텍스트 (영어)',
+                                '버튼 텍스트 (중국어)',
+                                '버튼 텍스트 (힌디어)',
+                                '버튼 텍스트 (아랍어)',
+                                '활성화',
+                                '순서',
+                                '생성일',
+                                '수정일',
+                            ]);
+                            
+                            foreach ($records as $record) {
+                                // Parse translations JSON
+                                $titleTrans = is_string($record->title_translations) 
+                                    ? json_decode($record->title_translations, true) 
+                                    : $record->title_translations;
+                                $subtitleTrans = is_string($record->subtitle_translations) 
+                                    ? json_decode($record->subtitle_translations, true) 
+                                    : $record->subtitle_translations;
+                                $descTrans = is_string($record->description_translations) 
+                                    ? json_decode($record->description_translations, true) 
+                                    : $record->description_translations;
+                                $buttonTrans = is_string($record->button_text_translations) 
+                                    ? json_decode($record->button_text_translations, true) 
+                                    : $record->button_text_translations;
+                                
+                                $csv->insertOne([
+                                    $record->id,
+                                    $record->title,
+                                    $record->subtitle,
+                                    $record->description,
+                                    $record->button_text,
+                                    $record->button_url,
+                                    $record->button_post_id,
+                                    $record->background_image,
+                                    $record->background_video,
+                                    $record->background_type,
+                                    isset($titleTrans['kor']) ? $titleTrans['kor'] : '',
+                                    isset($titleTrans['eng']) ? $titleTrans['eng'] : '',
+                                    isset($titleTrans['chn']) ? $titleTrans['chn'] : '',
+                                    isset($titleTrans['hin']) ? $titleTrans['hin'] : '',
+                                    isset($titleTrans['arb']) ? $titleTrans['arb'] : '',
+                                    isset($subtitleTrans['kor']) ? $subtitleTrans['kor'] : '',
+                                    isset($subtitleTrans['eng']) ? $subtitleTrans['eng'] : '',
+                                    isset($subtitleTrans['chn']) ? $subtitleTrans['chn'] : '',
+                                    isset($subtitleTrans['hin']) ? $subtitleTrans['hin'] : '',
+                                    isset($subtitleTrans['arb']) ? $subtitleTrans['arb'] : '',
+                                    isset($descTrans['kor']) ? $descTrans['kor'] : '',
+                                    isset($descTrans['eng']) ? $descTrans['eng'] : '',
+                                    isset($descTrans['chn']) ? $descTrans['chn'] : '',
+                                    isset($descTrans['hin']) ? $descTrans['hin'] : '',
+                                    isset($descTrans['arb']) ? $descTrans['arb'] : '',
+                                    isset($buttonTrans['kor']) ? $buttonTrans['kor'] : '',
+                                    isset($buttonTrans['eng']) ? $buttonTrans['eng'] : '',
+                                    isset($buttonTrans['chn']) ? $buttonTrans['chn'] : '',
+                                    isset($buttonTrans['hin']) ? $buttonTrans['hin'] : '',
+                                    isset($buttonTrans['arb']) ? $buttonTrans['arb'] : '',
+                                    $record->is_active ? '예' : '아니오',
+                                    $record->order,
+                                    $record->created_at->format('Y-m-d H:i:s'),
+                                    $record->updated_at->format('Y-m-d H:i:s'),
+                                ]);
+                            }
+                            
+                            return response()->streamDownload(function () use ($csv) {
+                                echo $csv->toString();
+                            }, 'hero-slides-' . date('Y-m-d-His') . '.csv', [
+                                'Content-Type' => 'text/csv; charset=UTF-8',
+                            ]);
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
+            ])
+            ->headerActions([
+                Tables\Actions\Action::make('exportAll')
+                    ->label('전체 데이터 CSV 내보내기')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function () {
+                        $records = Hero::all();
+                        
+                        $csv = Writer::createFromString('');
+                        $csv->setOutputBOM(Writer::BOM_UTF8);
+                        
+                        $csv->insertOne([
+                            'ID',
+                            '제목 (기본)',
+                            '부제목 (기본)',
+                            '설명 (기본)',
+                            '버튼 텍스트 (기본)',
+                            '버튼 URL',
+                            '버튼 게시물 ID',
+                            '배경 이미지',
+                            '배경 비디오',
+                            '배경 타입',
+                            '제목 (한국어)',
+                            '제목 (영어)',
+                            '제목 (중국어)',
+                            '제목 (힌디어)',
+                            '제목 (아랍어)',
+                            '부제목 (한국어)',
+                            '부제목 (영어)',
+                            '부제목 (중국어)',
+                            '부제목 (힌디어)',
+                            '부제목 (아랍어)',
+                            '설명 (한국어)',
+                            '설명 (영어)',
+                            '설명 (중국어)',
+                            '설명 (힌디어)',
+                            '설명 (아랍어)',
+                            '버튼 텍스트 (한국어)',
+                            '버튼 텍스트 (영어)',
+                            '버튼 텍스트 (중국어)',
+                            '버튼 텍스트 (힌디어)',
+                            '버튼 텍스트 (아랍어)',
+                            '활성화',
+                            '순서',
+                            '생성일',
+                            '수정일',
+                        ]);
+                        
+                        foreach ($records as $record) {
+                            // Parse translations JSON
+                            $titleTrans = is_string($record->title_translations) 
+                                ? json_decode($record->title_translations, true) 
+                                : $record->title_translations;
+                            $subtitleTrans = is_string($record->subtitle_translations) 
+                                ? json_decode($record->subtitle_translations, true) 
+                                : $record->subtitle_translations;
+                            $descTrans = is_string($record->description_translations) 
+                                ? json_decode($record->description_translations, true) 
+                                : $record->description_translations;
+                            $buttonTrans = is_string($record->button_text_translations) 
+                                ? json_decode($record->button_text_translations, true) 
+                                : $record->button_text_translations;
+                            
+                            $csv->insertOne([
+                                $record->id,
+                                $record->title,
+                                $record->subtitle,
+                                $record->description,
+                                $record->button_text,
+                                $record->button_url,
+                                $record->button_post_id,
+                                $record->background_image,
+                                $record->background_video,
+                                $record->background_type,
+                                isset($titleTrans['kor']) ? $titleTrans['kor'] : '',
+                                isset($titleTrans['eng']) ? $titleTrans['eng'] : '',
+                                isset($titleTrans['chn']) ? $titleTrans['chn'] : '',
+                                isset($titleTrans['hin']) ? $titleTrans['hin'] : '',
+                                isset($titleTrans['arb']) ? $titleTrans['arb'] : '',
+                                isset($subtitleTrans['kor']) ? $subtitleTrans['kor'] : '',
+                                isset($subtitleTrans['eng']) ? $subtitleTrans['eng'] : '',
+                                isset($subtitleTrans['chn']) ? $subtitleTrans['chn'] : '',
+                                isset($subtitleTrans['hin']) ? $subtitleTrans['hin'] : '',
+                                isset($subtitleTrans['arb']) ? $subtitleTrans['arb'] : '',
+                                isset($descTrans['kor']) ? $descTrans['kor'] : '',
+                                isset($descTrans['eng']) ? $descTrans['eng'] : '',
+                                isset($descTrans['chn']) ? $descTrans['chn'] : '',
+                                isset($descTrans['hin']) ? $descTrans['hin'] : '',
+                                isset($descTrans['arb']) ? $descTrans['arb'] : '',
+                                isset($buttonTrans['kor']) ? $buttonTrans['kor'] : '',
+                                isset($buttonTrans['eng']) ? $buttonTrans['eng'] : '',
+                                isset($buttonTrans['chn']) ? $buttonTrans['chn'] : '',
+                                isset($buttonTrans['hin']) ? $buttonTrans['hin'] : '',
+                                isset($buttonTrans['arb']) ? $buttonTrans['arb'] : '',
+                                $record->is_active ? '예' : '아니오',
+                                $record->order,
+                                $record->created_at->format('Y-m-d H:i:s'),
+                                $record->updated_at->format('Y-m-d H:i:s'),
+                            ]);
+                        }
+                        
+                        return response()->streamDownload(function () use ($csv) {
+                            echo $csv->toString();
+                        }, 'hero-slides-all-' . date('Y-m-d-His') . '.csv', [
+                            'Content-Type' => 'text/csv; charset=UTF-8',
+                        ]);
+                    }),
             ])
             ->defaultSort('order', 'asc')
             ->reorderable('order');

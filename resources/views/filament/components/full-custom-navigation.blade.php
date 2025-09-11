@@ -57,7 +57,7 @@
                             <li class="fi-sidebar-item">
                                 <a 
                                     href="{{ filament()->getHomeUrl() ?? filament()->getUrl() }}"
-                                    class="fi-sidebar-item-button flex items-center gap-x-3 px-3 py-2 rounded-lg transition {{ request()->routeIs('filament.*.pages.dashboard') ? 'bg-gray-50 dark:bg-white/5 text-primary-600' : 'hover:bg-gray-50 dark:hover:bg-white/5' }}"
+                                    class="fi-sidebar-item-button flex items-center gap-x-3 px-3 py-2 rounded-lg transition {{ request()->routeIs('filament.*.pages.dashboard') ? 'bg-gray-100 dark:bg-white/10 text-primary-600' : 'hover:bg-gray-100 dark:hover:bg-white/5' }}"
                                 >
                                     <span class="fi-sidebar-item-number flex h-6 w-6 items-center justify-center text-xs font-semibold text-gray-500 dark:text-gray-400">
                                         1
@@ -84,8 +84,8 @@
                                     @click="toggleGroup('{{ $groupName }}')"
                                     class="fi-sidebar-group-button flex items-center gap-x-3 px-3 py-2 w-full rounded-lg transition"
                                     :class="{ 
-                                        'bg-gray-50 dark:bg-white/5 text-primary-600': activeGroup === '{{ $groupName }}',
-                                        'hover:bg-gray-50 dark:hover:bg-white/5': activeGroup !== '{{ $groupName }}'
+                                        'bg-gray-100 dark:bg-white/10 text-primary-600': activeGroup === '{{ $groupName }}',
+                                        'hover:bg-gray-100 dark:hover:bg-white/5': activeGroup !== '{{ $groupName }}'
                                     }"
                                 >
                                     <span class="fi-sidebar-item-number flex h-6 w-6 items-center justify-center text-xs font-semibold text-gray-500 dark:text-gray-400">
@@ -112,17 +112,26 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 transform translate-x-0"
             x-transition:leave-end="opacity-0 transform -translate-x-full"
-            @click.away="handleClickAway($event)"
             style="display: none;"
             x-init="$el.style.display = ''"
         >
-            <div class="submenu-header px-3 py-3 mb-3">
+            <div class="submenu-header px-3 py-3 mb-3 flex items-center justify-between">
                 <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center">
                     <span x-text="activeGroup"></span>
                     <svg class="h-3 w-3 ml-1 text-gray-400" fill="none" viewBox="0 0 20 20">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </h3>
+                <button 
+                    @click="closeSubmenu()"
+                    type="button"
+                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    aria-label="Close submenu"
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
             
             <div class="px-2">
@@ -133,8 +142,8 @@
                                 :href="item.url"
                                 class="fi-sidebar-item-button relative flex items-center gap-x-3 px-3 py-2 text-sm font-medium rounded-lg transition duration-75"
                                 :class="{
-                                    'bg-gray-50 dark:bg-white/5 text-primary-600 dark:text-primary-400': item.isActive,
-                                    'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5': !item.isActive
+                                    'bg-gray-100 dark:bg-white/10 text-primary-600 dark:text-primary-400': item.isActive,
+                                    'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5': !item.isActive
                                 }"
                             >
                                 {{-- 활성 상태 인디케이터 --}}
@@ -313,14 +322,6 @@ function customFullNavigation() {
             this.activeGroupItems = [];
             this.activeGroupNumber = 0;
             // document.body.classList.remove('submenu-open'); // 제거 - 본문 밀기 비활성화
-        },
-        
-        handleClickAway(event) {
-            // 1차 사이드바 그룹 버튼 클릭이 아닌 경우에만 닫기
-            const isGroupButton = event.target.closest('.fi-sidebar-group-button');
-            if (!isGroupButton) {
-                this.closeSubmenu();
-            }
         },
         
         detectCurrentGroup() {

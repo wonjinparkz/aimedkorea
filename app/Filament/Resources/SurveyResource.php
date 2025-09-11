@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
+use League\Csv\Writer;
+use Illuminate\Support\Facades\Response;
 
 class SurveyResource extends Resource
 {
@@ -906,6 +908,306 @@ class SurveyResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+                Tables\Actions\BulkAction::make('export')
+                    ->label('선택항목 CSV 내보내기')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function (Collection $records) {
+                        $csv = Writer::createFromString('');
+                        $csv->setOutputBOM(Writer::BOM_UTF8);
+                        
+                        // CSV 헤더 정의
+                        $headers = [
+                            'ID',
+                            '제목 (한국어)',
+                            '제목 (영어)',
+                            '제목 (중국어)',
+                            '제목 (힌디어)',
+                            '제목 (아랍어)',
+                            '설명 (한국어)',
+                            '설명 (영어)',
+                            '설명 (중국어)',
+                            '설명 (힌디어)',
+                            '설명 (아랍어)',
+                            '체크리스트1 점수',
+                            '체크리스트1 한국어',
+                            '체크리스트1 영어',
+                            '체크리스트2 점수',
+                            '체크리스트2 한국어',
+                            '체크리스트2 영어',
+                            '체크리스트3 점수',
+                            '체크리스트3 한국어',
+                            '체크리스트3 영어',
+                            '체크리스트4 점수',
+                            '체크리스트4 한국어',
+                            '체크리스트4 영어',
+                            '체크리스트5 점수',
+                            '체크리스트5 한국어',
+                            '체크리스트5 영어',
+                            '질문1 (한국어)',
+                            '질문1 (영어)',
+                            '질문2 (한국어)',
+                            '질문2 (영어)',
+                            '질문3 (한국어)',
+                            '질문3 (영어)',
+                            '질문4 (한국어)',
+                            '질문4 (영어)',
+                            '질문5 (한국어)',
+                            '질문5 (영어)',
+                            '빈도항목1 (한국어)',
+                            '빈도항목1 (영어)',
+                            '빈도항목2 (한국어)',
+                            '빈도항목2 (영어)',
+                            '빈도항목3 (한국어)',
+                            '빈도항목3 (영어)',
+                            '이미지',
+                            '생성일',
+                            '수정일',
+                        ];
+                        
+                        $csv->insertOne($headers);
+                        
+                        foreach ($records as $record) {
+                            // Parse title translations
+                            $titleTrans = is_string($record->title_translations) 
+                                ? json_decode($record->title_translations, true) 
+                                : $record->title_translations;
+                            
+                            // Parse description translations
+                            $descTrans = is_string($record->description_translations) 
+                                ? json_decode($record->description_translations, true) 
+                                : $record->description_translations;
+                            
+                            // Parse checklist items translations
+                            $checklistTrans = is_string($record->checklist_items_translations) 
+                                ? json_decode($record->checklist_items_translations, true) 
+                                : $record->checklist_items_translations;
+                            
+                            // Parse checklist items
+                            $checklistItems = is_string($record->checklist_items) 
+                                ? json_decode($record->checklist_items, true) 
+                                : $record->checklist_items;
+                            
+                            // Parse questions translations
+                            $questionsTrans = is_string($record->questions_translations) 
+                                ? json_decode($record->questions_translations, true) 
+                                : $record->questions_translations;
+                            
+                            // Parse frequency items translations
+                            $freqTrans = is_string($record->frequency_items_translations) 
+                                ? json_decode($record->frequency_items_translations, true) 
+                                : $record->frequency_items_translations;
+                            
+                            $row = [
+                                $record->id,
+                                isset($titleTrans['kor']) ? $titleTrans['kor'] : '',
+                                isset($titleTrans['eng']) ? $titleTrans['eng'] : '',
+                                isset($titleTrans['chn']) ? $titleTrans['chn'] : '',
+                                isset($titleTrans['hin']) ? $titleTrans['hin'] : '',
+                                isset($titleTrans['arb']) ? $titleTrans['arb'] : '',
+                                isset($descTrans['kor']) ? $descTrans['kor'] : '',
+                                isset($descTrans['eng']) ? $descTrans['eng'] : '',
+                                isset($descTrans['chn']) ? $descTrans['chn'] : '',
+                                isset($descTrans['hin']) ? $descTrans['hin'] : '',
+                                isset($descTrans['arb']) ? $descTrans['arb'] : '',
+                            ];
+                            
+                            // Add checklist items (up to 5)
+                            for ($i = 0; $i < 5; $i++) {
+                                if (isset($checklistItems[$i])) {
+                                    $row[] = isset($checklistItems[$i]['score']) ? $checklistItems[$i]['score'] : '';
+                                    $row[] = isset($checklistTrans['kor'][$i]['label']) ? $checklistTrans['kor'][$i]['label'] : '';
+                                    $row[] = isset($checklistTrans['eng'][$i]['label']) ? $checklistTrans['eng'][$i]['label'] : '';
+                                } else {
+                                    $row[] = '';
+                                    $row[] = '';
+                                    $row[] = '';
+                                }
+                            }
+                            
+                            // Add questions (up to 5)
+                            for ($i = 0; $i < 5; $i++) {
+                                $row[] = isset($questionsTrans['kor'][$i]['label']) ? $questionsTrans['kor'][$i]['label'] : '';
+                                $row[] = isset($questionsTrans['eng'][$i]['label']) ? $questionsTrans['eng'][$i]['label'] : '';
+                            }
+                            
+                            // Add frequency items (up to 3)
+                            for ($i = 0; $i < 3; $i++) {
+                                $row[] = isset($freqTrans['kor'][$i]['label']) ? $freqTrans['kor'][$i]['label'] : '';
+                                $row[] = isset($freqTrans['eng'][$i]['label']) ? $freqTrans['eng'][$i]['label'] : '';
+                            }
+                            
+                            $row[] = $record->survey_image;
+                            $row[] = $record->created_at ? $record->created_at->format('Y-m-d H:i:s') : '';
+                            $row[] = $record->updated_at ? $record->updated_at->format('Y-m-d H:i:s') : '';
+                            
+                            $csv->insertOne($row);
+                        }
+                        
+                        $content = $csv->toString();
+                        
+                        return Response::streamDownload(
+                            function () use ($content) {
+                                echo $content;
+                            },
+                            'surveys_export_' . date('Y-m-d_His') . '.csv',
+                            [
+                                'Content-Type' => 'text/csv; charset=UTF-8',
+                                'Content-Encoding' => 'UTF-8',
+                            ]
+                        );
+                    }),
+            ])
+            ->headerActions([
+                Tables\Actions\Action::make('export_all')
+                    ->label('전체 CSV 내보내기')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        $records = Survey::all();
+                        
+                        $csv = Writer::createFromString('');
+                        $csv->setOutputBOM(Writer::BOM_UTF8);
+                        
+                        // CSV 헤더 정의
+                        $headers = [
+                            'ID',
+                            '제목 (한국어)',
+                            '제목 (영어)',
+                            '제목 (중국어)',
+                            '제목 (힌디어)',
+                            '제목 (아랍어)',
+                            '설명 (한국어)',
+                            '설명 (영어)',
+                            '설명 (중국어)',
+                            '설명 (힌디어)',
+                            '설명 (아랍어)',
+                            '체크리스트1 점수',
+                            '체크리스트1 한국어',
+                            '체크리스트1 영어',
+                            '체크리스트2 점수',
+                            '체크리스트2 한국어',
+                            '체크리스트2 영어',
+                            '체크리스트3 점수',
+                            '체크리스트3 한국어',
+                            '체크리스트3 영어',
+                            '체크리스트4 점수',
+                            '체크리스트4 한국어',
+                            '체크리스트4 영어',
+                            '체크리스트5 점수',
+                            '체크리스트5 한국어',
+                            '체크리스트5 영어',
+                            '질문1 (한국어)',
+                            '질문1 (영어)',
+                            '질문2 (한국어)',
+                            '질문2 (영어)',
+                            '질문3 (한국어)',
+                            '질문3 (영어)',
+                            '질문4 (한국어)',
+                            '질문4 (영어)',
+                            '질문5 (한국어)',
+                            '질문5 (영어)',
+                            '빈도항목1 (한국어)',
+                            '빈도항목1 (영어)',
+                            '빈도항목2 (한국어)',
+                            '빈도항목2 (영어)',
+                            '빈도항목3 (한국어)',
+                            '빈도항목3 (영어)',
+                            '이미지',
+                            '생성일',
+                            '수정일',
+                        ];
+                        
+                        $csv->insertOne($headers);
+                        
+                        foreach ($records as $record) {
+                            // Parse title translations
+                            $titleTrans = is_string($record->title_translations) 
+                                ? json_decode($record->title_translations, true) 
+                                : $record->title_translations;
+                            
+                            // Parse description translations
+                            $descTrans = is_string($record->description_translations) 
+                                ? json_decode($record->description_translations, true) 
+                                : $record->description_translations;
+                            
+                            // Parse checklist items translations
+                            $checklistTrans = is_string($record->checklist_items_translations) 
+                                ? json_decode($record->checklist_items_translations, true) 
+                                : $record->checklist_items_translations;
+                            
+                            // Parse checklist items
+                            $checklistItems = is_string($record->checklist_items) 
+                                ? json_decode($record->checklist_items, true) 
+                                : $record->checklist_items;
+                            
+                            // Parse questions translations
+                            $questionsTrans = is_string($record->questions_translations) 
+                                ? json_decode($record->questions_translations, true) 
+                                : $record->questions_translations;
+                            
+                            // Parse frequency items translations
+                            $freqTrans = is_string($record->frequency_items_translations) 
+                                ? json_decode($record->frequency_items_translations, true) 
+                                : $record->frequency_items_translations;
+                            
+                            $row = [
+                                $record->id,
+                                isset($titleTrans['kor']) ? $titleTrans['kor'] : '',
+                                isset($titleTrans['eng']) ? $titleTrans['eng'] : '',
+                                isset($titleTrans['chn']) ? $titleTrans['chn'] : '',
+                                isset($titleTrans['hin']) ? $titleTrans['hin'] : '',
+                                isset($titleTrans['arb']) ? $titleTrans['arb'] : '',
+                                isset($descTrans['kor']) ? $descTrans['kor'] : '',
+                                isset($descTrans['eng']) ? $descTrans['eng'] : '',
+                                isset($descTrans['chn']) ? $descTrans['chn'] : '',
+                                isset($descTrans['hin']) ? $descTrans['hin'] : '',
+                                isset($descTrans['arb']) ? $descTrans['arb'] : '',
+                            ];
+                            
+                            // Add checklist items (up to 5)
+                            for ($i = 0; $i < 5; $i++) {
+                                if (isset($checklistItems[$i])) {
+                                    $row[] = isset($checklistItems[$i]['score']) ? $checklistItems[$i]['score'] : '';
+                                    $row[] = isset($checklistTrans['kor'][$i]['label']) ? $checklistTrans['kor'][$i]['label'] : '';
+                                    $row[] = isset($checklistTrans['eng'][$i]['label']) ? $checklistTrans['eng'][$i]['label'] : '';
+                                } else {
+                                    $row[] = '';
+                                    $row[] = '';
+                                    $row[] = '';
+                                }
+                            }
+                            
+                            // Add questions (up to 5)
+                            for ($i = 0; $i < 5; $i++) {
+                                $row[] = isset($questionsTrans['kor'][$i]['label']) ? $questionsTrans['kor'][$i]['label'] : '';
+                                $row[] = isset($questionsTrans['eng'][$i]['label']) ? $questionsTrans['eng'][$i]['label'] : '';
+                            }
+                            
+                            // Add frequency items (up to 3)
+                            for ($i = 0; $i < 3; $i++) {
+                                $row[] = isset($freqTrans['kor'][$i]['label']) ? $freqTrans['kor'][$i]['label'] : '';
+                                $row[] = isset($freqTrans['eng'][$i]['label']) ? $freqTrans['eng'][$i]['label'] : '';
+                            }
+                            
+                            $row[] = $record->survey_image;
+                            $row[] = $record->created_at ? $record->created_at->format('Y-m-d H:i:s') : '';
+                            $row[] = $record->updated_at ? $record->updated_at->format('Y-m-d H:i:s') : '';
+                            
+                            $csv->insertOne($row);
+                        }
+                        
+                        $content = $csv->toString();
+                        
+                        return Response::streamDownload(
+                            function () use ($content) {
+                                echo $content;
+                            },
+                            'surveys_all_export_' . date('Y-m-d_His') . '.csv',
+                            [
+                                'Content-Type' => 'text/csv; charset=UTF-8',
+                                'Content-Encoding' => 'UTF-8',
+                            ]
+                        );
+                    }),
             ]);
     }
 
