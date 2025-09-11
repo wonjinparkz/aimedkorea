@@ -20,7 +20,9 @@ class SurveyResponseResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
     
-    protected static ?string $navigationGroup = '설문 관리';
+    protected static ?string $navigationGroup = '설문';
+    
+    protected static ?int $navigationSort = 71;
     
     protected static ?string $navigationLabel = '설문 결과';
     

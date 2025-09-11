@@ -13,7 +13,9 @@ class ProductPostResource extends PostResource
 
     protected static ?string $postType = Post::TYPE_PRODUCT;
 
-    protected static ?int $navigationSort = 7;
+    protected static ?string $navigationGroup = '콘텐츠';
+
+    protected static ?int $navigationSort = 35;
 
     public static function getNavigationBadge(): ?string
     {

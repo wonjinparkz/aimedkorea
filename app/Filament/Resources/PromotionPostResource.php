@@ -13,7 +13,9 @@ class PromotionPostResource extends PostResource
 
     protected static ?string $postType = Post::TYPE_PROMOTION;
 
-    protected static ?int $navigationSort = 10;
+    protected static ?string $navigationGroup = '마케팅';
+
+    protected static ?int $navigationSort = 90;
 
     public static function getNavigationBadge(): ?string
     {

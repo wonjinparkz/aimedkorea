@@ -25,9 +25,9 @@ class FooterMenuResource extends Resource
     
     protected static ?string $navigationLabel = '푸터 메뉴 관리';
     
-    protected static ?string $navigationGroup = '사이트 관리';
+    protected static ?string $navigationGroup = '사이트';
     
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 101;
     
     protected static ?string $slug = 'footer-menu';
 

@@ -22,9 +22,9 @@ class PaperPostResource extends PostResource
     
     protected static ?string $postType = Post::TYPE_PAPER;
     
-    protected static ?string $navigationGroup = '게시물 관리';
+    protected static ?string $navigationGroup = '리서치 허브';
     
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 41;
     
     public static function form(Form $form): Form
     {

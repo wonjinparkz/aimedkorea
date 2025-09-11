@@ -17,7 +17,9 @@ class NewsPostResource extends PostResource
     
     protected static ?string $postType = Post::TYPE_NEWS;
     
-    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationGroup = '콘텐츠';
+    
+    protected static ?int $navigationSort = 32;
 
     public static function getPages(): array
     {

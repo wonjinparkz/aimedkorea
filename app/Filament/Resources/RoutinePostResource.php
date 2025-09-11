@@ -17,7 +17,9 @@ class RoutinePostResource extends PostResource
     
     protected static ?string $postType = Post::TYPE_ROUTINE;
     
-    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationGroup = '루틴';
+    
+    protected static ?int $navigationSort = 50;
 
     public static function getPages(): array
     {

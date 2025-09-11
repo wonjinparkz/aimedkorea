@@ -23,9 +23,9 @@ class HeaderMenuResource extends Resource
     
     protected static ?string $navigationLabel = '헤더 메뉴 관리';
     
-    protected static ?string $navigationGroup = '사이트 관리';
+    protected static ?string $navigationGroup = '사이트';
     
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 100;
     
     protected static ?string $slug = 'header-menu';
 

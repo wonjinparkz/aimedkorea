@@ -55,6 +55,19 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->navigationGroups([
+                '대시보드',
+                '홈 구성',
+                '콘텐츠',
+                '리서치 허브',
+                '루틴',
+                '파트너',
+                '설문',
+                '미디어',
+                '마케팅',
+                '사이트',
+                '설정',
             ]);
     }
 }

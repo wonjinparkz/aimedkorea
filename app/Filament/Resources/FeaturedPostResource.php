@@ -17,7 +17,9 @@ class FeaturedPostResource extends PostResource
     
     protected static ?string $postType = Post::TYPE_FEATURED;
     
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = '콘텐츠';
+    
+    protected static ?int $navigationSort = 33;
 
     public static function getPages(): array
     {

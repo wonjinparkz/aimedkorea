@@ -17,9 +17,9 @@ class BannerPostResource extends PostResource
     
     protected static ?string $postType = Post::TYPE_BANNER;
     
-    protected static ?string $navigationGroup = 'Hero';
+    protected static ?string $navigationGroup = '홈 구성';
     
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 22;
 
     public static function getPages(): array
     {

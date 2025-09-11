@@ -27,9 +27,9 @@ class HeroResource extends Resource
     
     protected static ?string $pluralModelLabel = 'Hero 슬라이드';
     
-    protected static ?string $navigationGroup = 'Hero';
+    protected static ?string $navigationGroup = '홈 구성';
     
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 21;
 
     public static function form(Form $form): Form
     {

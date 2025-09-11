@@ -20,7 +20,9 @@ class TabPostResource extends PostResource
     
     protected static ?string $postType = Post::TYPE_TAB;
     
-    protected static ?int $navigationSort = 5;
+    protected static ?string $navigationGroup = '홈 구성';
+    
+    protected static ?int $navigationSort = 23;
 
     public static function form(Form $form): Form
     {

@@ -23,11 +23,11 @@ class QnaPostResource extends PostResource
 
     protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
 
-    protected static ?string $navigationGroup = '게시물 관리';
+    protected static ?string $navigationGroup = '콘텐츠';
 
     protected static ?string $postType = Post::TYPE_QNA;
 
-    protected static ?int $navigationSort = 13;
+    protected static ?int $navigationSort = 37;
 
     public static function form(Form $form): Form
     {

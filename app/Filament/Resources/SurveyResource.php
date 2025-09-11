@@ -20,7 +20,9 @@ class SurveyResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     
-    protected static ?string $navigationGroup = '설문 관리';
+    protected static ?string $navigationGroup = '설문';
+    
+    protected static ?int $navigationSort = 70;
     
     protected static ?string $navigationLabel = '설문 문항 관리';
     

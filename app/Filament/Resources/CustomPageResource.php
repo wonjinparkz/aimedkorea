@@ -20,9 +20,9 @@ class CustomPageResource extends Resource
     
     protected static ?string $navigationLabel = '맞춤형 페이지';
     
-    protected static ?string $navigationGroup = '페이지 관리';
+    protected static ?string $navigationGroup = '사이트';
     
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 102;
     
     protected static ?string $modelLabel = '맞춤형 페이지';
     

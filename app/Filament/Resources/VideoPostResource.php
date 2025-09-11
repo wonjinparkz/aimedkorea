@@ -23,11 +23,11 @@ class VideoPostResource extends PostResource
 
     protected static ?string $navigationIcon = 'heroicon-o-video-camera';
 
-    protected static ?string $navigationGroup = '게시물 관리';
+    protected static ?string $navigationGroup = '미디어';
 
     protected static ?string $postType = Post::TYPE_VIDEO;
 
-    protected static ?int $navigationSort = 14;
+    protected static ?int $navigationSort = 80;
 
     public static function form(Form $form): Form
     {

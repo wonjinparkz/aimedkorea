@@ -15,9 +15,9 @@ class PartnerResource extends Resource
     
     protected static ?string $pluralModelLabel = '파트너사';
     
-    protected static ?string $navigationGroup = '설정';
+    protected static ?string $navigationGroup = '파트너';
     
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 60;
     
     protected static ?string $slug = 'partners';
 

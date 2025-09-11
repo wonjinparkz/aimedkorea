@@ -13,7 +13,9 @@ class FoodPostResource extends PostResource
 
     protected static ?string $postType = Post::TYPE_FOOD;
 
-    protected static ?int $navigationSort = 8;
+    protected static ?string $navigationGroup = '콘텐츠';
+
+    protected static ?int $navigationSort = 34;
 
     public static function getNavigationBadge(): ?string
     {

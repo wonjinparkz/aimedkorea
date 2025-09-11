@@ -13,7 +13,9 @@ class ServicePostResource extends PostResource
 
     protected static ?string $postType = Post::TYPE_SERVICE;
 
-    protected static ?int $navigationSort = 9;
+    protected static ?string $navigationGroup = '콘텐츠';
+
+    protected static ?int $navigationSort = 36;
 
     public static function getNavigationBadge(): ?string
     {
