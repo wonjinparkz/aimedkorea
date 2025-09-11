@@ -52,6 +52,13 @@ return [
 
     'channels' => [
 
+        'search' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/search.log'),
+            'level' => 'info',
+            'days' => 30,
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', env('LOG_STACK', 'single')),

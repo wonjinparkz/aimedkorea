@@ -1,0 +1,133 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Performance Optimizations
+
+# Enable Gzip compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+    AddOutputFilterByType DEFLATE application/x-font-ttf
+    AddOutputFilterByType DEFLATE font/opentype
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE image/x-icon
+</IfModule>
+
+# Browser Caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Images
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # Video
+    ExpiresByType video/mp4 "access plus 1 year"
+    ExpiresByType video/mpeg "access plus 1 year"
+    ExpiresByType video/webm "access plus 1 year"
+    
+    # CSS, JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    
+    # Web fonts
+    ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
+    ExpiresByType font/eot "access plus 1 year"
+    ExpiresByType font/opentype "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    
+    # Others
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType application/json "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 0 seconds"
+    ExpiresByType text/xml "access plus 0 seconds"
+</IfModule>
+
+# Cache Control Headers
+<IfModule mod_headers.c>
+    # WEEK - 604800
+    # MONTH - 2592000
+    # YEAR - 31536000
+    
+    # Media files
+    <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|webp|js|css|swf)$">
+        Header set Cache-Control "max-age=2592000, public, immutable"
+    </FilesMatch>
+    
+    # Web fonts
+    <FilesMatch "\.(eot|ttf|otf|woff|woff2)$">
+        Header set Cache-Control "max-age=31536000, public, immutable"
+    </FilesMatch>
+    
+    # HTML files
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    </FilesMatch>
+    
+    # Security Headers
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Remove ETags
+    Header unset ETag
+    FileETag None
+    
+    # Keep-Alive
+    Header set Connection keep-alive
+</IfModule>
+
+# Enable HTTP/2 Server Push (if available)
+<IfModule http2_module>
+    # Push critical CSS
+    <FilesMatch "\.html$">
+        Header add Link "</build/assets/app.css>; rel=preload; as=style"
+        Header add Link "</build/assets/app.js>; rel=preload; as=script"
+    </FilesMatch>
+</IfModule>
+
+# Prevent hotlinking
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTP_REFERER} !^$
+    RewriteCond %{HTTP_REFERER} !^https?://(www\.)?aimedkorea\.cafe24\.com [NC]
+    RewriteRule \.(jpg|jpeg|png|gif|webp)$ - [F,L]
+</IfModule>

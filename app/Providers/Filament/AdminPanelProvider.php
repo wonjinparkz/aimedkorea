@@ -11,6 +11,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
+use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -75,6 +76,14 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.components.navigation-override')
+            )
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_START,
+                fn () => Blade::render('@include("filament.components.global-search")')
+            )
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn () => Blade::render('@include("filament.components.search-analytics")')
             );
     }
 }

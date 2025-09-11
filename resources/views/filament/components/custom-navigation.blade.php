@@ -18,14 +18,16 @@
         }
         
         .submenu-panel {
-            width: 200px;
-            padding: 1rem;
             background: rgba(249, 250, 251, 0.5);
             overflow-y: auto;
-            transition: all 0.3s ease;
         }
         
-        .submenu-panel.hidden {
+        .submenu-panel.open {
+            width: 200px;
+            padding: 1rem;
+        }
+        
+        .submenu-panel.closed {
             width: 0;
             padding: 0;
             overflow: hidden;
@@ -171,7 +173,9 @@
     {{-- 서브메뉴 패널 --}}
     <div 
         class="submenu-panel"
-        :class="{ 'hidden': !activeGroup }"
+        :class="activeGroup ? 'open' : 'closed'"
+        x-ref="submenuPanel"
+        :style="panelStyle"
     >
         <template x-if="activeGroup">
             <div>
@@ -211,13 +215,40 @@
         function customNavigation() {
             return {
                 activeGroup: null,
+                isInitialLoad: true,
+                panelStyle: '',
                 
                 init() {
-                    // 현재 페이지에 해당하는 그룹 자동 열기
+                    // 현재 페이지에 해당하는 그룹 자동 열기 (애니메이션 없이)
                     this.detectCurrentGroup();
+                    
+                    // 초기 로드 시 transition 없음
+                    this.updatePanelStyle();
+                    
+                    // 100ms 후 transition 활성화
+                    setTimeout(() => {
+                        this.isInitialLoad = false;
+                        this.updatePanelStyle();
+                    }, 100);
+                },
+                
+                updatePanelStyle() {
+                    if (this.isInitialLoad) {
+                        // 초기 로드: transition 없음
+                        this.panelStyle = 'transition: none;';
+                    } else {
+                        // 이후: transition 적용
+                        this.panelStyle = 'transition: width 0.3s ease, padding 0.3s ease;';
+                    }
                 },
                 
                 toggleGroup(group) {
+                    // 클릭 시 transition 보장
+                    if (this.isInitialLoad) {
+                        this.isInitialLoad = false;
+                        this.updatePanelStyle();
+                    }
+                    
                     if (this.activeGroup === group) {
                         this.activeGroup = null;
                     } else {

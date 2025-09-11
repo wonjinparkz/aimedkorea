@@ -5,9 +5,13 @@
             <div class="aspect-[16/9] overflow-hidden relative">
                 @if($post->video_thumbnail && !str_contains($post->video_thumbnail, 'youtube.com'))
                     {{-- 업로드된 썸네일 --}}
-                    <img src="{{ Storage::url($post->video_thumbnail) }}" 
-                         alt="{{ $post->title }}" 
-                         class="w-full h-full object-cover">
+                    <x-optimized-image 
+                        :src="Storage::url($post->video_thumbnail)" 
+                        :alt="$post->title" 
+                        class="w-full h-full object-cover"
+                        :width="800"
+                        :height="450"
+                        :lazy="true" />
                 @elseif($post->video_thumbnail && str_contains($post->video_thumbnail, 'youtube.com'))
                     {{-- 유튜브 썸네일 URL --}}
                     <img src="{{ $post->video_thumbnail }}" 
@@ -45,9 +49,13 @@
         {{-- 일반 이미지 처리 --}}
         @elseif($post->image)
             <div class="aspect-[16/9] overflow-hidden">
-                <img src="{{ Storage::url($post->image) }}" 
-                     alt="{{ $post->title }}" 
-                     class="w-full h-full object-cover">
+                <x-optimized-image 
+                    :src="Storage::url($post->image)" 
+                    :alt="$post->title" 
+                    class="w-full h-full object-cover"
+                    :width="800"
+                    :height="450"
+                    :lazy="true" />
             </div>
         @else
             <div class="aspect-[16/9] bg-gray-100 flex items-center justify-center">

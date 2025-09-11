@@ -8,9 +8,13 @@
         {{-- 좌측 이미지 섹션 --}}
         <div class="flex items-center justify-center p-8 lg:p-12">
             @if($post->image)
-                <img src="{{ Storage::url($post->image) }}" 
-                     alt="{{ $post->title }}" 
-                     class="w-full h-full max-w-md object-cover">
+                <x-optimized-image 
+                    :src="Storage::url($post->image)" 
+                    :alt="$post->title" 
+                    class="w-full h-full max-w-md object-cover"
+                    :width="600"
+                    :height="400"
+                    :lazy="true" />
             @else
                 <div class="w-full max-w-md aspect-video bg-gray-100 flex items-center justify-center">
                     <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

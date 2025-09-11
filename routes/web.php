@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Post;
 use App\Models\Hero;
 use Illuminate\Http\Request;
+use App\Http\Controllers\SearchLogController;
 
 Route::get('/', function () {
     // Hero 슬라이드
@@ -230,6 +231,10 @@ Route::get('/videos', function () {
 Route::get('/debug-menu', function () {
     return view('debug-menu');
 });
+
+// Search API routes
+Route::post('/api/log-search-event', [SearchLogController::class, 'logSearchEvent'])->name('api.log-search-event');
+Route::get('/api/global-search', [App\Http\Controllers\Api\GlobalSearchController::class, 'search'])->name('api.global-search');
 
 // Language change route
 Route::post('/change-language', function (Request $request) {

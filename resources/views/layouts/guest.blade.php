@@ -5,6 +5,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+        {{-- Google Analytics 4 --}}
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-2YV3S6V60E"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-2YV3S6V60E');
+        </script>
+
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->

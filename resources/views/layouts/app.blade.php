@@ -5,6 +5,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+        {{-- Google Analytics 4 --}}
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-2YV3S6V60E"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-2YV3S6V60E');
+        </script>
+
         {{-- PWA Meta Tags --}}
         <meta name="theme-color" content="#1e40af">
         <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,6 +28,41 @@
 
         {{-- Web App Manifest --}}
         <link rel="manifest" href="/manifest.json">
+
+        {{-- Critical CSS for faster initial render --}}
+        <style>
+            /* Critical CSS - inline for immediate rendering */
+            *,::after,::before{box-sizing:border-box}
+            body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;line-height:1.5;color:#212529;background-color:#fff}
+            .min-h-screen{min-height:100vh}
+            .bg-gray-100{background-color:#f7fafc}
+            .max-w-7xl{max-width:80rem}
+            .mx-auto{margin-left:auto;margin-right:auto}
+            .px-4{padding-left:1rem;padding-right:1rem}
+            .py-12{padding-top:3rem;padding-bottom:3rem}
+            .text-center{text-align:center}
+            .text-5xl{font-size:3rem;line-height:1}
+            .text-3xl{font-size:1.875rem;line-height:2.25rem}
+            .font-bold{font-weight:700}
+            .text-gray-900{color:#1a202c}
+            .text-gray-600{color:#718096}
+            .mb-4{margin-bottom:1rem}
+            .mb-8{margin-bottom:2rem}
+            .mb-12{margin-bottom:3rem}
+            .grid{display:grid}
+            .gap-6{gap:1.5rem}
+            @media(min-width:768px){
+                .md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+                .sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}
+            }
+            @media(min-width:1024px){
+                .lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+                .lg\:px-8{padding-left:2rem;padding-right:2rem}
+                .lg\:text-6xl{font-size:3.75rem;line-height:1}
+            }
+            /* Hide elements until fully loaded */
+            [x-cloak]{display:none!important}
+        </style>
 
         {{-- Icons --}}
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -35,13 +80,28 @@
         <link rel="apple-touch-startup-image" href="/images/splash/splash-1668x2224.png" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)">
         <link rel="apple-touch-startup-image" href="/images/splash/splash-2048x2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)">
 
-        <script src="https://cdn.tailwindcss.com"></script>
+        {{-- Defer Tailwind CSS loading --}}
+        <script>
+            // Load Tailwind CSS asynchronously
+            function loadTailwind() {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.tailwindcss.com';
+                script.async = true;
+                document.head.appendChild(script);
+            }
+            // Load after critical content
+            if (window.requestIdleCallback) {
+                requestIdleCallback(loadTailwind);
+            } else {
+                setTimeout(loadTailwind, 1);
+            }
+        </script>
 
         <title>@yield('title', config('app.name', 'Laravel'))</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

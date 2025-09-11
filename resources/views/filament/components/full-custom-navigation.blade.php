@@ -237,7 +237,7 @@
     }
     
     .dark .submenu-panel {
-        background: rgba(17, 24, 39, 0.1);
+        background: rgba(26, 26, 28, 0.1);
         border-left: 1px solid rgba(55, 65, 81, 0.1);
         border-right: 1px solid rgba(55, 65, 81, 0.1);
     }

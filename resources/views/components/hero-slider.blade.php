@@ -53,9 +53,13 @@
                             <source src="{{ Storage::url($hero->background_video) }}" type="video/mp4">
                         </video>
                     @elseif($hero->background_type === 'image' && $hero->background_image)
-                        <img src="{{ Storage::url($hero->background_image) }}" 
-                             alt="{{ $hero->getTitle() }}"
-                             class="w-full h-full object-cover">
+                        <x-optimized-image 
+                            :src="Storage::url($hero->background_image)" 
+                            :alt="$hero->getTitle()"
+                            class="w-full h-full object-cover"
+                            :width="1920"
+                            :height="500"
+                            :lazy="false" />
                     @endif
                     
                     {{-- 오버레이 --}}
