@@ -4,6 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        
+        {{-- Additional Meta Tags --}}
+        @stack('meta')
 
         {{-- Google Analytics 4 --}}
         @if(config('app.env') === 'production' && parse_url(config('app.url'), PHP_URL_HOST) === request()->getHost())

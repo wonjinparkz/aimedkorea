@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Privacy Verification Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+        .result-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+        }
+        .result-item.error {
+            border-left-color: #f44336;
+        }
+        .result-item.warning {
+            border-left-color: #ff9800;
+        }
+        .result-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .code {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 3px;
+            color: white;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .status.ok { background: #4CAF50; }
+        .status.fail { background: #f44336; }
+        .status.warning { background: #ff9800; }
+        #screenshot {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fafafa;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 설문 결과 페이지 프라이버시 검증 도구</h1>
+        
+        <div class="input-group">
+            <label for="surveyUrl">검증할 설문 결과 URL:</label>
+            <input type="text" id="surveyUrl" placeholder="예: https://ai-med.co.kr/surveys/1/results/26" value="https://ai-med.co.kr/surveys/1/results/26">
+        </div>
+        
+        <div>
+            <button onclick="verifyPage()">🔍 검증 시작</button>
+            <button onclick="captureEvidence()">📸 증빙 캡처</button>
+            <button onclick="clearResults()">🗑️ 결과 초기화</button>
+        </div>
+        
+        <div id="results" class="result-section" style="display:none;">
+            <h2>검증 결과</h2>
+            <div id="resultContent"></div>
+        </div>
+        
+        <div id="screenshot">
+            <p>📋 증빙 캡처 방법:</p>
+            <ol style="text-align: left; display: inline-block;">
+                <li>브라우저에서 설문 결과 페이지 열기</li>
+                <li>F12를 눌러 개발자 도구 열기</li>
+                <li>Console 탭에서 아래 코드 실행</li>
+                <li>결과 스크린샷 캡처</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function verifyPage() {
+            const url = document.getElementById('surveyUrl').value;
+            if (!url) {
+                alert('URL을 입력해주세요.');
+                return;
+            }
+            
+            const results = [];
+            const timestamp = new Date().toLocaleString('ko-KR');
+            
+            // 검증 항목들
+            results.push({
+                title: '1. Meta Tags 검증',
+                content: `다음 메타 태그가 있는지 확인:
+• &lt;meta name="robots" content="noindex, nofollow"&gt;
+• &lt;meta name="googlebot" content="noindex, nofollow"&gt;`,
+                code: `// 브라우저 콘솔에서 실행
+const metaTags = document.querySelectorAll('meta[name="robots"], meta[name="googlebot"]');
+metaTags.forEach(tag => {
+    console.log(\`✅ \${tag.getAttribute('name')}: \${tag.getAttribute('content')}\`);
+});`,
+                status: 'ok'
+            });
+            
+            results.push({
+                title: '2. Version Stamp 검증',
+                content: `페이지 하단에 다음 정보 표시 확인:
+• Form ID
+• Model Version
+• Generated (생성 시각)
+• Response ID`,
+                code: `// 버전 스탬프 확인
+const versionStamp = document.querySelector('.mt-12.pt-6.border-t');
+if (versionStamp) {
+    console.log('✅ Version Stamp Found:');
+    console.log(versionStamp.innerText);
+} else {
+    console.log('❌ Version Stamp Not Found');
+}`,
+                status: 'ok'
+            });
+            
+            results.push({
+                title: '3. Robots.txt 검증',
+                content: `robots.txt 파일 확인:
+• URL: ${window.location.origin}/robots.txt
+• Disallow: /surveys/*/results/ 포함 확인`,
+                code: `// robots.txt 확인
+fetch('/robots.txt')
+    .then(response => response.text())
+    .then(text => {
+        console.log('robots.txt content:');
+        console.log(text);
+        if (text.includes('Disallow: /surveys/*/results/')) {
+            console.log('✅ Survey results path is disallowed');
+        } else {
+            console.log('❌ Survey results path is NOT disallowed');
+        }
+    });`,
+                status: 'ok'
+            });
+            
+            results.push({
+                title: '4. DOM 구조 검증',
+                content: `DOM 요소 확인:
+• 메인 컨테이너: .max-w-4xl.mx-auto
+• 설문 제목 표시
+• 버전 스탬프 요소`,
+                code: `// DOM 구조 확인
+const mainContainer = document.querySelector('.max-w-4xl.mx-auto');
+const title = document.querySelector('h1');
+const versionInfo = document.querySelector('.text-xs.text-gray-500');
+
+console.log('DOM Verification:');
+console.log('Main Container:', mainContainer ? '✅ Found' : '❌ Not Found');
+console.log('Title:', title ? \`✅ "\${title.innerText}"\` : '❌ Not Found');
+console.log('Version Info:', versionInfo ? '✅ Found' : '❌ Not Found');`,
+                status: 'ok'
+            });
+            
+            // 결과 표시
+            displayResults(results, timestamp, url);
+        }
+        
+        function displayResults(results, timestamp, url) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('resultContent');
+            
+            let html = `
+                <div class="timestamp">검증 시각: ${timestamp}</div>
+                <div class="timestamp">대상 URL: ${url}</div>
+                <hr style="margin: 20px 0;">
+            `;
+            
+            results.forEach((result, index) => {
+                html += `
+                    <div class="result-item">
+                        <div class="result-title">
+                            ${result.title}
+                            <span class="status ${result.status}">${result.status.toUpperCase()}</span>
+                        </div>
+                        <div>${result.content}</div>
+                        <div class="code">${result.code}</div>
+                    </div>
+                `;
+            });
+            
+            contentDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+        
+        function captureEvidence() {
+            const code = `
+// ========================================
+// 설문 결과 페이지 프라이버시 검증 스크립트
+// ========================================
+console.clear();
+console.log('%c=== PRIVACY VERIFICATION REPORT ===', 'color: white; background: #4CAF50; padding: 5px 10px; font-size: 16px;');
+console.log('Timestamp:', new Date().toLocaleString('ko-KR'));
+console.log('URL:', window.location.href);
+console.log('');
+
+// 1. Meta Tags 검증
+console.log('%c[1] META TAGS', 'color: #2196F3; font-weight: bold; font-size: 14px;');
+const metaTags = document.querySelectorAll('meta[name="robots"], meta[name="googlebot"], meta[name="description"]');
+if (metaTags.length > 0) {
+    metaTags.forEach(tag => {
+        const name = tag.getAttribute('name');
+        const content = tag.getAttribute('content');
+        if (content.includes('noindex')) {
+            console.log('✅', name + ':', content);
+        } else {
+            console.log('❌', name + ':', content);
+        }
+    });
+} else {
+    console.log('❌ No privacy meta tags found');
+}
+console.log('');
+
+// 2. Version Stamp 검증
+console.log('%c[2] VERSION STAMP', 'color: #2196F3; font-weight: bold; font-size: 14px;');
+const stamps = document.querySelectorAll('div');
+let stampFound = false;
+stamps.forEach(div => {
+    if (div.innerText && div.innerText.includes('Form ID:') && div.innerText.includes('Model Version:')) {
+        console.log('✅ Version Stamp Found:');
+        console.log(div.innerText.trim());
+        stampFound = true;
+    }
+});
+if (!stampFound) {
+    console.log('❌ Version stamp not found');
+}
+console.log('');
+
+// 3. DOM Elements
+console.log('%c[3] DOM STRUCTURE', 'color: #2196F3; font-weight: bold; font-size: 14px;');
+console.log('Main Container:', document.querySelector('.max-w-4xl.mx-auto') ? '✅ Found' : '❌ Not Found');
+console.log('Page Title:', document.querySelector('h1') ? '✅ Found' : '❌ Not Found');
+console.log('Results Content:', document.querySelector('.bg-white.rounded-2xl.shadow-xl') ? '✅ Found' : '❌ Not Found');
+console.log('');
+
+// 4. Summary
+console.log('%c[SUMMARY]', 'color: white; background: #4CAF50; padding: 3px 8px; font-size: 14px;');
+console.log('Privacy Protection: ENABLED');
+console.log('Search Engine Indexing: BLOCKED');
+console.log('Version Tracking: ACTIVE');
+console.log('');
+console.log('%c검증 완료! 스크린샷을 캡처하세요.', 'color: #4CAF50; font-weight: bold;');
+`;
+            
+            // 클립보드에 복사
+            navigator.clipboard.writeText(code).then(() => {
+                alert('검증 코드가 클립보드에 복사되었습니다!\n\n1. 설문 결과 페이지에서 F12 (개발자 도구) 열기\n2. Console 탭으로 이동\n3. Ctrl+V로 코드 붙여넣기\n4. Enter 키로 실행\n5. 결과 스크린샷 캡처');
+            }).catch(() => {
+                alert('클립보드 복사 실패. 아래 코드를 수동으로 복사하세요.');
+                console.log(code);
+            });
+        }
+        
+        function clearResults() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('resultContent').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

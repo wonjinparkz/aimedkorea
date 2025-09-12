@@ -1,4 +1,7 @@
 <x-app-layout>
+        <meta name="robots" content="noindex, nofollow">
+        <meta name="googlebot" content="noindex, nofollow">
+        <meta name="description" content="Private survey results - not for indexing">
     <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- 헤더 -->
@@ -340,4 +343,24 @@
             }
         }
     </style>
+    
+    <script>
+    // Add version stamp to the page
+    document.addEventListener('DOMContentLoaded', function() {
+        const versionStamp = document.createElement('div');
+        versionStamp.className = 'mt-12 pt-6 border-t border-gray-200 text-center text-xs text-gray-500';
+        versionStamp.innerHTML = `
+            <div class="space-y-1">
+                <div>Form ID: {{ $survey->id }} • Model Version: {{ config('app.version', '1.0.0') }} • Generated: {{ now()->format('Y-m-d H:i:s T') }}</div>
+                <div>Response ID: {{ $response->id }} • Privacy: noindex, nofollow</div>
+            </div>
+        `;
+        
+        // Find the main container and append the stamp
+        const mainContainer = document.querySelector('.max-w-4xl.mx-auto');
+        if (mainContainer) {
+            mainContainer.appendChild(versionStamp);
+        }
+    });
+    </script>
 </x-app-layout>

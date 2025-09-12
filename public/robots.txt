@@ -1,2 +1,5 @@
 User-agent: *
-Disallow:
+Disallow: /surveys/*/results/
+Disallow: /admin/
+Disallow: /api/
+Allow: /

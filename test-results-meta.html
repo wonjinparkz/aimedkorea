@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="test-token">
+    
+    <!-- Privacy Meta Tags for Survey Results -->
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <meta name="description" content="Private survey results - not for indexing">
+    
+    <title>Survey Results - Privacy Protected</title>
+</head>
+<body>
+    <div class="max-w-4xl mx-auto px-4">
+        <h1>설문 결과 페이지 (테스트)</h1>
+        <p>이 페이지는 검색 엔진에 인덱싱되지 않습니다.</p>
+        
+        <!-- Version Stamp (JavaScript로 동적 추가되는 부분의 예시) -->
+        <div class="mt-12 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
+            <div class="space-y-1">
+                <div>Form ID: 1 • Model Version: 1.0.0 • Generated: 2025-09-12 15:50:00 KST</div>
+                <div>Response ID: 26 • Privacy: noindex, nofollow</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- DOM 구조 확인용 -->
+    <script>
+        console.log('Meta tags verification:');
+        const metaTags = document.querySelectorAll('meta[name="robots"], meta[name="googlebot"]');
+        metaTags.forEach(tag => {
+            console.log(`${tag.getAttribute('name')}: ${tag.getAttribute('content')}`);
+        });
+    </script>
+</body>
+</html>
