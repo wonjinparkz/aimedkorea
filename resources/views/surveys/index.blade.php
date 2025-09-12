@@ -11,6 +11,10 @@
         questionsPerPage: 3,
         savedResponses: {},
         savedFrequencyResponses: {},
+        pageStartTime: null,
+        pageTimestamps: {},
+        showTimeWarning: false,
+        minimumTimePerQuestion: 1500,
         
         init() {
             // ID가 1인 설문을 찾아서 선택
@@ -20,6 +24,49 @@
             // showQuestions 초기값을 false로 설정
             this.showQuestions = false;
             
+            // 페이지 시작 시간 기록 함수
+            this.startPageTimer = () => {
+                this.pageStartTime = Date.now();
+                console.log(`[Timer] Page ${this.currentPage + 1} started at:`, new Date(this.pageStartTime).toISOString());
+            };
+            
+            // 페이지 응답 시간 검증 함수
+            this.validateResponseTime = () => {
+                if (!this.pageStartTime) return true;
+                
+                const timeSpent = Date.now() - this.pageStartTime;
+                const questionsOnPage = Math.min(this.questionsPerPage, 
+                    this.surveys[this.selectedSurvey].questions.length - (this.currentPage * this.questionsPerPage));
+                const minimumRequired = questionsOnPage * this.minimumTimePerQuestion;
+                
+                console.log(`[Timer] Page ${this.currentPage + 1} - Time spent: ${timeSpent}ms, Minimum required: ${minimumRequired}ms`);
+                
+                // 타임스탬프 기록
+                if (!this.pageTimestamps[this.currentPage]) {
+                    this.pageTimestamps[this.currentPage] = {};
+                }
+                this.pageTimestamps[this.currentPage].startTime = this.pageStartTime;
+                this.pageTimestamps[this.currentPage].endTime = Date.now();
+                this.pageTimestamps[this.currentPage].duration = timeSpent;
+                this.pageTimestamps[this.currentPage].questions = questionsOnPage;
+                
+                // localStorage에 타임스탬프 저장
+                if (this.selectedSurvey !== null) {
+                    const timestampKey = `survey_${this.surveys[this.selectedSurvey].id}_timestamps`;
+                    localStorage.setItem(timestampKey, JSON.stringify(this.pageTimestamps));
+                }
+                
+                if (timeSpent < minimumRequired) {
+                    this.showTimeWarning = true;
+                    const remainingTime = Math.ceil((minimumRequired - timeSpent) / 1000);
+                    console.warn(`[Timer] Too fast! Need ${remainingTime} more seconds`);
+                    return false;
+                }
+                
+                this.showTimeWarning = false;
+                return true;
+            };
+            
             // 저장된 응답 불러오기 함수
             this.loadSavedData = () => {
                 if (this.selectedSurvey !== null && this.surveys[this.selectedSurvey]) {
@@ -27,6 +74,7 @@
                     const freqStorageKey = `survey_${this.surveys[this.selectedSurvey].id}_freq_responses`;
                     const pageKey = `survey_${this.surveys[this.selectedSurvey].id}_page`;
                     const maxPageKey = `survey_${this.surveys[this.selectedSurvey].id}_max_page`;
+                    const timestampKey = `survey_${this.surveys[this.selectedSurvey].id}_timestamps`;
                     
                     const saved = localStorage.getItem(storageKey);
                     const savedFreq = localStorage.getItem(freqStorageKey);
@@ -51,6 +99,12 @@
                     } else {
                         this.maxReachedPage = this.currentPage;
                     }
+                    
+                    // 타임스탬프 불러오기
+                    const savedTimestamps = localStorage.getItem(timestampKey);
+                    if (savedTimestamps) {
+                        this.pageTimestamps = JSON.parse(savedTimestamps);
+                    }
                 }
             };
             
@@ -74,6 +128,8 @@
                     } else {
                         this.currentPage = 0;
                     }
+                    // 페이지 타이머 시작
+                    this.startPageTimer();
                 }
             });
             
@@ -103,6 +159,10 @@
                         this.maxReachedPage = this.currentPage;
                         localStorage.setItem(maxPageKey, this.maxReachedPage.toString());
                     }
+                    
+                    // 페이지 변경 시 타이머 재시작
+                    this.startPageTimer();
+                    this.showTimeWarning = false;
                 }
             });
         }
@@ -233,6 +293,25 @@
                                     <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                                         <div class="h-full bg-indigo-600 rounded-full transition-all duration-500" 
                                              :style="`width: ${((maxReachedPage + 1) / Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage)) * 100}%`"></div>
+                                    </div>
+                                    
+                                    <!-- 시간 경고 메시지 -->
+                                    <div x-show="showTimeWarning" x-transition
+                                         class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <div class="flex items-start">
+                                            <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-yellow-800">
+                                                    너무 빨리 응답하고 있습니다
+                                                </p>
+                                                <p class="text-xs text-yellow-600 mt-1">
+                                                    정확한 분석을 위해 각 문항을 신중히 읽고 답변해주세요.
+                                                    최소 응답 시간: 문항당 1.5초
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                     
                                     <!-- 페이지 인디케이터 -->
@@ -463,7 +542,7 @@
                                             
                                             <!-- 취소 버튼 -->
                                             <button type="button" 
-                                                    @click="showQuestions = false; currentPage = 0; maxReachedPage = 0; localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_responses`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_freq_responses`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_page`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_max_page`); responses = {}; frequencyResponses = {};" 
+                                                    @click="showQuestions = false; currentPage = 0; maxReachedPage = 0; pageTimestamps = {}; showTimeWarning = false; localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_responses`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_freq_responses`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_page`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_max_page`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_timestamps`); responses = {}; frequencyResponses = {};" 
                                                     class="px-6 py-3 text-gray-500 hover:text-gray-700 transition-all duration-200">
                                                 취소
                                             </button>
@@ -485,11 +564,24 @@
                                                                     break;
                                                                 }
                                                             }
-                                                            if (allAnswered) {
-                                                                currentPage = Math.min(Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage) - 1, currentPage + 1);
-                                                            } else {
+                                                            if (!allAnswered) {
                                                                 alert('현재 페이지의 모든 문항에 답변해주세요.');
+                                                                return;
                                                             }
+                                                            
+                                                            // 시간 검증
+                                                            if (!validateResponseTime()) {
+                                                                const questionsOnPage = Math.min(questionsPerPage, surveys[selectedSurvey].questions.length - (currentPage * questionsPerPage));
+                                                                const timeSpent = Date.now() - pageStartTime;
+                                                                const minimumRequired = questionsOnPage * minimumTimePerQuestion;
+                                                                const remainingTime = Math.ceil((minimumRequired - timeSpent) / 1000);
+                                                                
+                                                                showTimeWarning = true;
+                                                                alert(`너무 빨리 응답하고 있습니다.\n\n각 문항을 신중히 읽고 답변해주세요.\n최소 ${remainingTime}초 더 필요합니다.`);
+                                                                return;
+                                                            }
+                                                            
+                                                            currentPage = Math.min(Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage) - 1, currentPage + 1);
                                                         }"
                                                         class="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-500">
                                                     다음
@@ -508,13 +600,31 @@
                                                             if (!allAnswered || !allFreqAnswered) {
                                                                 e.preventDefault();
                                                                 alert('모든 문항에 답변해주세요.');
-                                                            } else {
-                                                                // 제출 성공 시 로컬 스토리지 정리
-                                                                localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_responses`);
-                                                                localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_freq_responses`);
-                                                                localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_page`);
-                                                                localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_max_page`);
+                                                                return;
                                                             }
+                                                            
+                                                            // 마지막 페이지 시간 검증
+                                                            if (!validateResponseTime()) {
+                                                                e.preventDefault();
+                                                                const questionsOnPage = Math.min(questionsPerPage, surveys[selectedSurvey].questions.length - (currentPage * questionsPerPage));
+                                                                const timeSpent = Date.now() - pageStartTime;
+                                                                const minimumRequired = questionsOnPage * minimumTimePerQuestion;
+                                                                const remainingTime = Math.ceil((minimumRequired - timeSpent) / 1000);
+                                                                
+                                                                showTimeWarning = true;
+                                                                alert(`너무 빨리 응답하고 있습니다.\n\n각 문항을 신중히 읽고 답변해주세요.\n최소 ${remainingTime}초 더 필요합니다.`);
+                                                                return;
+                                                            }
+                                                            
+                                                            // 전체 타임스탬프 로그 출력
+                                                            console.log('[Survey Complete] Total timestamps:', pageTimestamps);
+                                                            
+                                                            // 제출 성공 시 로컬 스토리지 정리
+                                                            localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_responses`);
+                                                            localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_freq_responses`);
+                                                            localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_page`);
+                                                            localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_max_page`);
+                                                            localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_timestamps`);
                                                         }"
                                                         class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
                                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

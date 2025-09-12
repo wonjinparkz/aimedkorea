@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Response Time Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+        .test-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+        }
+        .code {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 3px;
+            color: white;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .status.ok { background: #4CAF50; }
+        .status.warning { background: #ff9800; }
+        .status.error { background: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🕐 설문조사 응답시간 가드 테스트</h1>
+        
+        <div class="test-section">
+            <h2>테스트 시나리오</h2>
+            
+            <div class="test-item">
+                <h3>1. 최소 응답시간 설정값</h3>
+                <p>문항당 최소 응답시간: <strong>1.5초 (1500ms)</strong></p>
+                <p>3문항 페이지 최소 시간: <strong>4.5초 (4500ms)</strong></p>
+            </div>
+            
+            <div class="test-item">
+                <h3>2. 타임스탬프 로깅 확인</h3>
+                <p>브라우저 콘솔에서 다음 정보가 기록되는지 확인:</p>
+                <div class="code">// 페이지 시작 시
+[Timer] Page 1 started at: 2025-09-12T07:30:00.000Z
+
+// 다음 버튼 클릭 시
+[Timer] Page 1 - Time spent: 2000ms, Minimum required: 4500ms
+[Timer] Too fast! Need 3 more seconds
+
+// 정상 진행 시
+[Timer] Page 1 - Time spent: 5000ms, Minimum required: 4500ms
+
+// 완료 시
+[Survey Complete] Total timestamps: {
+    0: {
+        startTime: 1234567890,
+        endTime: 1234572390,
+        duration: 4500,
+        questions: 3
+    },
+    1: {...},
+    ...
+}</div>
+            </div>
+            
+            <div class="test-item">
+                <h3>3. LocalStorage 저장 확인</h3>
+                <button onclick="checkLocalStorage()">LocalStorage 확인</button>
+                <div id="localStorage-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>4. 경고 메시지 표시</h3>
+                <p>너무 빠른 응답 시 노란색 경고 메시지가 표시되는지 확인</p>
+                <div style="padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; margin-top: 10px;">
+                    <strong>⚠️ 너무 빨리 응답하고 있습니다</strong><br>
+                    <small>정확한 분석을 위해 각 문항을 신중히 읽고 답변해주세요. 최소 응답 시간: 문항당 1.5초</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>검증 스크립트</h2>
+            <button onclick="runValidation()">검증 실행</button>
+            <button onclick="clearTestData()">테스트 데이터 초기화</button>
+            
+            <div id="validation-result" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const keys = ['survey_1_timestamps', 'survey_1_page', 'survey_1_responses'];
+            let html = '<h4>LocalStorage 내용:</h4>';
+            
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                if (value) {
+                    html += `<div class="code">${key}: ${value}</div>`;
+                } else {
+                    html += `<div class="code">${key}: <span style="color: red;">없음</span></div>`;
+                }
+            });
+            
+            document.getElementById('localStorage-result').innerHTML = html;
+        }
+        
+        function runValidation() {
+            const script = `
+// ========================================
+// 설문조사 응답시간 가드 검증 스크립트
+// ========================================
+console.clear();
+console.log('%c=== RESPONSE TIME GUARD VALIDATION ===', 'color: white; background: #4CAF50; padding: 5px 10px; font-size: 16px;');
+console.log('Timestamp:', new Date().toLocaleString('ko-KR'));
+console.log('URL:', window.location.href);
+console.log('');
+
+// 1. Alpine.js 데이터 확인
+console.log('%c[1] ALPINE DATA CHECK', 'color: #2196F3; font-weight: bold; font-size: 14px;');
+const alpineComponent = document.querySelector('[x-data]');
+if (alpineComponent && alpineComponent.__x) {
+    const data = alpineComponent.__x.$data;
+    console.log('✅ Page Start Time:', data.pageStartTime ? new Date(data.pageStartTime).toISOString() : 'Not set');
+    console.log('✅ Current Page:', data.currentPage);
+    console.log('✅ Min Time Per Question:', data.minimumTimePerQuestion + 'ms');
+    console.log('✅ Show Time Warning:', data.showTimeWarning);
+    console.log('✅ Page Timestamps:', data.pageTimestamps);
+} else {
+    console.log('❌ Alpine component not found');
+}
+console.log('');
+
+// 2. LocalStorage 타임스탬프 확인
+console.log('%c[2] LOCALSTORAGE TIMESTAMPS', 'color: #2196F3; font-weight: bold; font-size: 14px;');
+const timestampKey = 'survey_1_timestamps';
+const savedTimestamps = localStorage.getItem(timestampKey);
+if (savedTimestamps) {
+    const timestamps = JSON.parse(savedTimestamps);
+    console.log('✅ Saved timestamps found:');
+    Object.entries(timestamps).forEach(([page, data]) => {
+        const duration = data.duration / 1000;
+        const minRequired = (data.questions * 1.5);
+        const status = duration >= minRequired ? '✅' : '⚠️';
+        console.log(\`  Page \${parseInt(page) + 1}: \${duration.toFixed(1)}s / \${minRequired}s \${status}\`);
+    });
+} else {
+    console.log('❌ No timestamp data in localStorage');
+}
+console.log('');
+
+// 3. 경고 UI 요소 확인
+console.log('%c[3] WARNING UI ELEMENTS', 'color: #2196F3; font-weight: bold; font-size: 14px;');
+const warningElement = document.querySelector('[x-show="showTimeWarning"]');
+if (warningElement) {
+    const isVisible = window.getComputedStyle(warningElement).display !== 'none';
+    console.log(isVisible ? '⚠️ Warning is currently visible' : '✅ Warning is hidden');
+} else {
+    console.log('❌ Warning element not found in DOM');
+}
+console.log('');
+
+// 4. Summary
+console.log('%c[SUMMARY]', 'color: white; background: #4CAF50; padding: 3px 8px; font-size: 14px;');
+console.log('Response Time Guard: ACTIVE');
+console.log('Minimum Time: 1.5s per question');
+console.log('Timestamp Logging: ENABLED');
+console.log('Warning System: READY');
+console.log('');
+console.log('%c검증 완료!', 'color: #4CAF50; font-weight: bold;');
+`;
+            
+            // 클립보드에 복사
+            navigator.clipboard.writeText(script).then(() => {
+                document.getElementById('validation-result').innerHTML = `
+                    <div class="test-item">
+                        <span class="status ok">SUCCESS</span>
+                        <strong>검증 스크립트가 클립보드에 복사되었습니다!</strong>
+                        <ol style="margin-top: 10px;">
+                            <li>설문조사 페이지(https://ai-med.co.kr/surveys)로 이동</li>
+                            <li>F12를 눌러 개발자 도구 열기</li>
+                            <li>Console 탭에서 Ctrl+V로 붙여넣기</li>
+                            <li>Enter로 실행하여 결과 확인</li>
+                        </ol>
+                    </div>
+                `;
+            }).catch(() => {
+                alert('클립보드 복사 실패. 콘솔에서 수동으로 복사하세요.');
+                console.log(script);
+            });
+        }
+        
+        function clearTestData() {
+            const keys = [
+                'survey_1_timestamps',
+                'survey_1_responses', 
+                'survey_1_freq_responses',
+                'survey_1_page',
+                'survey_1_max_page'
+            ];
+            
+            keys.forEach(key => {
+                localStorage.removeItem(key);
+            });
+            
+            alert('테스트 데이터가 초기화되었습니다.');
+            checkLocalStorage();
+        }
+        
+        // 페이지 로드 시 자동으로 LocalStorage 확인
+        window.addEventListener('load', () => {
+            checkLocalStorage();
+        });
+    </script>
+</body>
+</html>
