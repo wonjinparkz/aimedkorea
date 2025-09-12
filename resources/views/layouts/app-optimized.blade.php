@@ -44,8 +44,6 @@
         {{-- Preconnect to external domains --}}
         <link rel="dns-prefetch" href="https://fonts.bunny.net">
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-        <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
-        <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
 
         {{-- Preload critical resources --}}
         <link rel="preload" href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" as="style">
@@ -69,9 +67,6 @@
 
         <!-- Fonts with font-display: swap -->
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Defer non-critical scripts -->
-        <script src="https://cdn.tailwindcss.com" defer></script>
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -6,14 +6,19 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         {{-- Google Analytics 4 --}}
+        @if(config('app.env') === 'production' && parse_url(config('app.url'), PHP_URL_HOST) === request()->getHost())
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-2YV3S6V60E"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-2YV3S6V60E');
+            gtag('config', 'G-2YV3S6V60E', {
+                'cookie_domain': 'ai-med.co.kr',
+                'cookie_flags': 'SameSite=None;Secure'
+            });
         </script>
+        @endif
 
         {{-- PWA Meta Tags --}}
         <meta name="theme-color" content="#1e40af">
@@ -27,7 +32,7 @@
         <meta name="msapplication-config" content="/browserconfig.xml">
 
         {{-- Web App Manifest --}}
-        <link rel="manifest" href="/manifest.json">
+        <link rel="manifest" href="/manifest.json?v=2025-01-12-v2">
 
         {{-- Critical CSS for faster initial render --}}
         <style>
@@ -81,21 +86,7 @@
         <link rel="apple-touch-startup-image" href="/images/splash/splash-2048x2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)">
 
         {{-- Defer Tailwind CSS loading --}}
-        <script>
-            // Load Tailwind CSS asynchronously
-            function loadTailwind() {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.tailwindcss.com';
-                script.async = true;
-                document.head.appendChild(script);
-            }
-            // Load after critical content
-            if (window.requestIdleCallback) {
-                requestIdleCallback(loadTailwind);
-            } else {
-                setTimeout(loadTailwind, 1);
-            }
-        </script>
+        {{-- Tailwind CDN removed - using Vite compiled CSS instead --}}
 
         <title>@yield('title', config('app.name', 'Laravel'))</title>
 
@@ -170,7 +161,7 @@
         @livewireScripts
         
         {{-- PWA Registration Script --}}
-        <script src="{{ asset('js/pwa/register.js') }}" defer></script>
+        <script src="{{ asset('js/pwa/register.js') }}?v=2025-01-12-v2" defer></script>
         
         @stack('scripts')
     </body>

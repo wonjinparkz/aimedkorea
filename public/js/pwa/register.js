@@ -10,7 +10,9 @@ if ('serviceWorker' in navigator) {
 // Register service worker
 async function registerServiceWorker() {
     try {
-        const registration = await navigator.serviceWorker.register('/service-worker.js', {
+        // Use static version for service worker
+        const SW_VERSION = '2025-01-12-v2';
+        const registration = await navigator.serviceWorker.register('/service-worker.js?v=' + SW_VERSION, {
             scope: '/'
         });
         

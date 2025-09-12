@@ -1,7 +1,7 @@
 // Service Worker for AimedKorea PWA
-const CACHE_NAME = 'aimedkorea-v1';
+const CACHE_VERSION = '2025-01-12-v2'; // Update this version when deploying changes
+const CACHE_NAME = `aimedkorea-${CACHE_VERSION}`;
 const urlsToCache = [
-    '/',
     '/offline'
 ];
 
@@ -56,43 +56,73 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Skip admin panel requests
-    if (event.request.url.includes('/admin') || event.request.url.includes('/livewire')) {
+    // Skip admin panel, API, and dynamic content requests
+    if (event.request.url.includes('/admin') || 
+        event.request.url.includes('/livewire') ||
+        event.request.url.includes('/surveys') ||
+        event.request.url.includes('/api/') ||
+        event.request.url.includes('.json')) {
         return;
     }
 
+    // Network-first strategy for HTML documents
+    if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    // Check if valid response
+                    if (!response || response.status !== 200 || response.type !== 'basic') {
+                        return response;
+                    }
+                    
+                    // Update cache with fresh content
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, responseToCache);
+                    });
+                    
+                    return response;
+                })
+                .catch(() => {
+                    // If network fails, try cache
+                    return caches.match(event.request)
+                        .then(cachedResponse => {
+                            if (cachedResponse) {
+                                return cachedResponse;
+                            }
+                            // Return offline page if no cache
+                            return caches.match('/offline');
+                        });
+                })
+        );
+        return;
+    }
+
+    // Cache-first strategy for static assets (images, CSS, JS)
     event.respondWith(
         caches.match(event.request)
             .then(response => {
-                // Cache hit - return response
                 if (response) {
                     return response;
                 }
 
-                // Clone the request
-                const fetchRequest = event.request.clone();
-
-                return fetch(fetchRequest).then(response => {
+                return fetch(event.request).then(response => {
                     // Check if valid response
                     if (!response || response.status !== 200 || response.type !== 'basic') {
                         return response;
                     }
 
-                    // Clone the response
-                    const responseToCache = response.clone();
-
-                    // Cache the response for future use
-                    caches.open(CACHE_NAME)
-                        .then(cache => {
-                            // Only cache successful responses
-                            if (event.request.url.includes('/api/') || 
-                                event.request.url.includes('.json') ||
-                                event.request.url.includes('/surveys/')) {
-                                // Don't cache API responses or dynamic content
-                                return;
-                            }
+                    // Only cache static assets
+                    if (event.request.url.includes('/images/') ||
+                        event.request.url.includes('/css/') ||
+                        event.request.url.includes('/js/') ||
+                        event.request.url.includes('/fonts/')) {
+                        
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then(cache => {
                             cache.put(event.request, responseToCache);
                         });
+                    }
 
                     return response;
                 }).catch(() => {

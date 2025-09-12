@@ -2,15 +2,111 @@
     <div class="min-h-screen bg-white" x-data="{ 
         selectedSurvey: {{ $surveys->search(function($survey) { return $survey->id == 1; }) !== false ? $surveys->search(function($survey) { return $survey->id == 1; }) : 0 }}, 
         surveys: {{ $surveys->toJson() }},
-        showQuestions: true,
+        showQuestions: false,
         analysisType: 'simple',
         responses: {},
-        frequencyResponses: {}
-    }" x-init="
-        // ID가 1인 설문을 찾아서 선택
-        let surveyIndex = surveys.findIndex(survey => survey.id === 1);
-        selectedSurvey = surveyIndex !== -1 ? surveyIndex : 0;
-    ">
+        frequencyResponses: {},
+        currentPage: 0,
+        maxReachedPage: 0,
+        questionsPerPage: 3,
+        savedResponses: {},
+        savedFrequencyResponses: {},
+        
+        init() {
+            // ID가 1인 설문을 찾아서 선택
+            let surveyIndex = this.surveys.findIndex(survey => survey.id === 1);
+            this.selectedSurvey = surveyIndex !== -1 ? surveyIndex : 0;
+            
+            // showQuestions 초기값을 false로 설정
+            this.showQuestions = false;
+            
+            // 저장된 응답 불러오기 함수
+            this.loadSavedData = () => {
+                if (this.selectedSurvey !== null && this.surveys[this.selectedSurvey]) {
+                    const storageKey = `survey_${this.surveys[this.selectedSurvey].id}_responses`;
+                    const freqStorageKey = `survey_${this.surveys[this.selectedSurvey].id}_freq_responses`;
+                    const pageKey = `survey_${this.surveys[this.selectedSurvey].id}_page`;
+                    const maxPageKey = `survey_${this.surveys[this.selectedSurvey].id}_max_page`;
+                    
+                    const saved = localStorage.getItem(storageKey);
+                    const savedFreq = localStorage.getItem(freqStorageKey);
+                    const savedPage = localStorage.getItem(pageKey);
+                    const savedMaxPage = localStorage.getItem(maxPageKey);
+                    
+                    if (saved) {
+                        this.responses = JSON.parse(saved);
+                        this.savedResponses = JSON.parse(saved);
+                    }
+                    if (savedFreq) {
+                        this.frequencyResponses = JSON.parse(savedFreq);
+                        this.savedFrequencyResponses = JSON.parse(savedFreq);
+                    }
+                    if (savedPage !== null) {
+                        this.currentPage = parseInt(savedPage);
+                    } else {
+                        this.currentPage = 0;
+                    }
+                    if (savedMaxPage !== null) {
+                        this.maxReachedPage = parseInt(savedMaxPage);
+                    } else {
+                        this.maxReachedPage = this.currentPage;
+                    }
+                }
+            };
+            
+            // 초기 로드
+            this.loadSavedData();
+            
+            // 선택된 설문 변경 시
+            this.$watch('selectedSurvey', (value) => {
+                if (value !== null) {
+                    this.loadSavedData();
+                }
+            });
+            
+            // showQuestions 변경 시 currentPage 초기화
+            this.$watch('showQuestions', (value) => {
+                if (value && this.selectedSurvey !== null) {
+                    const pageKey = `survey_${this.surveys[this.selectedSurvey].id}_page`;
+                    const savedPage = localStorage.getItem(pageKey);
+                    if (savedPage !== null) {
+                        this.currentPage = parseInt(savedPage);
+                    } else {
+                        this.currentPage = 0;
+                    }
+                }
+            });
+            
+            // 응답 자동 저장
+            this.$watch('responses', () => {
+                if (this.selectedSurvey !== null && this.showQuestions) {
+                    const storageKey = `survey_${this.surveys[this.selectedSurvey].id}_responses`;
+                    localStorage.setItem(storageKey, JSON.stringify(this.responses));
+                }
+            });
+            
+            this.$watch('frequencyResponses', () => {
+                if (this.selectedSurvey !== null && this.showQuestions) {
+                    const freqStorageKey = `survey_${this.surveys[this.selectedSurvey].id}_freq_responses`;
+                    localStorage.setItem(freqStorageKey, JSON.stringify(this.frequencyResponses));
+                }
+            });
+            
+            this.$watch('currentPage', () => {
+                if (this.selectedSurvey !== null && this.showQuestions) {
+                    const pageKey = `survey_${this.surveys[this.selectedSurvey].id}_page`;
+                    const maxPageKey = `survey_${this.surveys[this.selectedSurvey].id}_max_page`;
+                    localStorage.setItem(pageKey, this.currentPage.toString());
+                    
+                    // maxReachedPage 업데이트
+                    if (this.currentPage > this.maxReachedPage) {
+                        this.maxReachedPage = this.currentPage;
+                        localStorage.setItem(maxPageKey, this.maxReachedPage.toString());
+                    }
+                }
+            });
+        }
+    }">
         <!-- 히어로 섹션 -->
         <div class="relative">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -104,12 +200,12 @@
                                             'arb' => ['simple' => 'تحليل بسيط', 'detailed' => 'تحليل مفصل']
                                         ];
                                     @endphp
-                                    <button @click="showQuestions = true; analysisType = 'simple'" 
+                                    <button @click="showQuestions = true; analysisType = 'simple'; loadSavedData();" 
                                            class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50">
                                         {{ $buttonLabels[$currentLang]['simple'] ?? $buttonLabels['kor']['simple'] }}
                                     </button>
                                     
-                                    <button @click="showQuestions = true; analysisType = 'detailed'" 
+                                    <button @click="showQuestions = true; analysisType = 'detailed'; loadSavedData();" 
                                            class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
                                         {{ $buttonLabels[$currentLang]['detailed'] ?? $buttonLabels['kor']['detailed'] }}
                                     </button>
@@ -124,7 +220,60 @@
                     <div class="p-6">
                         <template x-if="selectedSurvey !== null && showQuestions">
                             <div>
-                                <h2 class="text-xl font-bold text-gray-900 mb-6" x-text="surveys[selectedSurvey].title"></h2>
+                                <h2 class="text-xl font-bold text-gray-900 mb-4" x-text="surveys[selectedSurvey].title"></h2>
+                                
+                                <!-- 진행률 표시 -->
+                                <div class="mb-6">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-medium text-gray-700">진행 상황</span>
+                                        <span class="text-sm font-medium text-indigo-600">
+                                            F<span x-text="currentPage + 1"></span> / F<span x-text="Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage)"></span>
+                                        </span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                        <div class="h-full bg-indigo-600 rounded-full transition-all duration-500" 
+                                             :style="`width: ${((maxReachedPage + 1) / Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage)) * 100}%`"></div>
+                                    </div>
+                                    
+                                    <!-- 페이지 인디케이터 -->
+                                    <div class="flex items-center justify-center mt-4 space-x-2">
+                                        <template x-for="pageNum in Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage)" :key="pageNum">
+                                            <button type="button" 
+                                                    @click="() => {
+                                                        const targetPage = pageNum - 1;
+                                                        // maxReachedPage까지는 자유롭게 이동 가능
+                                                        if (targetPage <= maxReachedPage) {
+                                                            currentPage = targetPage;
+                                                        } else {
+                                                            // maxReachedPage를 넘어서는 페이지로는 이동 불가
+                                                            alert('이전 페이지의 모든 문항에 답변해주세요.');
+                                                        }
+                                                    }"
+                                                    :disabled="(() => {
+                                                        const targetPage = pageNum - 1;
+                                                        // maxReachedPage까지는 활성화, 그 이후는 비활성화
+                                                        return targetPage > maxReachedPage;
+                                                    })()"
+                                                    :class="(() => {
+                                                        const targetPage = pageNum - 1;
+                                                        if (currentPage === targetPage) {
+                                                            return 'bg-indigo-600 border-indigo-600 text-white';
+                                                        }
+                                                        
+                                                        // maxReachedPage를 넘는 페이지는 비활성화 스타일
+                                                        if (targetPage > maxReachedPage) {
+                                                            return 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed opacity-50';
+                                                        }
+                                                        
+                                                        return 'bg-white border-gray-300 text-gray-600 hover:border-indigo-400';
+                                                    })()"
+                                                    class="px-2 py-1 rounded-full border-2 text-sm font-medium transition-all duration-300">
+                                                    F<span x-text="pageNum"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                                
                                 <p class="text-sm text-gray-600 mb-6">
                                     @php
                                         $currentLang = session('locale', 'kor');
@@ -143,10 +292,10 @@
                                     @csrf
                                     <input type="hidden" name="analysis_type" :value="analysisType">
                                     
-                                    <!-- 간편 분석 - 기존 형태 -->
-                                    <template x-if="analysisType === 'simple'">
+                                    <!-- 간편 분석 - 페이지네이션 적용 -->
+                                    <template x-if="analysisType === 'simple' && surveys[selectedSurvey] && surveys[selectedSurvey].questions">
                                         <div class="space-y-6">
-                                            <template x-for="(question, qIndex) in surveys[selectedSurvey].questions" :key="qIndex">
+                                            <template x-for="(question, qIndex) in (surveys[selectedSurvey].questions || []).slice(currentPage * questionsPerPage, Math.min((currentPage + 1) * questionsPerPage, surveys[selectedSurvey].questions.length))" :key="`simple-${surveys[selectedSurvey].questions.indexOf(question)}`">
                                                 <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
                                                     <table class="w-full">
                                                         <tbody>
@@ -154,7 +303,7 @@
                                                             <tr class="bg-gray-50">
                                                                 <td class="p-4">
                                                                     <div class="flex items-start">
-                                                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-semibold mr-3 flex-shrink-0" x-text="qIndex + 1"></span>
+                                                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-semibold mr-3 flex-shrink-0" x-text="surveys[selectedSurvey].questions.indexOf(question) + 1"></span>
                                                                         <span class="text-sm font-medium text-gray-700" x-text="question.label"></span>
                                                                     </div>
                                                                 </td>
@@ -167,9 +316,11 @@
                                                                             <template x-for="(option, oIndex) in question.specific_checklist_items" :key="oIndex">
                                                                                 <label class="inline-flex items-center cursor-pointer">
                                                                                     <input type="radio" 
-                                                                                           :name="`responses[${qIndex}]`" 
+                                                                                           :name="`responses[${surveys[selectedSurvey].questions.indexOf(question)}]`" 
                                                                                            :value="oIndex"
-                                                                                           x-model="responses[qIndex]"
+                                                                                           x-model="responses[surveys[selectedSurvey].questions.indexOf(question)]"
+                                                                                           :checked="responses[surveys[selectedSurvey].questions.indexOf(question)] == oIndex"
+                                                                                           @change="$nextTick(() => { responses = {...responses} })"
                                                                                            class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
                                                                                     <span class="text-sm text-gray-600" x-text="option.label"></span>
                                                                                 </label>
@@ -179,9 +330,11 @@
                                                                             <template x-for="(option, oIndex) in surveys[selectedSurvey].checklist_items" :key="oIndex">
                                                                                 <label class="inline-flex items-center cursor-pointer">
                                                                                     <input type="radio" 
-                                                                                           :name="`responses[${qIndex}]`" 
+                                                                                           :name="`responses[${surveys[selectedSurvey].questions.indexOf(question)}]`" 
                                                                                            :value="oIndex"
-                                                                                           x-model="responses[qIndex]"
+                                                                                           x-model="responses[surveys[selectedSurvey].questions.indexOf(question)]"
+                                                                                           :checked="responses[surveys[selectedSurvey].questions.indexOf(question)] == oIndex"
+                                                                                           @change="$nextTick(() => { responses = {...responses} })"
                                                                                            class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
                                                                                     <span class="text-sm text-gray-600" x-text="option.label"></span>
                                                                                 </label>
@@ -197,10 +350,10 @@
                                         </div>
                                     </template>
                                     
-                                    <!-- 심층 분석 - 기존 형태 + 빈도 평가 추가 -->
-                                    <template x-if="analysisType === 'detailed'">
+                                    <!-- 심층 분석 - 페이지네이션 적용 + 빈도 평가 추가 -->
+                                    <template x-if="analysisType === 'detailed' && surveys[selectedSurvey] && surveys[selectedSurvey].questions">
                                         <div class="space-y-6">
-                                            <template x-for="(question, qIndex) in surveys[selectedSurvey].questions" :key="qIndex">
+                                            <template x-for="(question, qIndex) in (surveys[selectedSurvey].questions || []).slice(currentPage * questionsPerPage, Math.min((currentPage + 1) * questionsPerPage, surveys[selectedSurvey].questions.length))" :key="`detailed-${surveys[selectedSurvey].questions.indexOf(question)}`">
                                                 <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
                                                     <table class="w-full">
                                                         <tbody>
@@ -208,7 +361,7 @@
                                                             <tr class="bg-gray-50">
                                                                 <td class="p-4">
                                                                     <div class="flex items-start">
-                                                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-semibold mr-3 flex-shrink-0" x-text="qIndex + 1"></span>
+                                                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-semibold mr-3 flex-shrink-0" x-text="surveys[selectedSurvey].questions.indexOf(question) + 1"></span>
                                                                         <span class="text-sm font-medium text-gray-700" x-text="question.label"></span>
                                                                     </div>
                                                                 </td>
@@ -221,9 +374,11 @@
                                                                             <template x-for="(option, oIndex) in question.specific_checklist_items" :key="oIndex">
                                                                                 <label class="inline-flex items-center cursor-pointer">
                                                                                     <input type="radio" 
-                                                                                           :name="`responses[${qIndex}]`" 
+                                                                                           :name="`responses[${surveys[selectedSurvey].questions.indexOf(question)}]`" 
                                                                                            :value="oIndex"
-                                                                                           x-model="responses[qIndex]"
+                                                                                           x-model="responses[surveys[selectedSurvey].questions.indexOf(question)]"
+                                                                                           :checked="responses[surveys[selectedSurvey].questions.indexOf(question)] == oIndex"
+                                                                                           @change="$nextTick(() => { responses = {...responses} })"
                                                                                            class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
                                                                                     <span class="text-sm text-gray-600" x-text="option.label"></span>
                                                                                 </label>
@@ -233,9 +388,11 @@
                                                                             <template x-for="(option, oIndex) in surveys[selectedSurvey].checklist_items" :key="oIndex">
                                                                                 <label class="inline-flex items-center cursor-pointer">
                                                                                     <input type="radio" 
-                                                                                           :name="`responses[${qIndex}]`" 
+                                                                                           :name="`responses[${surveys[selectedSurvey].questions.indexOf(question)}]`" 
                                                                                            :value="oIndex"
-                                                                                           x-model="responses[qIndex]"
+                                                                                           x-model="responses[surveys[selectedSurvey].questions.indexOf(question)]"
+                                                                                           :checked="responses[surveys[selectedSurvey].questions.indexOf(question)] == oIndex"
+                                                                                           @change="$nextTick(() => { responses = {...responses} })"
                                                                                            class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
                                                                                     <span class="text-sm text-gray-600" x-text="option.label"></span>
                                                                                 </label>
@@ -274,6 +431,7 @@
                                                                                        :name="`frequency_responses[${qIndex}]`" 
                                                                                        :value="oIndex"
                                                                                        x-model="frequencyResponses[qIndex]"
+                                                                                       :checked="frequencyResponses[qIndex] == oIndex"
                                                                                        class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
                                                                                 <span class="text-sm text-gray-600" x-text="option.label"></span>
                                                                             </label>
@@ -288,21 +446,84 @@
                                         </div>
                                     </template>
                                     
-                                    <!-- 제출 버튼 -->
-                                    <div class="mt-8 flex justify-between items-center">
-                                        <button type="button" 
-                                                @click="showQuestions = false" 
-                                                class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300">
-                                            취소
-                                        </button>
-                                        
-                                        <button type="submit" 
-                                                class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
-                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            설문 완료하기
-                                        </button>
+                                    <!-- 네비게이션 및 제출 버튼 -->
+                                    <div class="mt-8">
+                                        <div class="flex justify-between items-center">
+                                            <!-- 이전 버튼 -->
+                                            <button type="button" 
+                                                    @click="currentPage = Math.max(0, currentPage - 1)"
+                                                    :disabled="currentPage === 0"
+                                                    :class="currentPage === 0 ? 'opacity-50 cursor-not-allowed' : ''"
+                                                    class="flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300">
+                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                </svg>
+                                                이전
+                                            </button>
+                                            
+                                            <!-- 취소 버튼 -->
+                                            <button type="button" 
+                                                    @click="showQuestions = false; currentPage = 0; maxReachedPage = 0; localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_responses`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_freq_responses`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_page`); localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_max_page`); responses = {}; frequencyResponses = {};" 
+                                                    class="px-6 py-3 text-gray-500 hover:text-gray-700 transition-all duration-200">
+                                                취소
+                                            </button>
+                                            
+                                            <!-- 다음/제출 버튼 -->
+                                            <template x-if="currentPage < Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage) - 1">
+                                                <button type="button" 
+                                                        @click="() => {
+                                                            const startIdx = currentPage * questionsPerPage;
+                                                            const endIdx = Math.min((currentPage + 1) * questionsPerPage, surveys[selectedSurvey].questions.length);
+                                                            let allAnswered = true;
+                                                            for (let i = startIdx; i < endIdx; i++) {
+                                                                if (!responses.hasOwnProperty(i)) {
+                                                                    allAnswered = false;
+                                                                    break;
+                                                                }
+                                                                if (analysisType === 'detailed' && !frequencyResponses.hasOwnProperty(i)) {
+                                                                    allAnswered = false;
+                                                                    break;
+                                                                }
+                                                            }
+                                                            if (allAnswered) {
+                                                                currentPage = Math.min(Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage) - 1, currentPage + 1);
+                                                            } else {
+                                                                alert('현재 페이지의 모든 문항에 답변해주세요.');
+                                                            }
+                                                        }"
+                                                        class="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-500">
+                                                    다음
+                                                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                    </svg>
+                                                </button>
+                                            </template>
+                                            
+                                            <template x-if="currentPage === Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage) - 1">
+                                                <button type="submit" 
+                                                        @click="(e) => {
+                                                            const allAnswered = surveys[selectedSurvey].questions.every((q, idx) => responses.hasOwnProperty(idx));
+                                                            const allFreqAnswered = analysisType === 'detailed' ? surveys[selectedSurvey].questions.every((q, idx) => frequencyResponses.hasOwnProperty(idx)) : true;
+                                                            
+                                                            if (!allAnswered || !allFreqAnswered) {
+                                                                e.preventDefault();
+                                                                alert('모든 문항에 답변해주세요.');
+                                                            } else {
+                                                                // 제출 성공 시 로컬 스토리지 정리
+                                                                localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_responses`);
+                                                                localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_freq_responses`);
+                                                                localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_page`);
+                                                                localStorage.removeItem(`survey_${surveys[selectedSurvey].id}_max_page`);
+                                                            }
+                                                        }"
+                                                        class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transform transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    설문 완료하기
+                                                </button>
+                                            </template>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
