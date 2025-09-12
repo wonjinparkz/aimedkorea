@@ -56,20 +56,41 @@ class SurveyResponse extends Model
             $answeredCount = 0;
             
             foreach ($category['question_indices'] as $index) {
+                // 인덱스를 정수로 변환 (문자열로 저장된 경우 처리)
+                $intIndex = (int)$index;
+                $strIndex = (string)$index;
                 $questionCount++;
                 
-                // 해당 인덱스의 응답 찾기
-                if (isset($responses[$index])) {
+                // 해당 인덱스의 응답 찾기 (문자열과 정수 인덱스 모두 확인)
+                $response = null;
+                if (isset($responses[$strIndex])) {
+                    $response = $responses[$strIndex];
+                } elseif (isset($responses[$intIndex])) {
+                    $response = $responses[$intIndex];
+                } elseif (isset($responses[$index])) {
                     $response = $responses[$index];
-                    $categoryScore += $response['selected_score'] ?? 0;
-                    $answeredCount++;
-                    
-                    // 최대 점수 계산 (해당 문항의 체크리스트에서 최대값)
-                    $maxScore = $this->getMaxScoreForQuestion($survey, $index);
-                    $categoryMaxScore += $maxScore;
                 }
+                
+                if ($response !== null) {
+                    $score = (int)($response['selected_score'] ?? 0);
+                    $categoryScore += $score;
+                    $answeredCount++;
+                }
+                
+                // 최대 점수는 항상 계산
+                $maxScore = $this->getMaxScoreForQuestion($survey, $intIndex);
+                $categoryMaxScore += $maxScore;
             }
             
+            $percentage = $categoryMaxScore > 0 ? round(($categoryScore / $categoryMaxScore) * 100, 1) : 0;
+            
+            // 최대 점수가 0인 경우 (모든 문항이 없거나 잘못된 경우) 기본값 설정
+            if ($categoryMaxScore == 0 && $questionCount > 0) {
+                // 각 문항의 기본 최대 점수를 4로 가정
+                $categoryMaxScore = $questionCount * 4;
+            }
+            
+            // 백분율 계산 (점수가 높을수록 노화가 심하므로)
             $percentage = $categoryMaxScore > 0 ? round(($categoryScore / $categoryMaxScore) * 100, 1) : 0;
             
             $categoryScores[] = [
@@ -93,6 +114,9 @@ class SurveyResponse extends Model
     {
         $questions = $survey->questions ?? [];
         
+        // 인덱스를 정수로 변환
+        $questionIndex = (int)$questionIndex;
+        
         // 문항 배열을 순서대로 정리
         $orderedQuestions = [];
         $index = 0;
@@ -104,7 +128,7 @@ class SurveyResponse extends Model
         }
         
         if (!isset($orderedQuestions[$questionIndex])) {
-            return 0;
+            return 4; // 기본 최대 점수
         }
         
         $question = $orderedQuestions[$questionIndex];

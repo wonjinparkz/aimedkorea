@@ -136,14 +136,23 @@ class SurveyController extends Controller
         $currentLang = session('locale', 'kor');
         $categoryData = $survey->getCategories($currentLang);
         
-        // 카테고리별 점수를 역전하여 반환 (높은 점수가 좋은 상태)
+        // 카테고리별 점수를 역전하여 반환 (높은 점수가 나쁜 상태)
         $categories = [];
         foreach ($categoryScores as $index => $categoryScore) {
             $categoryInfo = $categoryData[$index] ?? null;
             
+            // 응답한 문항이 있는 경우만 백분율 계산
+            if ($categoryScore['answered_count'] > 0) {
+                // 역전: 높은 점수가 나쁜 상태이므로, 낮은 백분율이 좋은 상태
+                $percentage = 100 - $categoryScore['percentage'];
+            } else {
+                // 응답한 문항이 없으면 백분율을 표시하지 않음 (null 또는 0)
+                $percentage = null;
+            }
+            
             $categories[] = [
                 'name' => $categoryScore['name'],
-                'percentage' => 100 - $categoryScore['percentage'], // 역전: 낮은 점수가 좋은 상태
+                'percentage' => $percentage,
                 'score' => $categoryScore['score'],
                 'max_score' => $categoryScore['max_score'],
                 'question_count' => $categoryScore['question_count'],

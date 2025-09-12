@@ -371,6 +371,22 @@
                                     @csrf
                                     <input type="hidden" name="analysis_type" :value="analysisType">
                                     
+                                    <!-- 현재 페이지에 표시되지 않은 모든 응답을 hidden input으로 저장 -->
+                                    <template x-for="(response, index) in responses" :key="`hidden-response-${index}`">
+                                        <template x-if="currentPage === null || index < currentPage * questionsPerPage || index >= (currentPage + 1) * questionsPerPage">
+                                            <input type="hidden" :name="`responses[${index}]`" :value="response">
+                                        </template>
+                                    </template>
+                                    
+                                    <!-- 심층 분석의 경우 빈도 응답도 hidden input으로 저장 -->
+                                    <template x-if="analysisType === 'detailed'">
+                                        <template x-for="(freqResponse, index) in frequencyResponses" :key="`hidden-freq-${index}`">
+                                            <template x-if="currentPage === null || index < currentPage * questionsPerPage || index >= (currentPage + 1) * questionsPerPage">
+                                                <input type="hidden" :name="`frequency_responses[${index}]`" :value="freqResponse">
+                                            </template>
+                                        </template>
+                                    </template>
+                                    
                                     <!-- 간편 분석 - 페이지네이션 적용 -->
                                     <template x-if="analysisType === 'simple' && surveys[selectedSurvey] && surveys[selectedSurvey].questions">
                                         <div class="space-y-6">

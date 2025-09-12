@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Submission Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .code {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 설문조사 제출 테스트</h1>
+        
+        <h2>테스트 순서:</h2>
+        <ol>
+            <li>아래 버튼을 클릭하여 테스트 스크립트를 클립보드에 복사</li>
+            <li>새 탭에서 https://ai-med.co.kr/surveys 열기</li>
+            <li>F12로 개발자 도구 열기</li>
+            <li>Console 탭에서 스크립트 붙여넣기 (Ctrl+V)</li>
+            <li>Enter 키로 실행</li>
+            <li>결과 확인</li>
+        </ol>
+        
+        <button onclick="copyFullTest()">📋 전체 테스트 스크립트 복사</button>
+        <button onclick="copyQuickTest()">⚡ 빠른 테스트 스크립트 복사</button>
+        
+        <div id="result"></div>
+        
+        <div class="code" id="script-preview"></div>
+    </div>
+
+    <script>
+        function copyFullTest() {
+            const script = `
+// ========================================
+// 전체 설문 테스트 스크립트
+// ========================================
+
+console.clear();
+console.log('%c🧪 설문 제출 테스트 시작', 'color: blue; font-size: 16px; font-weight: bold');
+
+// Alpine 컴포넌트 찾기
+const component = document.querySelector('[x-data]').__x;
+if (!component) {
+    console.error('❌ Alpine 컴포넌트를 찾을 수 없습니다');
+    return;
+}
+
+// 1. 설문 시작
+component.$data.selectedSurvey = 0;
+component.$data.showQuestions = true;
+component.$data.analysisType = 'simple';
+
+console.log('📝 설문 시작됨');
+
+// 2. 모든 문항에 응답 (25개)
+for (let i = 0; i < 25; i++) {
+    component.$data.responses[i] = 2; // 모든 문항에 "보통 있음" 선택
+}
+
+console.log('✅ 25개 문항 모두 응답 완료');
+console.log('   응답 개수:', Object.keys(component.$data.responses).length);
+
+// 3. 모든 페이지 방문 (페이지네이션 처리)
+const totalPages = Math.ceil(25 / 3);
+for (let page = 0; page < totalPages; page++) {
+    component.$data.currentPage = page;
+    component.$data.maxReachedPage = page;
+}
+
+console.log('📄 모든 페이지 방문 완료');
+
+// 4. 마지막 페이지로 이동
+component.$data.currentPage = totalPages - 1;
+
+// 5. Form 검증
+setTimeout(() => {
+    const form = document.querySelector('form[method="POST"]');
+    if (!form) {
+        console.error('❌ Form을 찾을 수 없습니다');
+        return;
+    }
+    
+    // Hidden inputs 확인
+    const hiddenInputs = form.querySelectorAll('input[type="hidden"][name^="responses"]');
+    const radioInputs = form.querySelectorAll('input[type="radio"][name^="responses"]:checked');
+    
+    console.log('');
+    console.log('%c📊 Form 상태 분석', 'color: green; font-weight: bold');
+    console.log('   Hidden inputs:', hiddenInputs.length, '개');
+    console.log('   Radio inputs (checked):', radioInputs.length, '개');
+    console.log('   총 입력 필드:', hiddenInputs.length + radioInputs.length, '개');
+    
+    // 모든 입력 확인
+    const allInputs = new Set();
+    hiddenInputs.forEach(input => {
+        const match = input.name.match(/responses\\[(\\d+)\\]/);
+        if (match) allInputs.add(parseInt(match[1]));
+    });
+    radioInputs.forEach(input => {
+        const match = input.name.match(/responses\\[(\\d+)\\]/);
+        if (match) allInputs.add(parseInt(match[1]));
+    });
+    
+    console.log('   유니크 문항 인덱스:', Array.from(allInputs).sort((a,b) => a-b));
+    
+    if (allInputs.size === 25) {
+        console.log('');
+        console.log('%c✅ 테스트 성공!', 'color: green; font-size: 18px; font-weight: bold');
+        console.log('   25개 문항 모두 Form에 포함됨');
+        console.log('');
+        console.log('📌 다음 단계:');
+        console.log('   1. "설문 완료하기" 버튼 클릭');
+        console.log('   2. 또는 콘솔에서: document.querySelector("button[type=\\'submit\\']").click()');
+        
+        // 제출 버튼 활성화 확인
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn && !submitBtn.disabled) {
+            console.log('');
+            console.log('%c제출 버튼 활성화됨 - 클릭 가능', 'color: green');
+        }
+    } else {
+        console.log('');
+        console.log('%c⚠️ 문제 발견!', 'color: red; font-size: 18px; font-weight: bold');
+        console.log('   예상: 25개 문항');
+        console.log('   실제:', allInputs.size, '개 문항');
+        console.log('   누락된 문항 확인 필요');
+    }
+}, 1000);
+`;
+            
+            navigator.clipboard.writeText(script).then(() => {
+                document.getElementById('result').innerHTML = '<p class="success">✅ 전체 테스트 스크립트가 클립보드에 복사되었습니다!</p>';
+                document.getElementById('script-preview').textContent = script;
+            });
+        }
+        
+        function copyQuickTest() {
+            const script = `
+// 빠른 테스트
+const c = document.querySelector('[x-data]').__x;
+c.$data.selectedSurvey = 0;
+c.$data.showQuestions = true;
+c.$data.analysisType = 'simple';
+for(let i=0; i<25; i++) c.$data.responses[i] = 2;
+const pages = Math.ceil(25/3);
+for(let p=0; p<pages; p++) { c.$data.currentPage = p; c.$data.maxReachedPage = p; }
+setTimeout(() => {
+    const form = document.querySelector('form[method="POST"]');
+    const total = form.querySelectorAll('input[name^="responses"]').length;
+    console.log(total === 25 ? '✅ 성공! 25개 문항 준비됨' : '❌ 실패! ' + total + '개만 준비됨');
+}, 500);
+`;
+            
+            navigator.clipboard.writeText(script).then(() => {
+                document.getElementById('result').innerHTML = '<p class="success">✅ 빠른 테스트 스크립트가 클립보드에 복사되었습니다!</p>';
+                document.getElementById('script-preview').textContent = script;
+            });
+        }
+    </script>
+</body>
+</html>

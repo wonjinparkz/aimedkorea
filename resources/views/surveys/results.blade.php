@@ -29,6 +29,20 @@
                 @endif
             </div>
 
+            <!-- 면책 고지 (상단) -->
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-sm text-amber-800">
+                        <p class="font-medium mb-1">중요 안내</p>
+                        <p>본 결과는 웰니스 목적의 자가평가 정보이며, 질병의 진단·치료·예방을 위한 것이 아닙니다.</p>
+                        <p class="mt-2">화면의 수치는 <strong>내부 컨디션 지표(H/레벨/Model Confidence)</strong>로, 개인 특성에 따라 달라질 수 있습니다.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- 계기판 스타일 점수 표시 -->
             <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
                 <div class="max-w-lg mx-auto">
@@ -131,26 +145,118 @@
                     @endphp
                     
                     @if($categoryAnalysisDescription)
-                        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                            <div class="prose prose-gray mx-auto">
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <div class="prose prose-sm prose-gray max-w-none">
                                 {!! $categoryAnalysisDescription !!}
                             </div>
                         </div>
                     @endif
                     
-                    <div class="space-y-4">
-                        @foreach($categoryAnalysis as $category)
+                    @php
+                        // 카테고리를 점수 기준으로 정렬 (응답이 있는 카테고리만)
+                        $scoredCategories = collect($categoryAnalysis)->filter(function($cat) {
+                            return $cat['percentage'] !== null && $cat['answered_count'] > 0;
+                        })->sortByDesc('percentage')->values();
+                        
+                        $top3Categories = $scoredCategories->take(3);
+                        $bottom3Categories = $scoredCategories->slice(-3)->reverse()->values();
+                    @endphp
+                    
+                    @if($scoredCategories->count() >= 3)
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                            <!-- Top 3 카테고리 -->
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <h3 class="text-sm font-semibold text-green-800 mb-3 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    우수 영역 TOP 3
+                                </h3>
+                                <div class="space-y-2">
+                                    @foreach($top3Categories as $index => $category)
+                                        <div class="flex items-center justify-between text-sm">
+                                            <div class="flex items-center">
+                                                <span class="text-green-600 font-bold mr-2">{{ $index + 1 }}.</span>
+                                                <span class="text-gray-700">F{{ collect($categoryAnalysis)->search(function($item) use ($category) { 
+                                                    return $item['name'] === $category['name']; 
+                                                }) + 1 }}. {{ $category['name'] }}</span>
+                                            </div>
+                                            <span class="font-semibold text-green-700">{{ $category['percentage'] }}%</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            
+                            <!-- Bottom 3 카테고리 -->
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                <h3 class="text-sm font-semibold text-red-800 mb-3 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    개선 필요 영역
+                                </h3>
+                                <div class="space-y-2">
+                                    @foreach($bottom3Categories as $index => $category)
+                                        <div class="flex items-center justify-between text-sm">
+                                            <div class="flex items-center">
+                                                <span class="text-red-600 font-bold mr-2">{{ $index + 1 }}.</span>
+                                                <span class="text-gray-700">F{{ collect($categoryAnalysis)->search(function($item) use ($category) { 
+                                                    return $item['name'] === $category['name']; 
+                                                }) + 1 }}. {{ $category['name'] }}</span>
+                                            </div>
+                                            <span class="font-semibold text-red-700">{{ $category['percentage'] }}%</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    
+                    <div class="space-y-8 pt-8">
+                        @foreach($categoryAnalysis as $index => $category)
                             <div>
                                 <div class="flex justify-between mb-2">
-                                    <div>
-                                        <span class="text-gray-700 font-medium">{{ $category['name'] }}</span>
-                                        @if(isset($category['answered_count']) && isset($category['question_count']))
-                                            <span class="text-sm text-gray-500 ml-2">
-                                                ({{ $category['answered_count'] }}/{{ $category['question_count'] }}개 응답)
+                                    <div class="flex items-center">
+                                        @php
+                                            // 상태 뱃지 결정 (100%에 가까울수록 최적, 0%에 가까울수록 붕괴)
+                                            $statusBadge = '';
+                                            $badgeColor = '';
+                                            if ($category['percentage'] !== null && $category['answered_count'] > 0) {
+                                                if ($category['percentage'] >= 85) {
+                                                    $statusBadge = '최적';
+                                                    $badgeColor = 'bg-green-100 text-green-800 border-green-300';
+                                                } elseif ($category['percentage'] >= 70) {
+                                                    $statusBadge = '우수';
+                                                    $badgeColor = 'bg-blue-100 text-blue-800 border-blue-300';
+                                                } elseif ($category['percentage'] >= 50) {
+                                                    $statusBadge = '양호';
+                                                    $badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                                                } elseif ($category['percentage'] >= 30) {
+                                                    $statusBadge = '주의';
+                                                    $badgeColor = 'bg-orange-100 text-orange-800 border-orange-300';
+                                                } elseif ($category['percentage'] >= 15) {
+                                                    $statusBadge = '위험';
+                                                    $badgeColor = 'bg-red-100 text-red-800 border-red-300';
+                                                } else {
+                                                    $statusBadge = '붕괴';
+                                                    $badgeColor = 'bg-red-200 text-red-900 border-red-400';
+                                                }
+                                            }
+                                        @endphp
+                                        
+                                        @if($statusBadge)
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full border {{ $badgeColor }} mr-2">
+                                                {{ $statusBadge }}
                                             </span>
                                         @endif
+                                        <span class="text-gray-500 font-semibold mr-2">F{{ $index + 1 }}.</span>
+                                        <span class="text-gray-700 font-medium">{{ $category['name'] }}</span>
                                     </div>
-                                    <span class="text-gray-600 font-semibold">{{ $category['percentage'] }}%</span>
+                                    @if($category['percentage'] !== null)
+                                        <span class="text-gray-600 font-semibold">{{ $category['percentage'] }}%</span>
+                                    @else
+                                        <span class="text-gray-400 text-sm">미응답</span>
+                                    @endif
                                 </div>
                                 
                                 @if(!empty($category['description']))
@@ -174,16 +280,17 @@
                                             $barColor = 'bg-gradient-to-r from-red-800 to-red-900'; // 붕괴
                                         }
                                     @endphp
-                                    <div class="h-full rounded-full transition-all duration-1000 ease-out relative {{ $barColor }}" 
-                                         style="width: {{ $category['percentage'] }}%">
-                                        <div class="absolute inset-0 bg-white bg-opacity-20"></div>
-                                    </div>
+                                    @if($category['percentage'] !== null && $category['answered_count'] > 0)
+                                        <div class="h-full rounded-full transition-all duration-1000 ease-out relative {{ $barColor }}" 
+                                             style="width: {{ $category['percentage'] }}%">
+                                            <div class="absolute inset-0 bg-white bg-opacity-20"></div>
+                                        </div>
+                                    @else
+                                        <div class="h-full flex items-center justify-center text-xs text-gray-500">
+                                            응답 데이터 없음
+                                        </div>
+                                    @endif
                                 </div>
-                                @if(isset($category['score']) && isset($category['max_score']))
-                                    <div class="text-xs text-gray-500 mt-1 text-right">
-                                        노화지수: {{ round((100 - $category['percentage'])) }}% ({{ $category['score'] }}/{{ $category['max_score'] }}점)
-                                    </div>
-                                @endif
                                 
                                 @if(!empty($category['result_description']))
                                     <div class="mt-2 p-3 bg-gray-50 rounded text-sm text-gray-700">
@@ -194,26 +301,6 @@
                         @endforeach
                     </div>
                     
-                    <!-- 카테고리 분석 설명 -->
-                    @if($categoryAnalysisDescription)
-                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <div class="prose prose-sm prose-gray max-w-none">
-                                {!! $categoryAnalysisDescription !!}
-                            </div>
-                        </div>
-                    @else
-                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <p class="text-sm text-gray-600">
-                                <span class="font-semibold">카테고리별 노화지수 해석:</span><br>
-                                <span class="text-green-600 font-medium">0-15%</span>: 최적 상태 - 디지털 노화가 거의 진행되지 않았습니다.<br>
-                                <span class="text-blue-600 font-medium">16-30%</span>: 우수 상태 - 디지털 노화가 경미한 수준입니다.<br>
-                                <span class="text-yellow-600 font-medium">31-50%</span>: 양호 상태 - 디지털 노화가 진행되고 있지만 관리 가능합니다.<br>
-                                <span class="text-orange-600 font-medium">51-70%</span>: 주의 필요 - 디지털 노화가 상당히 진행되어 관리가 필요합니다.<br>
-                                <span class="text-red-600 font-medium">71-85%</span>: 위험 상태 - 디지털 노화가 심각한 수준입니다.<br>
-                                <span class="text-red-800 font-medium">86% 이상</span>: 붕괴 레벨 - 즉각적인 전문적 개입이 필요합니다.
-                            </p>
-                        </div>
-                    @endif
                 </div>
             @endif
 
@@ -252,6 +339,20 @@
                     </svg>
                     결과 인쇄
                 </button>
+            </div>
+            
+            <!-- 면책 고지 (하단) -->
+            <div class="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-gray-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-sm text-gray-700">
+                        <p class="font-medium mb-1">면책 고지</p>
+                        <p>본 결과는 웰니스 목적의 자가평가 정보이며, 질병의 진단·치료·예방을 위한 것이 아닙니다.</p>
+                        <p class="mt-2">화면의 수치는 <strong>내부 컨디션 지표(H/레벨/Model Confidence)</strong>로, 개인 특성에 따라 달라질 수 있습니다.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
