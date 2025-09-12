@@ -8,6 +8,7 @@ use App\Models\SurveyResponse;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use App\Helpers\PermissionHelper;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -190,8 +191,30 @@ class SurveyResponseResource extends Resource
         ];
     }
     
+    // 네비게이션 표시 여부 제어
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (PermissionHelper::hasPermission('section_survey-view') && PermissionHelper::hasPermission('survey_responses-view')) || PermissionHelper::isAdmin();
+    }
+    
+    // 권한 메서드들
+    public static function canViewAny(): bool
+    {
+        return PermissionHelper::hasPermission('survey_responses-view');
+    }
+    
     public static function canCreate(): bool
     {
         return false; // 응답은 직접 생성하지 않음
+    }
+    
+    public static function canEdit($record): bool
+    {
+        return PermissionHelper::hasPermission('survey_responses-edit');
+    }
+    
+    public static function canDelete($record): bool
+    {
+        return PermissionHelper::hasPermission('survey_responses-delete');
     }
 }

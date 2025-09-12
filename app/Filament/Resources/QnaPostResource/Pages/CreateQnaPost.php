@@ -18,7 +18,7 @@ class CreateQnaPost extends CreatePost
         
         // QNA-specific data
         $data['type'] = \App\Models\Post::TYPE_QNA;
-        $data['author_id'] = auth()->id();
+        $data['author_id'] = auth()->check() ? auth()->id() : 1;
         
         return $data;
     }

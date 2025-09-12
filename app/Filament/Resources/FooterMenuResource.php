@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Helpers\PermissionHelper;
 use App\Filament\Resources\FooterMenuResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -255,6 +256,6 @@ class FooterMenuResource extends Resource
     
     public static function shouldRegisterNavigation(): bool
     {
-        return true;
+        return (PermissionHelper::hasPermission('section_site-view') && PermissionHelper::hasPermission('footer_menus-view')) || PermissionHelper::isAdmin();
     }
 }

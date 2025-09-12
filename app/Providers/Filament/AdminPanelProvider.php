@@ -20,6 +20,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Helpers\PermissionHelper;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -59,19 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->navigationGroups([
-                '대시보드',
-                '홈 구성',
-                '콘텐츠',
-                '리서치 허브',
-                '루틴',
-                '파트너',
-                '설문',
-                '미디어',
-                '마케팅',
-                '사이트',
-                '설정',
-            ])
+            ->navigationGroups($this->getVisibleNavigationGroups())
             ->sidebarWidth('220px')
             ->renderHook(
                 PanelsRenderHook::BODY_END,
@@ -85,5 +74,36 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::HEAD_END,
                 fn () => Blade::render('@include("filament.components.search-analytics")')
             );
+    }
+
+    /**
+     * Get navigation groups that should be visible based on user permissions
+     */
+    private function getVisibleNavigationGroups(): array
+    {
+        $allGroups = [
+            '대시보드' => 'section_dashboard-view',
+            '홈 구성' => 'section_home-view',
+            '콘텐츠' => 'section_content-view',
+            '리서치 허브' => 'section_research-view',
+            '루틴' => 'section_routine-view',
+            '파트너' => 'section_partner-view',
+            '설문' => 'section_survey-view',
+            '미디어' => 'section_media-view',
+            '마케팅' => 'section_marketing-view',
+            '사이트' => 'section_site-view',
+            '설정' => 'section_settings-view',
+        ];
+
+        $visibleGroups = [];
+        
+        foreach ($allGroups as $groupName => $sectionPermission) {
+            // Check if user has section view permission
+            if (PermissionHelper::hasPermission($sectionPermission) || PermissionHelper::isAdmin()) {
+                $visibleGroups[] = $groupName;
+            }
+        }
+        
+        return $visibleGroups;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Helpers\PermissionHelper;
 use App\Forms\Components\QuillEditor;
 use App\Models\Post;
 use Filament\Forms;
@@ -342,4 +343,31 @@ class VideoPostResource extends PostResource
         ];
     }
 
+
+    // 네비게이션 표시 여부 제어
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (PermissionHelper::hasPermission('section_media-view') && PermissionHelper::hasPermission('video_posts-view')) || PermissionHelper::isAdmin();
+    }
+    
+    // 권한 메서드들
+    public static function canViewAny(): bool
+    {
+        return PermissionHelper::hasPermission('video_posts-view');
+    }
+    
+    public static function canCreate(): bool
+    {
+        return PermissionHelper::hasPermission('video_posts-create');
+    }
+    
+    public static function canEdit($record): bool
+    {
+        return PermissionHelper::hasPermission('video_posts-edit');
+    }
+    
+    public static function canDelete($record): bool
+    {
+        return PermissionHelper::hasPermission('video_posts-delete');
+    }
 }

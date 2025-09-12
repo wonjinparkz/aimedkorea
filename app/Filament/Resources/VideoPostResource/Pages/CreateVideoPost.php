@@ -16,7 +16,7 @@ class CreateVideoPost extends CreatePost
         
         // Add video-specific data
         $data['type'] = \App\Models\Post::TYPE_VIDEO;
-        $data['author_id'] = auth()->id();
+        $data['author_id'] = auth()->check() ? auth()->id() : 1;
         
         // 유튜브 비디오의 경우 썸네일 URL 자동 생성
         if ($data['video_type'] === 'youtube' && !empty($data['youtube_url'])) {

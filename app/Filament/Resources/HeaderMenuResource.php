@@ -6,6 +6,7 @@ use App\Filament\Resources\HeaderMenuResource\Pages;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use App\Helpers\PermissionHelper;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
@@ -172,5 +173,32 @@ class HeaderMenuResource extends Resource
     {
         $menuItems = get_option('header_menu', []);
         return count($menuItems) > 0 ? count($menuItems) : null;
+    }
+
+    // 네비게이션 표시 여부 제어
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (PermissionHelper::hasPermission('section_site-view') && PermissionHelper::hasPermission('header_menus-view')) || PermissionHelper::isAdmin();
+    }
+    
+    // 권한 메서드들
+    public static function canViewAny(): bool
+    {
+        return PermissionHelper::hasPermission('menus-view');
+    }
+    
+    public static function canCreate(): bool
+    {
+        return PermissionHelper::hasPermission('menus-create');
+    }
+    
+    public static function canEdit($record): bool
+    {
+        return PermissionHelper::hasPermission('menus-edit');
+    }
+    
+    public static function canDelete($record): bool
+    {
+        return PermissionHelper::hasPermission('menus-delete');
     }
 }

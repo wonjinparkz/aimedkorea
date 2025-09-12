@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Helpers\PermissionHelper;
 use App\Forms\Components\QuillEditor;
 use App\Models\Post;
 use Filament\Forms;
@@ -245,5 +246,32 @@ class PaperPostResource extends PostResource
             'edit' => PaperPostResource\Pages\EditPaperPost::route('/{record}/edit'),
             'view' => PaperPostResource\Pages\ViewPaperPost::route('/{record}'),
         ];
+    }
+
+    // 네비게이션 표시 여부 제어
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (PermissionHelper::hasPermission('section_research-view') && PermissionHelper::hasPermission('paper_posts-view')) || PermissionHelper::isAdmin();
+    }
+    
+    // 권한 메서드들
+    public static function canViewAny(): bool
+    {
+        return PermissionHelper::hasPermission('papers-view');
+    }
+    
+    public static function canCreate(): bool
+    {
+        return PermissionHelper::hasPermission('papers-create');
+    }
+    
+    public static function canEdit($record): bool
+    {
+        return PermissionHelper::hasPermission('papers-edit');
+    }
+    
+    public static function canDelete($record): bool
+    {
+        return PermissionHelper::hasPermission('papers-delete');
     }
 }

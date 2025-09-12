@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Post;
 use League\Csv\Writer;
 use Illuminate\Database\Eloquent\Collection;
+use App\Helpers\PermissionHelper;
 
 class HeroResource extends Resource
 {
@@ -884,5 +885,32 @@ class HeroResource extends Resource
             'create' => Pages\CreateHero::route('/create'),
             'edit' => Pages\EditHero::route('/{record}/edit'),
         ];
+    }
+    
+    // 네비게이션 표시 여부 제어
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (PermissionHelper::hasPermission('section_home-view') && PermissionHelper::hasPermission('heroes-view')) || PermissionHelper::isAdmin();
+    }
+    
+    // 권한 메서드들
+    public static function canViewAny(): bool
+    {
+        return PermissionHelper::hasPermission('heroes-view');
+    }
+    
+    public static function canCreate(): bool
+    {
+        return PermissionHelper::hasPermission('heroes-create');
+    }
+    
+    public static function canEdit($record): bool
+    {
+        return PermissionHelper::hasPermission('heroes-edit');
+    }
+    
+    public static function canDelete($record): bool
+    {
+        return PermissionHelper::hasPermission('heroes-delete');
     }
 }

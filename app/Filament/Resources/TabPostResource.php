@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Helpers\PermissionHelper;
 use App\Filament\Resources\TabPostResource\Pages;
 use App\Models\Post;
 use Filament\Forms;
@@ -114,7 +115,9 @@ class TabPostResource extends PostResource
                 
                 // author_id 기본값 설정
                 Forms\Components\Hidden::make('author_id')
-                    ->default(auth()->id() ?? 1),
+                    ->default(function () {
+                        return auth()->check() ? auth()->id() : 1;
+                    }),
             ]);
     }
 
@@ -125,5 +128,32 @@ class TabPostResource extends PostResource
             'create' => Pages\CreateTabPost::route('/create'),
             'edit' => Pages\EditTabPost::route('/{record}/edit'),
         ];
+    }
+
+    // 네비게이션 표시 여부 제어
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (PermissionHelper::hasPermission('section_research-view') && PermissionHelper::hasPermission('tab_posts-view')) || PermissionHelper::isAdmin();
+    }
+    
+    // 권한 메서드들
+    public static function canViewAny(): bool
+    {
+        return PermissionHelper::hasPermission('tab_posts-view');
+    }
+    
+    public static function canCreate(): bool
+    {
+        return PermissionHelper::hasPermission('tab_posts-create');
+    }
+    
+    public static function canEdit($record): bool
+    {
+        return PermissionHelper::hasPermission('tab_posts-edit');
+    }
+    
+    public static function canDelete($record): bool
+    {
+        return PermissionHelper::hasPermission('tab_posts-delete');
     }
 }

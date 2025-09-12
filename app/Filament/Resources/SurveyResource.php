@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
 use League\Csv\Writer;
 use Illuminate\Support\Facades\Response;
+use App\Helpers\PermissionHelper;
 
 class SurveyResource extends Resource
 {
@@ -1226,5 +1227,37 @@ class SurveyResource extends Resource
             'view' => Pages\ViewSurvey::route('/{record}'),
             'edit' => Pages\EditSurvey::route('/{record}/edit'),
         ];
+    }
+    
+    // 네비게이션 표시 여부 제어
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (PermissionHelper::hasPermission('section_survey-view') && PermissionHelper::hasPermission('surveys-view')) || PermissionHelper::isAdmin();
+    }
+    
+    // 권한 메서드들
+    public static function canViewAny(): bool
+    {
+        return PermissionHelper::hasPermission('surveys-view');
+    }
+    
+    public static function canCreate(): bool
+    {
+        return PermissionHelper::hasPermission('surveys-create');
+    }
+    
+    public static function canEdit($record): bool
+    {
+        return PermissionHelper::hasPermission('surveys-edit');
+    }
+    
+    public static function canDelete($record): bool
+    {
+        return PermissionHelper::hasPermission('surveys-delete');
+    }
+    
+    public static function canView($record): bool
+    {
+        return PermissionHelper::hasPermission('surveys-view');
     }
 }

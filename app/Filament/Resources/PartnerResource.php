@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use Filament\Resources\Resource;
+use App\Helpers\PermissionHelper;
 use App\Filament\Resources\PartnerResource\Pages;
 
 class PartnerResource extends Resource
@@ -28,8 +29,34 @@ class PartnerResource extends Resource
         ];
     }
     
+    // 네비게이션 표시 여부 제어
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (PermissionHelper::hasPermission('section_partner-view') && PermissionHelper::hasPermission('partners-view')) || PermissionHelper::isAdmin();
+    }
+    
+    // 권한 메서드들
+    public static function canViewAny(): bool
+    {
+        // URL 직접 접근 시 route guard 로깅
+        if (!PermissionHelper::hasPermission('section_partner-view') || !PermissionHelper::hasPermission('partners-view')) {
+            PermissionHelper::requireRouteAccess('partners-view');
+        }
+        return PermissionHelper::hasPermission('partners-view');
+    }
+    
     public static function canCreate(): bool
     {
-        return false;
+        return PermissionHelper::hasPermission('partners-create');
+    }
+    
+    public static function canEdit($record): bool
+    {
+        return PermissionHelper::hasPermission('partners-edit');
+    }
+    
+    public static function canDelete($record): bool
+    {
+        return PermissionHelper::hasPermission('partners-delete');
     }
 }

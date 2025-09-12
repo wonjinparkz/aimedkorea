@@ -17,7 +17,7 @@ class CreatePaperPost extends CreatePost
         
         // Add paper-specific data
         $data['type'] = Post::TYPE_PAPER;
-        $data['author_id'] = auth()->id();
+        $data['author_id'] = auth()->check() ? auth()->id() : 1;
         
         return $data;
     }
