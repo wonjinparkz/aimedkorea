@@ -1,42 +1,70 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Post;
 use App\Models\Hero;
 use Illuminate\Http\Request;
 use App\Http\Controllers\SearchLogController;
 
 Route::get('/', function () {
-    // Hero 슬라이드
-    $heroes = Hero::active()->with('buttonPost')->get();
-    
     // 현재 언어 가져오기
     $currentLang = session('locale', 'kor');
     
-    // 특징 게시물 - featured 타입의 가장 최신 게시물 1개
-    $featuredPost = Post::where('type', 'featured')
-        ->inLanguage($currentLang)
-        ->latest()
-        ->first();
+    // Cache homepage data for 30 minutes to improve performance
+    $cacheKey = 'homepage_data_' . $currentLang;
+    $data = Cache::remember($cacheKey, 1800, function () use ($currentLang) {
+        // Optimize Hero query - only select needed columns
+        $heroes = Hero::active()
+            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb', 
+                    'subtitle', 'subtitle_eng', 'subtitle_chn', 'subtitle_hin', 'subtitle_arb',
+                    'image', 'link', 'button_text', 'button_text_eng', 'button_text_chn', 
+                    'button_text_hin', 'button_text_arb', 'button_post_id', 'order', 'is_active')
+            ->with(['buttonPost' => function($query) {
+                $query->select('id', 'title', 'slug', 'type');
+            }])
+            ->get();
+        
+        // Optimize Post queries - select only necessary columns
+        $featuredPost = Post::where('type', 'featured')
+            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb',
+                    'slug', 'excerpt', 'excerpt_eng', 'excerpt_chn', 'excerpt_hin', 'excerpt_arb',
+                    'image', 'type', 'created_at')
+            ->inLanguage($currentLang)
+            ->latest()
+            ->first();
+        
+        $routinePosts = Post::where('type', 'routine')
+            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb',
+                    'slug', 'excerpt', 'excerpt_eng', 'excerpt_chn', 'excerpt_hin', 'excerpt_arb',
+                    'image', 'type', 'created_at')
+            ->inLanguage($currentLang)
+            ->latest()
+            ->take(3)
+            ->get();
+        
+        $blogPosts = Post::where('type', 'blog')
+            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb',
+                    'slug', 'excerpt', 'excerpt_eng', 'excerpt_chn', 'excerpt_hin', 'excerpt_arb',
+                    'image', 'type', 'created_at')
+            ->inLanguage($currentLang)
+            ->latest()
+            ->take(3)
+            ->get();
+        
+        $tabPosts = Post::where('type', 'tab')
+            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb',
+                    'slug', 'excerpt', 'excerpt_eng', 'excerpt_chn', 'excerpt_hin', 'excerpt_arb',
+                    'image', 'type', 'created_at')
+            ->inLanguage($currentLang)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)  // Limit tab posts to prevent loading too many
+            ->get();
+        
+        return compact('heroes', 'featuredPost', 'routinePosts', 'blogPosts', 'tabPosts');
+    });
     
-    $routinePosts = Post::where('type', 'routine')
-        ->inLanguage($currentLang)
-        ->latest()
-        ->take(3)
-        ->get();
-    
-    $blogPosts = Post::where('type', 'blog')
-        ->inLanguage($currentLang)
-        ->latest()
-        ->take(3)
-        ->get();
-    
-    $tabPosts = Post::where('type', 'tab')
-        ->inLanguage($currentLang)
-        ->orderBy('created_at', 'desc')
-        ->get();
-    
-    return view('welcome', compact('heroes', 'featuredPost', 'routinePosts', 'blogPosts', 'tabPosts'));
+    return view('welcome', $data);
 });
 
 // Hero 프리뷰 라우트

@@ -119,8 +119,20 @@
 
         <title>@yield('title', config('app.name', 'Laravel'))</title>
 
-        <!-- Fonts -->
+        <!-- Preconnect for performance -->
         <link rel="preconnect" href="https://fonts.bunny.net">
+        <link rel="dns-prefetch" href="https://fonts.bunny.net">
+        <link rel="preconnect" href="https://www.googletagmanager.com">
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+        <link rel="preconnect" href="https://img.cafe24.com">
+        <link rel="dns-prefetch" href="https://img.cafe24.com">
+        
+        {{-- Preload critical resources --}}
+        @if(request()->is('/'))
+        <link rel="preload" as="image" href="/images/hero-1.webp" fetchpriority="high">
+        @endif
+        
+        <!-- Fonts with display swap for better LCP -->
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 
         <!-- Scripts -->

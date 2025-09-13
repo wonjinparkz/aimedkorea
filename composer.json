@@ -31,7 +31,8 @@
         },
         "files": [
             "app/Helpers/options.php",
-            "app/Helpers/partners.php"
+            "app/Helpers/partners.php",
+            "app/helpers.php"
         ]
     },
     "autoload-dev": {

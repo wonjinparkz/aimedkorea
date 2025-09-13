@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Metrics Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .metric-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .metric-card.good {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .metric-card.warning {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+        .metric-card.poor {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        .metric-name {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .metric-target {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            font-weight: bold;
+        }
+        .status.pass {
+            background: #28a745;
+            color: white;
+        }
+        .status.fail {
+            background: #dc3545;
+            color: white;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .recommendations {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .recommendations h3 {
+            color: #004085;
+            margin-top: 0;
+        }
+        .recommendations ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .recommendations li {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 AI-MED Korea Performance Metrics</h1>
+        
+        <div class="metrics" id="metrics">
+            <!-- Metrics will be populated here -->
+        </div>
+        
+        <div>
+            <button class="btn" onclick="runTest()">🔄 Run Performance Test</button>
+            <button class="btn" onclick="testMainPage()">🏠 Test Main Page</button>
+            <button class="btn" onclick="clearCache()">🗑️ Clear Cache</button>
+        </div>
+        
+        <div class="recommendations">
+            <h3>📊 Performance Requirements (NFR)</h3>
+            <ul>
+                <li><strong>목록 응답</strong>: &lt; 800ms</li>
+                <li><strong>TTI (Time to Interactive)</strong>: &lt; 1.5s</li>
+                <li><strong>LCP (Largest Contentful Paint)</strong>: ≤ 2.5s</li>
+                <li><strong>CLS (Cumulative Layout Shift)</strong>: ≤ 0.1</li>
+            </ul>
+        </div>
+        
+        <div class="log" id="log">
+            Performance test log will appear here...
+        </div>
+        
+        <div class="recommendations" id="improvements" style="display: none;">
+            <h3>🔧 Recommended Improvements</h3>
+            <ul id="improvementsList"></ul>
+        </div>
+    </div>
+    
+    <script>
+        const NFR_TARGETS = {
+            responseTime: 800,  // ms
+            tti: 1500,         // ms
+            lcp: 2500,         // ms
+            cls: 0.1,
+            fcp: 1800,         // ms
+            fid: 100           // ms
+        };
+        
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            logEl.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        async function runTest() {
+            log('Starting performance test...', 'info');
+            
+            const metrics = {
+                responseTime: 0,
+                domContentLoaded: 0,
+                loadComplete: 0,
+                tti: 0,
+                lcp: 0,
+                fcp: 0,
+                cls: 0,
+                fid: 0
+            };
+            
+            // Test response time
+            const startTime = performance.now();
+            try {
+                const response = await fetch('/', { cache: 'no-cache' });
+                const endTime = performance.now();
+                metrics.responseTime = endTime - startTime;
+                log(`Response time: ${metrics.responseTime.toFixed(2)}ms`, 'success');
+            } catch (error) {
+                log(`Error testing response: ${error.message}`, 'error');
+            }
+            
+            // Get Navigation Timing API data
+            if (window.performance && window.performance.timing) {
+                const timing = window.performance.timing;
+                metrics.domContentLoaded = timing.domContentLoadedEventEnd - timing.navigationStart;
+                metrics.loadComplete = timing.loadEventEnd - timing.navigationStart;
+                
+                log(`DOM Content Loaded: ${metrics.domContentLoaded}ms`, 'success');
+                log(`Page Load Complete: ${metrics.loadComplete}ms`, 'success');
+            }
+            
+            // Try to get Web Vitals
+            if ('PerformanceObserver' in window) {
+                try {
+                    // LCP
+                    const lcpObserver = new PerformanceObserver((list) => {
+                        const entries = list.getEntries();
+                        const lastEntry = entries[entries.length - 1];
+                        metrics.lcp = lastEntry.renderTime || lastEntry.loadTime;
+                        log(`LCP: ${metrics.lcp.toFixed(2)}ms`, 'success');
+                    });
+                    lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+                    
+                    // FCP
+                    const fcpObserver = new PerformanceObserver((list) => {
+                        const entries = list.getEntries();
+                        entries.forEach(entry => {
+                            if (entry.name === 'first-contentful-paint') {
+                                metrics.fcp = entry.startTime;
+                                log(`FCP: ${metrics.fcp.toFixed(2)}ms`, 'success');
+                            }
+                        });
+                    });
+                    fcpObserver.observe({ entryTypes: ['paint'] });
+                    
+                    // CLS
+                    let clsValue = 0;
+                    const clsObserver = new PerformanceObserver((list) => {
+                        for (const entry of list.getEntries()) {
+                            if (!entry.hadRecentInput) {
+                                clsValue += entry.value;
+                            }
+                        }
+                        metrics.cls = clsValue;
+                        log(`CLS: ${metrics.cls.toFixed(3)}`, 'success');
+                    });
+                    clsObserver.observe({ entryTypes: ['layout-shift'] });
+                    
+                } catch (error) {
+                    log(`Error observing performance: ${error.message}`, 'error');
+                }
+            }
+            
+            // Estimate TTI (simplified)
+            metrics.tti = Math.max(metrics.domContentLoaded, metrics.fcp) + 500;
+            log(`TTI (estimated): ${metrics.tti.toFixed(2)}ms`, 'success');
+            
+            // Wait a bit for all metrics to be collected
+            setTimeout(() => {
+                displayMetrics(metrics);
+                analyzeAndRecommend(metrics);
+            }, 2000);
+        }
+        
+        function displayMetrics(metrics) {
+            const metricsEl = document.getElementById('metrics');
+            metricsEl.innerHTML = '';
+            
+            const metricData = [
+                {
+                    name: 'Response Time',
+                    value: metrics.responseTime,
+                    target: NFR_TARGETS.responseTime,
+                    unit: 'ms',
+                    key: 'responseTime'
+                },
+                {
+                    name: 'TTI (Time to Interactive)',
+                    value: metrics.tti,
+                    target: NFR_TARGETS.tti,
+                    unit: 'ms',
+                    key: 'tti'
+                },
+                {
+                    name: 'LCP (Largest Contentful Paint)',
+                    value: metrics.lcp || metrics.loadComplete,
+                    target: NFR_TARGETS.lcp,
+                    unit: 'ms',
+                    key: 'lcp'
+                },
+                {
+                    name: 'CLS (Cumulative Layout Shift)',
+                    value: metrics.cls,
+                    target: NFR_TARGETS.cls,
+                    unit: '',
+                    key: 'cls'
+                },
+                {
+                    name: 'FCP (First Contentful Paint)',
+                    value: metrics.fcp,
+                    target: NFR_TARGETS.fcp,
+                    unit: 'ms',
+                    key: 'fcp'
+                },
+                {
+                    name: 'DOM Content Loaded',
+                    value: metrics.domContentLoaded,
+                    target: 2000,
+                    unit: 'ms',
+                    key: 'domContentLoaded'
+                }
+            ];
+            
+            metricData.forEach(metric => {
+                const card = document.createElement('div');
+                const status = evaluateMetric(metric.value, metric.target, metric.key);
+                card.className = `metric-card ${status}`;
+                
+                const pass = metric.value <= metric.target;
+                
+                card.innerHTML = `
+                    <div class="metric-name">${metric.name}</div>
+                    <div class="metric-value">${metric.value ? metric.value.toFixed(metric.unit ? 2 : 3) : 'N/A'}${metric.unit}</div>
+                    <div class="metric-target">Target: ${metric.key === 'cls' ? '≤' : '<'} ${metric.target}${metric.unit}</div>
+                    <span class="status ${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>
+                `;
+                
+                metricsEl.appendChild(card);
+            });
+        }
+        
+        function evaluateMetric(value, target, key) {
+            if (!value) return 'warning';
+            
+            const ratio = value / target;
+            
+            if (key === 'cls') {
+                if (value <= target) return 'good';
+                if (value <= target * 2) return 'warning';
+                return 'poor';
+            }
+            
+            if (ratio <= 1) return 'good';
+            if (ratio <= 1.5) return 'warning';
+            return 'poor';
+        }
+        
+        function analyzeAndRecommend(metrics) {
+            const improvements = [];
+            
+            // Response Time Analysis
+            if (metrics.responseTime > NFR_TARGETS.responseTime) {
+                improvements.push({
+                    priority: 'HIGH',
+                    issue: `Response time (${metrics.responseTime.toFixed(0)}ms) exceeds target (${NFR_TARGETS.responseTime}ms)`,
+                    solutions: [
+                        'Enable server-side caching (Redis/Memcached)',
+                        'Optimize database queries with eager loading',
+                        'Implement query result caching',
+                        'Use CDN for static assets',
+                        'Enable OPcache for PHP'
+                    ]
+                });
+            }
+            
+            // LCP Analysis
+            if (metrics.lcp > NFR_TARGETS.lcp || metrics.loadComplete > NFR_TARGETS.lcp) {
+                improvements.push({
+                    priority: 'HIGH',
+                    issue: `LCP (${(metrics.lcp || metrics.loadComplete).toFixed(0)}ms) exceeds target (${NFR_TARGETS.lcp}ms)`,
+                    solutions: [
+                        'Optimize hero images (convert to WebP, responsive sizes)',
+                        'Preload critical resources',
+                        'Lazy load non-critical images',
+                        'Minimize render-blocking CSS/JS',
+                        'Use image CDN with optimization'
+                    ]
+                });
+            }
+            
+            // TTI Analysis
+            if (metrics.tti > NFR_TARGETS.tti) {
+                improvements.push({
+                    priority: 'MEDIUM',
+                    issue: `TTI (${metrics.tti.toFixed(0)}ms) exceeds target (${NFR_TARGETS.tti}ms)`,
+                    solutions: [
+                        'Reduce JavaScript bundle size',
+                        'Code split and lazy load JS modules',
+                        'Defer non-critical JavaScript',
+                        'Minimize main thread work',
+                        'Remove unused JavaScript'
+                    ]
+                });
+            }
+            
+            // CLS Analysis
+            if (metrics.cls > NFR_TARGETS.cls) {
+                improvements.push({
+                    priority: 'MEDIUM',
+                    issue: `CLS (${metrics.cls.toFixed(3)}) exceeds target (${NFR_TARGETS.cls})`,
+                    solutions: [
+                        'Set explicit dimensions for images and videos',
+                        'Reserve space for dynamic content',
+                        'Avoid inserting content above existing content',
+                        'Use CSS transform for animations',
+                        'Preload fonts to avoid FOUT'
+                    ]
+                });
+            }
+            
+            // Display recommendations
+            if (improvements.length > 0) {
+                const improvementsEl = document.getElementById('improvements');
+                const listEl = document.getElementById('improvementsList');
+                
+                listEl.innerHTML = improvements.map(item => `
+                    <li>
+                        <strong style="color: ${item.priority === 'HIGH' ? 'red' : 'orange'}">[${item.priority}]</strong> 
+                        ${item.issue}
+                        <ul>
+                            ${item.solutions.map(solution => `<li>${solution}</li>`).join('')}
+                        </ul>
+                    </li>
+                `).join('');
+                
+                improvementsEl.style.display = 'block';
+            }
+        }
+        
+        async function testMainPage() {
+            log('Testing main page performance...', 'info');
+            
+            const testUrl = 'https://ai-med.co.kr';
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = testUrl;
+            
+            document.body.appendChild(iframe);
+            
+            iframe.onload = function() {
+                log('Main page loaded in iframe', 'success');
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    runTest();
+                }, 1000);
+            };
+        }
+        
+        function clearCache() {
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                        log(`Cleared cache: ${name}`, 'success');
+                    });
+                });
+            }
+            
+            // Clear localStorage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            log('Cache cleared. Reload the page for fresh test.', 'success');
+        }
+        
+        // Auto-run test on load
+        window.addEventListener('load', () => {
+            setTimeout(runTest, 1000);
+        });
+    </script>
+</body>
+</html>
