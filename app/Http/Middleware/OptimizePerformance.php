@@ -34,8 +34,9 @@ class OptimizePerformance
                 $response->headers->set('Cache-Control', 'public, max-age=3600, s-maxage=3600');
             }
             
-            // Enable compression hint
-            $response->headers->set('Content-Encoding', 'gzip');
+            // Note: Content-Encoding should only be set if content is actually compressed
+            // Remove this as it causes encoding errors when content is not gzipped
+            // $response->headers->set('Content-Encoding', 'gzip');
             
             // Preload critical resources
             $preloads = [];
