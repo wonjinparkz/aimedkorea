@@ -1,8 +1,12 @@
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
-            <x-authentication-card-logo />
+            {{-- Logo slot empty - title moved inside card --}}
         </x-slot>
+
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 text-center">로그인</h2>
+        </div>
 
         <x-validation-errors class="mb-4" />
 
@@ -15,33 +19,61 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
+            {{-- Username/Email Input without label --}}
             <div>
-                <x-label for="username" value="{{ __('Username') }}" />
-                <x-input id="username" class="block mt-1 w-full" type="text" name="username" :value="old('username')" required autofocus autocomplete="username" />
+                <input id="username" 
+                       class="block w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400" 
+                       type="text" 
+                       name="username" 
+                       value="{{ old('username') }}" 
+                       placeholder="이메일을 입력해주세요" 
+                       required 
+                       autofocus 
+                       autocomplete="username" />
             </div>
 
+            {{-- Password Input without label --}}
             <div class="mt-4">
-                <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
+                <input id="password" 
+                       class="block w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400" 
+                       type="password" 
+                       name="password" 
+                       placeholder="비밀번호를 입력해주세요" 
+                       required 
+                       autocomplete="current-password" />
             </div>
 
-            <div class="block mt-4">
+            {{-- Remember Me and Forgot Password on same line --}}
+            <div class="flex items-center justify-between mt-4">
                 <label for="remember_me" class="flex items-center">
-                    <x-checkbox id="remember_me" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                    <input id="remember_me" 
+                           type="checkbox" 
+                           class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" 
+                           name="remember">
+                    <span class="ms-2 text-sm text-gray-600">로그인 상태 유지</span>
                 </label>
-            </div>
 
-            <div class="flex items-center justify-end mt-4">
                 @if (Route::has('password.request'))
-                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
+                    <a class="text-sm text-blue-600 hover:text-blue-800 hover:underline" href="{{ route('password.request') }}">
+                        비밀번호 찾기
                     </a>
                 @endif
+            </div>
 
-                <x-button class="ms-4">
-                    {{ __('Log in') }}
-                </x-button>
+            {{-- Login Button --}}
+            <div class="mt-6">
+                <button type="submit" 
+                        class="w-full px-4 py-3 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                    로그인
+                </button>
+            </div>
+
+            {{-- Register Button --}}
+            <div class="mt-3">
+                <a href="{{ route('register') }}" 
+                   class="block w-full px-4 py-3 bg-white border-2 border-blue-600 rounded-md font-semibold text-center text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                    회원가입
+                </a>
             </div>
         </form>
     </x-authentication-card>

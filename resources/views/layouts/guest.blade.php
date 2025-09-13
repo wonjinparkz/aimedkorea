@@ -12,7 +12,11 @@
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-2YV3S6V60E');
+            gtag('config', 'G-2YV3S6V60E', {
+                'cookie_domain': 'auto',
+                'cookie_flags': 'SameSite=None;Secure',
+                'cookie_prefix': 'AIMED_'
+            });
         </script>
 
                 <!-- Google Tag Manager -->
@@ -57,13 +61,12 @@
         @livewireStyles
     </head>
     <body>
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8GJF2QW" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
+        
         <div class="font-sans text-gray-900 antialiased min-h-screen flex flex-col">
-            <main class="flex-grow">
-                {{ $slot }}
-            </main>
-            
-            <!-- Footer -->
-            @livewire('footer')
+            {{ $slot }}
         </div>
 
         @livewireScripts

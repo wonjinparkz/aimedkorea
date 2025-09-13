@@ -174,6 +174,34 @@ class SurveyController extends Controller
         $totalScore = $response->total_score;
         $maxPossibleScore = $answeredQuestions * 4;
         
+        // 현재 언어 가져오기
+        $currentLang = session('locale', 'kor');
+        
+        // 다국어 기본 카테고리명
+        $defaultCategoryNames = [
+            'early' => [
+                'kor' => '초기 증상',
+                'eng' => 'Early Symptoms',
+                'chn' => '早期症状',
+                'hin' => 'प्रारंभिक लक्षण',
+                'arb' => 'الأعراض المبكرة'
+            ],
+            'main' => [
+                'kor' => '주요 증상',
+                'eng' => 'Main Symptoms',
+                'chn' => '主要症状',
+                'hin' => 'मुख्य लक्षण',
+                'arb' => 'الأعراض الرئيسية'
+            ],
+            'advanced' => [
+                'kor' => '심화 증상',
+                'eng' => 'Advanced Symptoms',
+                'chn' => '晚期症状',
+                'hin' => 'उन्नत लक्षण',
+                'arb' => 'الأعراض المتقدمة'
+            ]
+        ];
+        
         // 전체 점수의 백분율 계산 후 역전
         $overallPercentage = $maxPossibleScore > 0 
             ? 100 - round(($totalScore / $maxPossibleScore) * 100) 
@@ -193,7 +221,7 @@ class SurveyController extends Controller
             }
         }
         $categories[] = [
-            'name' => '초기 증상',
+            'name' => $defaultCategoryNames['early'][$currentLang] ?? $defaultCategoryNames['early']['kor'],
             'percentage' => $category1Count > 0 
                 ? 100 - round(($category1Score / ($category1Count * 4)) * 100) 
                 : 100
@@ -209,7 +237,7 @@ class SurveyController extends Controller
             }
         }
         $categories[] = [
-            'name' => '주요 증상',
+            'name' => $defaultCategoryNames['main'][$currentLang] ?? $defaultCategoryNames['main']['kor'],
             'percentage' => $category2Count > 0 
                 ? 100 - round(($category2Score / ($category2Count * 4)) * 100) 
                 : 100
@@ -225,7 +253,7 @@ class SurveyController extends Controller
             }
         }
         $categories[] = [
-            'name' => '종합 상태',
+            'name' => $defaultCategoryNames['advanced'][$currentLang] ?? $defaultCategoryNames['advanced']['kor'],
             'percentage' => $category3Count > 0 
                 ? 100 - round(($category3Score / ($category3Count * 4)) * 100) 
                 : 100

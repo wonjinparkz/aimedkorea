@@ -44,7 +44,8 @@ class SurveyResponse extends Model
     public function getCategoryScores()
     {
         $survey = $this->survey;
-        $categories = $survey->getCategories();
+        $currentLang = session('locale', 'kor');
+        $categories = $survey->getCategories($currentLang);
         $responses = $this->responses_data ?? [];
         
         $categoryScores = [];

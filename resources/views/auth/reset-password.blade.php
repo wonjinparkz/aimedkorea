@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
-            <x-authentication-card-logo />
+            <h2 class="text-3xl font-bold text-gray-900">비밀번호 재설정</h2>
         </x-slot>
 
         <x-validation-errors class="mb-4" />

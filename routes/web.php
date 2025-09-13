@@ -284,6 +284,15 @@ Route::get('/install', function () {
     return view('pwa.install');
 })->name('pwa.install');
 
+// Terms and Policy pages
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms.show');
+
+Route::get('/policy', function () {
+    return view('policy');
+})->name('policy.show');
+
 // TEST ROUTE: Hero translations debug
 Route::get('/test-hero-translations', function () {
     $hero = Hero::first();

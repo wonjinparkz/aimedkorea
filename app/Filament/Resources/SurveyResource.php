@@ -537,9 +537,36 @@ class SurveyResource extends Resource
                         Forms\Components\Repeater::make('question_categories')
                             ->label('카테고리 목록')
                             ->schema([
-                                Forms\Components\TextInput::make('category_name_kor')
-                                    ->label('카테고리명')
-                                    ->required(),
+                                Forms\Components\Tabs::make('Category Names')
+                                    ->tabs([
+                                        Forms\Components\Tabs\Tab::make('한국어')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('category_name_kor')
+                                                    ->label('카테고리명 (한국어)')
+                                                    ->required(),
+                                            ]),
+                                        Forms\Components\Tabs\Tab::make('English')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('category_name_eng')
+                                                    ->label('Category Name (English)'),
+                                            ]),
+                                        Forms\Components\Tabs\Tab::make('中文')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('category_name_chn')
+                                                    ->label('类别名称 (中文)'),
+                                            ]),
+                                        Forms\Components\Tabs\Tab::make('हिन्दी')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('category_name_hin')
+                                                    ->label('श्रेणी का नाम (हिन्दी)'),
+                                            ]),
+                                        Forms\Components\Tabs\Tab::make('العربية')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('category_name_arb')
+                                                    ->label('اسم الفئة (العربية)'),
+                                            ]),
+                                    ])
+                                    ->columnSpanFull(),
                                 Forms\Components\Select::make('question_indices')
                                     ->label('문항 선택')
                                     ->multiple()
@@ -560,7 +587,8 @@ class SurveyResource extends Resource
                                     })
                                     ->reactive()
                                     ->searchable()
-                                    ->preload(),
+                                    ->preload()
+                                    ->columnSpanFull(),
                             ])
                             ->collapsible()
                             ->cloneable()
@@ -600,22 +628,22 @@ class SurveyResource extends Resource
                                                 'result_description' => $desc['result_description_kor'] ?? '',
                                             ],
                                             'eng' => [
-                                                'name' => $category['category_name_kor'] ?? '', // 카테고리명은 한국어만 입력
+                                                'name' => $category['category_name_eng'] ?? '',
                                                 'description' => $desc['category_description_eng'] ?? '',
                                                 'result_description' => $desc['result_description_eng'] ?? '',
                                             ],
                                             'chn' => [
-                                                'name' => $category['category_name_kor'] ?? '', // 카테고리명은 한국어만 입력
+                                                'name' => $category['category_name_chn'] ?? '',
                                                 'description' => $desc['category_description_chn'] ?? '',
                                                 'result_description' => $desc['result_description_chn'] ?? '',
                                             ],
                                             'hin' => [
-                                                'name' => $category['category_name_kor'] ?? '', // 카테고리명은 한국어만 입력
+                                                'name' => $category['category_name_hin'] ?? '',
                                                 'description' => $desc['category_description_hin'] ?? '',
                                                 'result_description' => $desc['result_description_hin'] ?? '',
                                             ],
                                             'arb' => [
-                                                'name' => $category['category_name_kor'] ?? '', // 카테고리명은 한국어만 입력
+                                                'name' => $category['category_name_arb'] ?? '',
                                                 'description' => $desc['category_description_arb'] ?? '',
                                                 'result_description' => $desc['result_description_arb'] ?? '',
                                             ],
@@ -633,11 +661,15 @@ class SurveyResource extends Resource
                                 $savedData = get_option('survey_categories_' . $record->id);
                                 if (!$savedData || !isset($savedData['categories'])) return;
                                 
-                                // 저장된 데이터를 폼 형식으로 변환 (카테고리명과 문항만)
+                                // 저장된 데이터를 폼 형식으로 변환 (다국어 카테고리명과 문항)
                                 $formData = [];
                                 foreach ($savedData['categories'] as $category) {
                                     $formCategory = [
                                         'category_name_kor' => $category['translations']['kor']['name'] ?? $category['name'] ?? '',
+                                        'category_name_eng' => $category['translations']['eng']['name'] ?? '',
+                                        'category_name_chn' => $category['translations']['chn']['name'] ?? '',
+                                        'category_name_hin' => $category['translations']['hin']['name'] ?? '',
+                                        'category_name_arb' => $category['translations']['arb']['name'] ?? '',
                                         'question_indices' => $category['question_indices'] ?? [],
                                     ];
                                     $formData[] = $formCategory;

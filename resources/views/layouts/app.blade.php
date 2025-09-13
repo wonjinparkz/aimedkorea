@@ -15,8 +15,9 @@
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-2YV3S6V60E', {
-                'cookie_domain': 'ai-med.co.kr',
-                'cookie_flags': 'SameSite=None;Secure'
+                'cookie_domain': 'auto',
+                'cookie_flags': 'SameSite=None;Secure',
+                'cookie_prefix': 'AIMED_'
             });
         </script>
 
@@ -127,10 +128,7 @@
         <link rel="preconnect" href="https://img.cafe24.com">
         <link rel="dns-prefetch" href="https://img.cafe24.com">
         
-        {{-- Preload critical resources --}}
-        @if(request()->is('/'))
-        <link rel="preload" as="image" href="/images/hero-1.webp" fetchpriority="high">
-        @endif
+        {{-- Preload critical resources - removed to avoid 404 errors --}}
         
         <!-- Fonts with display swap for better LCP -->
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
@@ -166,16 +164,49 @@
             @media (display-mode: standalone) {
                 /* Custom styles for installed PWA */
             }
+            
+            /* Mobile sticky header and bottom navigation spacing */
+            @media (max-width: 767px) {
+                /* Sticky header on mobile */
+                nav.mobile-sticky {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    z-index: 40;
+                    background-color: white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                /* Add padding to body for fixed header */
+                body.has-mobile-nav {
+                    padding-top: 64px; /* Adjust based on header height */
+                    padding-bottom: 64px; /* Height of bottom navigation */
+                }
+                
+                /* Ensure main content doesn't overlap with fixed elements */
+                .main-content-wrapper {
+                    min-height: calc(100vh - 128px); /* Account for both header and bottom nav */
+                }
+            }
+            
+            /* Desktop - no padding needed */
+            @media (min-width: 768px) {
+                body.has-mobile-nav {
+                    padding-top: 0;
+                    padding-bottom: 0;
+                }
+            }
         </style>
         @stack('styles')
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased has-mobile-nav">
         <!-- Google Tag Manager (noscript) -->
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8GJF2QW" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- End Google Tag Manager (noscript) -->
         <x-banner />
 
-        <div class="min-h-screen flex flex-col">
+        <div class="min-h-screen flex flex-col main-content-wrapper">
             @livewire('navigation-menu')
 
             <!-- Page Heading -->
@@ -196,9 +227,14 @@
                 @endif
             </main>
 
-            <!-- Footer -->
-            @livewire('footer')
+            <!-- Footer (hidden on mobile when bottom nav is visible) -->
+            <div class="hidden md:block">
+                @livewire('footer')
+            </div>
         </div>
+        
+        <!-- Mobile Bottom Navigation -->
+        <x-mobile-navigation />
 
         @stack('modals')
 

@@ -38,18 +38,8 @@ class OptimizePerformance
             // Remove this as it causes encoding errors when content is not gzipped
             // $response->headers->set('Content-Encoding', 'gzip');
             
-            // Preload critical resources
-            $preloads = [];
-            
-            // Preload critical CSS
-            if ($request->is('/')) {
-                $preloads[] = '</build/assets/app.*.css>; rel=preload; as=style';
-                $preloads[] = '</build/assets/app.*.js>; rel=preload; as=script';
-            }
-            
-            if (!empty($preloads)) {
-                $response->headers->set('Link', implode(', ', $preloads));
-            }
+            // Remove incorrect preload headers that use wildcards
+            // Vite handles asset loading optimization automatically
         }
 
         return $response;
