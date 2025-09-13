@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTM Connection Test</title>
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-N8GJF2QW');</script>
+    <!-- End Google Tag Manager -->
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .test-button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .menu-test {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .menu-item:hover {
+            background: #5a6268;
+        }
+        
+        .check-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        
+        .check-item.success {
+            border-color: #28a745;
+        }
+        
+        .check-item.error {
+            border-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8GJF2QW"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    
+    <div class="container">
+        <h1>🔍 GTM Connection Test Page</h1>
+        
+        <div id="gtm-status" class="status warning">
+            GTM 상태 확인 중...
+        </div>
+        
+        <h2>1. GTM 설치 확인</h2>
+        <div id="checks">
+            <div class="check-item" id="check-gtm">GTM 스크립트 로드 확인...</div>
+            <div class="check-item" id="check-datalayer">DataLayer 초기화 확인...</div>
+            <div class="check-item" id="check-container">GTM 컨테이너 ID 확인...</div>
+        </div>
+        
+        <h2>2. 이벤트 테스트</h2>
+        <div>
+            <button class="test-button" onclick="testBasicEvent()">기본 이벤트 발송</button>
+            <button class="test-button" onclick="testMenuClick()">메뉴 클릭 이벤트</button>
+            <button class="test-button" onclick="testCustomEvent()">커스텀 이벤트</button>
+        </div>
+        
+        <h2>3. 메뉴 클릭 시뮬레이션</h2>
+        <div class="menu-test">
+            <a href="#" 
+               class="menu-item"
+               data-gtm-menu-type="main"
+               data-gtm-menu-category="테스트"
+               data-gtm-menu-label="메인 메뉴"
+               data-gtm-menu-position="1"
+               onclick="trackMenuClick(event, this)">
+                메인 메뉴
+            </a>
+            <a href="#" 
+               class="menu-item"
+               data-gtm-menu-type="submenu"
+               data-gtm-menu-category="테스트"
+               data-gtm-menu-label="서브 메뉴"
+               data-gtm-menu-position="2"
+               onclick="trackMenuClick(event, this)">
+                서브 메뉴
+            </a>
+            <a href="#" 
+               class="menu-item"
+               data-gtm-menu-type="footer"
+               data-gtm-menu-category="테스트"
+               data-gtm-menu-label="푸터 메뉴"
+               data-gtm-menu-position="3"
+               onclick="trackMenuClick(event, this)">
+                푸터 메뉴
+            </a>
+        </div>
+        
+        <h2>4. DataLayer 로그</h2>
+        <div id="log" class="log">
+            DataLayer 이벤트가 여기에 표시됩니다...
+        </div>
+        
+        <h2>5. 디버깅 정보</h2>
+        <div id="debug-info" class="log">
+            디버깅 정보 로딩 중...
+        </div>
+    </div>
+    
+    <script>
+        // DataLayer 초기화
+        window.dataLayer = window.dataLayer || [];
+        
+        // 페이지 로드 시 GTM 확인
+        window.addEventListener('load', function() {
+            checkGTMStatus();
+            setupDataLayerMonitor();
+            displayDebugInfo();
+        });
+        
+        function checkGTMStatus() {
+            const statusEl = document.getElementById('gtm-status');
+            const checks = {
+                gtm: false,
+                datalayer: false,
+                container: false
+            };
+            
+            // GTM 스크립트 확인
+            if (typeof google_tag_manager !== 'undefined') {
+                checks.gtm = true;
+                document.getElementById('check-gtm').textContent = '✅ GTM 스크립트 로드됨';
+                document.getElementById('check-gtm').classList.add('success');
+            } else {
+                document.getElementById('check-gtm').textContent = '❌ GTM 스크립트 없음';
+                document.getElementById('check-gtm').classList.add('error');
+            }
+            
+            // DataLayer 확인
+            if (window.dataLayer && Array.isArray(window.dataLayer)) {
+                checks.datalayer = true;
+                document.getElementById('check-datalayer').textContent = '✅ DataLayer 초기화됨 (' + window.dataLayer.length + '개 이벤트)';
+                document.getElementById('check-datalayer').classList.add('success');
+            } else {
+                document.getElementById('check-datalayer').textContent = '❌ DataLayer 없음';
+                document.getElementById('check-datalayer').classList.add('error');
+            }
+            
+            // 컨테이너 ID 확인
+            if (checks.gtm && google_tag_manager['GTM-N8GJF2QW']) {
+                checks.container = true;
+                document.getElementById('check-container').textContent = '✅ GTM-N8GJF2QW 컨테이너 활성';
+                document.getElementById('check-container').classList.add('success');
+            } else {
+                document.getElementById('check-container').textContent = '❌ GTM-N8GJF2QW 컨테이너 없음';
+                document.getElementById('check-container').classList.add('error');
+            }
+            
+            // 전체 상태 업데이트
+            if (checks.gtm && checks.datalayer && checks.container) {
+                statusEl.className = 'status success';
+                statusEl.textContent = '✅ GTM이 정상적으로 작동 중입니다!';
+            } else if (checks.gtm || checks.datalayer) {
+                statusEl.className = 'status warning';
+                statusEl.textContent = '⚠️ GTM이 부분적으로 작동 중입니다.';
+            } else {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ GTM이 설치되지 않았습니다.';
+            }
+        }
+        
+        function setupDataLayerMonitor() {
+            const originalPush = window.dataLayer.push;
+            window.dataLayer.push = function() {
+                const result = originalPush.apply(window.dataLayer, arguments);
+                logEvent(arguments[0]);
+                return result;
+            };
+        }
+        
+        function logEvent(event) {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const eventStr = JSON.stringify(event, null, 2);
+            
+            logEl.innerHTML = `<div style="border-bottom: 1px solid #dee2e6; padding: 10px 0;">
+                <strong>[${timestamp}]</strong>
+                <pre style="margin: 5px 0;">${eventStr}</pre>
+            </div>` + logEl.innerHTML;
+            
+            // 콘솔에도 출력
+            console.log('DataLayer Event:', event);
+        }
+        
+        function testBasicEvent() {
+            window.dataLayer.push({
+                'event': 'test_basic',
+                'test_type': 'basic',
+                'timestamp': new Date().toISOString()
+            });
+            alert('기본 이벤트 발송됨! DataLayer 로그를 확인하세요.');
+        }
+        
+        function testMenuClick() {
+            window.dataLayer.push({
+                'event': 'menu_click',
+                'menuType': 'test',
+                'menuCategory': '테스트 카테고리',
+                'menuLabel': '테스트 메뉴',
+                'menuPosition': '1',
+                'menuURL': window.location.href,
+                'timestamp': new Date().toISOString()
+            });
+            alert('메뉴 클릭 이벤트 발송됨! DataLayer 로그를 확인하세요.');
+        }
+        
+        function testCustomEvent() {
+            const eventName = prompt('이벤트 이름을 입력하세요:', 'custom_event');
+            if (eventName) {
+                window.dataLayer.push({
+                    'event': eventName,
+                    'custom_data': 'test_value',
+                    'timestamp': new Date().toISOString()
+                });
+                alert(eventName + ' 이벤트 발송됨! DataLayer 로그를 확인하세요.');
+            }
+        }
+        
+        function trackMenuClick(event, element) {
+            event.preventDefault();
+            
+            const menuData = {
+                'event': 'menu_click',
+                'menuType': element.getAttribute('data-gtm-menu-type'),
+                'menuCategory': element.getAttribute('data-gtm-menu-category'),
+                'menuLabel': element.getAttribute('data-gtm-menu-label'),
+                'menuPosition': element.getAttribute('data-gtm-menu-position'),
+                'menuURL': element.href,
+                'pageURL': window.location.href,
+                'timestamp': new Date().toISOString()
+            };
+            
+            window.dataLayer.push(menuData);
+            alert('메뉴 클릭 추적됨! DataLayer 로그를 확인하세요.');
+        }
+        
+        function displayDebugInfo() {
+            const debugEl = document.getElementById('debug-info');
+            
+            const debugInfo = {
+                'URL': window.location.href,
+                'Protocol': window.location.protocol,
+                'GTM Container ID': 'GTM-N8GJF2QW',
+                'GTM Loaded': typeof google_tag_manager !== 'undefined',
+                'DataLayer Size': window.dataLayer ? window.dataLayer.length : 0,
+                'Cookies Enabled': navigator.cookieEnabled,
+                'User Agent': navigator.userAgent,
+                'Language': navigator.language,
+                'Screen Resolution': window.screen.width + 'x' + window.screen.height,
+                'Viewport Size': window.innerWidth + 'x' + window.innerHeight
+            };
+            
+            let html = '<table style="width: 100%;">';
+            for (let key in debugInfo) {
+                html += `<tr>
+                    <td style="padding: 5px; font-weight: bold;">${key}:</td>
+                    <td style="padding: 5px;">${debugInfo[key]}</td>
+                </tr>`;
+            }
+            html += '</table>';
+            
+            debugEl.innerHTML = html;
+        }
+        
+        // 초기 pageview 이벤트
+        window.dataLayer.push({
+            'event': 'gtm_test_pageview',
+            'page_title': 'GTM Test Page',
+            'page_location': window.location.href,
+            'timestamp': new Date().toISOString()
+        });
+    </script>
+</body>
+</html>

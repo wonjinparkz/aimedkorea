@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTM 설정 단계별 가이드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step-container {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+        
+        .step-title {
+            flex: 1;
+        }
+        
+        .step-title h2 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .step-title p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .instruction-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+        
+        .highlight {
+            background: #fbbf24;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .warning {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .warning-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 10px;
+        }
+        
+        .success {
+            background: #f0fdf4;
+            border: 2px solid #22c55e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .success-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: #22c55e;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 10px;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .screenshot {
+            width: 100%;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 10px 0;
+            padding-left: 35px;
+            position: relative;
+        }
+        
+        .checklist li:before {
+            content: '☐';
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+            color: #667eea;
+        }
+        
+        .checklist li.done:before {
+            content: '✓';
+            color: #22c55e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Google Tag Manager 설정 가이드</h1>
+            <p>AI-MED Korea 메뉴 클릭 추적을 위한 GTM 설정 단계별 안내</p>
+        </div>
+        
+        <div class="content">
+            <!-- STEP 1: 변수 설정 -->
+            <div class="step-container">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">
+                        <h2>사용자 정의 변수 생성</h2>
+                        <p>메뉴 클릭 데이터를 캡처하기 위한 변수 설정</p>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>1-1. DOM 요소 변수 생성</h3>
+                    <p>GTM 관리 화면 → 변수 → 사용자 정의 변수 → 새로 만들기</p>
+                    
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>변수 이름</th>
+                                    <th>변수 유형</th>
+                                    <th>선택 방법</th>
+                                    <th>속성 이름</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Menu Type</strong></td>
+                                    <td>DOM 요소</td>
+                                    <td>CSS 선택기</td>
+                                    <td>data-gtm-menu-type</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Menu Category</strong></td>
+                                    <td>DOM 요소</td>
+                                    <td>CSS 선택기</td>
+                                    <td>data-gtm-menu-category</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Menu Label</strong></td>
+                                    <td>DOM 요소</td>
+                                    <td>CSS 선택기</td>
+                                    <td>data-gtm-menu-label</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Menu Position</strong></td>
+                                    <td>DOM 요소</td>
+                                    <td>CSS 선택기</td>
+                                    <td>data-gtm-menu-position</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Menu Parent</strong></td>
+                                    <td>DOM 요소</td>
+                                    <td>CSS 선택기</td>
+                                    <td>data-gtm-menu-parent</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="warning">
+                        <span class="warning-icon">!</span>
+                        <strong>중요:</strong> 각 변수의 "요소 선택기" 필드에는 <code>{{Click Element}}</code>를 입력해야 합니다.
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>1-2. 데이터 영역 변수 생성 (Data Layer Variables)</h3>
+                    <p>JavaScript로 푸시되는 이벤트 데이터를 캡처하기 위한 변수</p>
+                    
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>변수 이름</th>
+                                    <th>변수 유형</th>
+                                    <th>데이터 영역 변수 이름</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>DLV - menuType</strong></td>
+                                    <td>데이터 영역 변수</td>
+                                    <td>menuType</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DLV - menuCategory</strong></td>
+                                    <td>데이터 영역 변수</td>
+                                    <td>menuCategory</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DLV - menuLabel</strong></td>
+                                    <td>데이터 영역 변수</td>
+                                    <td>menuLabel</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DLV - menuPosition</strong></td>
+                                    <td>데이터 영역 변수</td>
+                                    <td>menuPosition</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DLV - menuURL</strong></td>
+                                    <td>데이터 영역 변수</td>
+                                    <td>menuURL</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- STEP 2: 트리거 설정 -->
+            <div class="step-container">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">
+                        <h2>트리거 생성</h2>
+                        <p>메뉴 클릭 이벤트를 감지하기 위한 트리거 설정</p>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>2-1. DOM 기반 클릭 트리거</h3>
+                    <p>GTM 관리 화면 → 트리거 → 새로 만들기</p>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">복사</button>
+                        <pre>트리거 이름: Menu Click - DOM Elements
+트리거 유형: 클릭 - 모든 요소
+이 트리거는 다음 경우에 실행: 일부 클릭
+
+실행 조건:
+Click Element → CSS 선택기와 일치 → <span class="highlight">[data-gtm-menu-type]</span></pre>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>2-2. 데이터 레이어 이벤트 트리거</h3>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">복사</button>
+                        <pre>트리거 이름: Menu Click - Data Layer
+트리거 유형: 사용자 정의 이벤트
+이벤트 이름: <span class="highlight">menu_click</span>
+이 트리거는 다음 경우에 실행: 모든 사용자 정의 이벤트</pre>
+                    </div>
+                    
+                    <div class="success">
+                        <span class="success-icon">✓</span>
+                        <strong>팁:</strong> 두 트리거를 모두 생성하면 DOM 속성과 JavaScript 이벤트 모두 추적 가능합니다.
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>2-3. 동적 메뉴용 트리거 (선택사항)</h3>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">복사</button>
+                        <pre>트리거 이름: Menu Click - Dynamic
+트리거 유형: 사용자 정의 이벤트
+이벤트 이름: <span class="highlight">menu_click_dynamic</span>
+이 트리거는 다음 경우에 실행: 모든 사용자 정의 이벤트</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- STEP 3: 태그 설정 -->
+            <div class="step-container">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">
+                        <h2>태그 생성</h2>
+                        <p>Google Analytics 4로 데이터를 전송하기 위한 태그 설정</p>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>3-1. GA4 이벤트 태그 (DOM 기반)</h3>
+                    <p>GTM 관리 화면 → 태그 → 새로 만들기</p>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">복사</button>
+                        <pre>태그 이름: GA4 - Menu Click Event (DOM)
+태그 유형: Google Analytics: GA4 이벤트
+
+구성:
+측정 ID: <span class="highlight">G-2YV3S6V60E</span>
+이벤트 이름: <span class="highlight">menu_click</span>
+
+이벤트 매개변수:
+┌─────────────────┬──────────────────────┐
+│ 매개변수 이름   │ 값                   │
+├─────────────────┼──────────────────────┤
+│ menu_type       │ {{Menu Type}}        │
+│ menu_category   │ {{Menu Category}}    │
+│ menu_label      │ {{Menu Label}}       │
+│ menu_position   │ {{Menu Position}}    │
+│ menu_parent     │ {{Menu Parent}}      │
+│ click_url       │ {{Click URL}}        │
+│ page_location   │ {{Page URL}}         │
+│ page_title      │ {{Page Title}}       │
+└─────────────────┴──────────────────────┘
+
+트리거: Menu Click - DOM Elements</pre>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>3-2. GA4 이벤트 태그 (데이터 레이어 기반)</h3>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">복사</button>
+                        <pre>태그 이름: GA4 - Menu Click Event (DataLayer)
+태그 유형: Google Analytics: GA4 이벤트
+
+구성:
+측정 ID: <span class="highlight">G-2YV3S6V60E</span>
+이벤트 이름: <span class="highlight">menu_click</span>
+
+이벤트 매개변수:
+┌─────────────────┬──────────────────────┐
+│ 매개변수 이름   │ 값                   │
+├─────────────────┼──────────────────────┤
+│ menu_type       │ {{DLV - menuType}}   │
+│ menu_category   │ {{DLV - menuCategory}}│
+│ menu_label      │ {{DLV - menuLabel}}  │
+│ menu_position   │ {{DLV - menuPosition}}│
+│ menu_url        │ {{DLV - menuURL}}    │
+│ page_location   │ {{Page URL}}         │
+│ page_title      │ {{Page Title}}       │
+└─────────────────┴──────────────────────┘
+
+트리거: Menu Click - Data Layer</pre>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>3-3. 디버그용 콘솔 로그 태그 (선택사항)</h3>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">복사</button>
+                        <pre>태그 이름: Debug - Menu Click Console Log
+태그 유형: 맞춤 HTML
+
+HTML:
+&lt;script&gt;
+console.log('🔍 GTM Menu Click Debug:', {
+    'event': 'menu_click',
+    'type': {{Menu Type}} || {{DLV - menuType}},
+    'category': {{Menu Category}} || {{DLV - menuCategory}},
+    'label': {{Menu Label}} || {{DLV - menuLabel}},
+    'position': {{Menu Position}} || {{DLV - menuPosition}},
+    'parent': {{Menu Parent}},
+    'url': {{Click URL}} || {{DLV - menuURL}},
+    'element': {{Click Element}},
+    'timestamp': new Date().toISOString()
+});
+&lt;/script&gt;
+
+트리거: 
+- Menu Click - DOM Elements
+- Menu Click - Data Layer</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- STEP 4: 테스트 -->
+            <div class="step-container">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title">
+                        <h2>테스트 및 검증</h2>
+                        <p>설정이 올바르게 작동하는지 확인</p>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>4-1. GTM 미리보기 모드</h3>
+                    
+                    <ol style="padding-left: 20px;">
+                        <li>GTM 관리 화면 상단의 <strong>"미리보기"</strong> 버튼 클릭</li>
+                        <li>연결할 URL 입력: <code>https://ai-med.co.kr</code></li>
+                        <li>Tag Assistant 창이 열리면 웹사이트에서 메뉴 클릭</li>
+                        <li>Tag Assistant에서 다음 확인:
+                            <ul style="margin-top: 10px;">
+                                <li>✓ "menu_click" 이벤트 발생</li>
+                                <li>✓ 태그 실행 여부</li>
+                                <li>✓ 변수 값이 올바르게 캡처되는지</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>4-2. 브라우저 콘솔 테스트</h3>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">복사</button>
+                        <pre>// 1. dataLayer 확인
+console.log(window.dataLayer);
+
+// 2. 최근 menu_click 이벤트만 필터링
+window.dataLayer.filter(item => item.event === 'menu_click');
+
+// 3. 실시간 모니터링 (콘솔에 붙여넣기)
+(function() {
+    const originalPush = window.dataLayer.push;
+    window.dataLayer.push = function() {
+        const result = originalPush.apply(window.dataLayer, arguments);
+        if (arguments[0].event && arguments[0].event.includes('menu')) {
+            console.log('📊 Menu Event:', arguments[0]);
+        }
+        return result;
+    };
+    console.log('✅ Menu tracking monitor activated!');
+})();</pre>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>4-3. GA4 실시간 보고서</h3>
+                    
+                    <ol style="padding-left: 20px;">
+                        <li>Google Analytics 4 접속</li>
+                        <li>보고서 → 실시간 → 이벤트</li>
+                        <li>"menu_click" 이벤트 확인</li>
+                        <li>이벤트 클릭하여 매개변수 확인:
+                            <ul style="margin-top: 10px;">
+                                <li>menu_type</li>
+                                <li>menu_category</li>
+                                <li>menu_label</li>
+                                <li>menu_position</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    
+                    <div class="warning">
+                        <span class="warning-icon">!</span>
+                        <strong>주의:</strong> GA4 실시간 보고서는 1-2초 지연이 있을 수 있습니다.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- STEP 5: 게시 -->
+            <div class="step-container">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title">
+                        <h2>게시 및 최종 확인</h2>
+                        <p>모든 설정을 라이브로 적용</p>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>5-1. GTM 컨테이너 게시</h3>
+                    
+                    <ol style="padding-left: 20px;">
+                        <li>GTM 관리 화면에서 <strong>"제출"</strong> 버튼 클릭</li>
+                        <li>버전 이름 입력: "메뉴 클릭 추적 구현"</li>
+                        <li>버전 설명 입력:
+                            <div class="code-block">
+                                <pre>- Menu Click 이벤트 추적 추가
+- GA4 menu_click 이벤트 태그 생성
+- DOM 요소 및 데이터 레이어 변수 설정
+- 메인, 서브, 모바일 메뉴 추적 지원</pre>
+                            </div>
+                        </li>
+                        <li><strong>"게시"</strong> 클릭</li>
+                    </ol>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>5-2. 체크리스트</h3>
+                    
+                    <ul class="checklist">
+                        <li>변수 생성 완료 (10개)</li>
+                        <li>트리거 생성 완료 (2-3개)</li>
+                        <li>태그 생성 완료 (2-3개)</li>
+                        <li>미리보기 모드 테스트 완료</li>
+                        <li>GA4 실시간 데이터 확인</li>
+                        <li>컨테이너 게시 완료</li>
+                        <li>라이브 사이트에서 최종 테스트</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 추가 정보 -->
+            <div class="step-container">
+                <div class="step-header">
+                    <div class="step-number">📊</div>
+                    <div class="step-title">
+                        <h2>GA4 보고서 활용</h2>
+                        <p>수집된 데이터를 분석하는 방법</p>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>맞춤 보고서 생성</h3>
+                    
+                    <div class="tabs">
+                        <button class="tab active" onclick="showTab(event, 'exploration')">탐색 보고서</button>
+                        <button class="tab" onclick="showTab(event, 'dashboard')">대시보드</button>
+                        <button class="tab" onclick="showTab(event, 'segments')">세그먼트</button>
+                    </div>
+                    
+                    <div id="exploration" class="tab-content active">
+                        <h4>자유 형식 탐색</h4>
+                        <ol style="padding-left: 20px;">
+                            <li>GA4 → 탐색 → 빈 탐색 만들기</li>
+                            <li>측정기준 추가:
+                                <ul>
+                                    <li>이벤트 이름</li>
+                                    <li>menu_type (맞춤 측정기준)</li>
+                                    <li>menu_category (맞춤 측정기준)</li>
+                                    <li>menu_label (맞춤 측정기준)</li>
+                                </ul>
+                            </li>
+                            <li>측정항목 추가:
+                                <ul>
+                                    <li>이벤트 수</li>
+                                    <li>총 사용자</li>
+                                    <li>세션당 이벤트</li>
+                                </ul>
+                            </li>
+                            <li>필터: 이벤트 이름 = "menu_click"</li>
+                        </ol>
+                    </div>
+                    
+                    <div id="dashboard" class="tab-content">
+                        <h4>맞춤 대시보드</h4>
+                        <p>자주 사용하는 메뉴 분석을 위한 대시보드 구성:</p>
+                        <ul style="padding-left: 20px;">
+                            <li>인기 메뉴 Top 10</li>
+                            <li>메뉴 타입별 클릭 분포</li>
+                            <li>시간대별 메뉴 사용 패턴</li>
+                            <li>디바이스별 메뉴 선호도</li>
+                        </ul>
+                    </div>
+                    
+                    <div id="segments" class="tab-content">
+                        <h4>사용자 세그먼트</h4>
+                        <p>메뉴 사용 패턴에 따른 사용자 그룹:</p>
+                        <ul style="padding-left: 20px;">
+                            <li>자주 방문하는 메뉴별 사용자</li>
+                            <li>메가메뉴 사용자 vs 일반메뉴 사용자</li>
+                            <li>모바일 메뉴 주 사용자</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="success">
+                    <span class="success-icon">✓</span>
+                    <strong>축하합니다!</strong> 이제 메뉴 클릭 추적이 완전히 설정되었습니다.
+                    24-48시간 후부터 GA4에서 상세한 분석이 가능합니다.
+                </div>
+            </div>
+            
+            <!-- 문제 해결 -->
+            <div class="step-container">
+                <div class="step-header">
+                    <div class="step-number">🔧</div>
+                    <div class="step-title">
+                        <h2>문제 해결</h2>
+                        <p>자주 발생하는 문제와 해결 방법</p>
+                    </div>
+                </div>
+                
+                <div class="instruction-box">
+                    <h3>일반적인 문제</h3>
+                    
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>문제</th>
+                                    <th>원인</th>
+                                    <th>해결 방법</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>이벤트가 전혀 발생하지 않음</td>
+                                    <td>GTM 컨테이너 미설치</td>
+                                    <td>페이지 소스에서 GTM 스니펫 확인</td>
+                                </tr>
+                                <tr>
+                                    <td>변수 값이 undefined</td>
+                                    <td>CSS 선택기 오류</td>
+                                    <td>요소 선택기에 {{Click Element}} 입력 확인</td>
+                                </tr>
+                                <tr>
+                                    <td>태그가 실행되지 않음</td>
+                                    <td>트리거 조건 불일치</td>
+                                    <td>미리보기 모드에서 트리거 조건 확인</td>
+                                </tr>
+                                <tr>
+                                    <td>GA4에서 이벤트가 안 보임</td>
+                                    <td>측정 ID 오류</td>
+                                    <td>G-2YV3S6V60E 확인</td>
+                                </tr>
+                                <tr>
+                                    <td>중복 이벤트 발생</td>
+                                    <td>여러 태그 동시 실행</td>
+                                    <td>태그 우선순위 설정 또는 트리거 조건 수정</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✓ 복사됨';
+                button.style.background = '#22c55e';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            });
+        }
+        
+        function showTab(event, tabId) {
+            // 모든 탭 비활성화
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 모든 탭 콘텐츠 숨기기
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 선택된 탭 활성화
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+        
+        // 체크리스트 클릭 이벤트
+        document.querySelectorAll('.checklist li').forEach(item => {
+            item.addEventListener('click', function() {
+                this.classList.toggle('done');
+            });
+        });
+    </script>
+</body>
+</html>

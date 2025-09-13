@@ -15,6 +15,35 @@
             gtag('config', 'G-2YV3S6V60E');
         </script>
 
+                <!-- Google Tag Manager -->
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-N8GJF2QW');</script>
+        <!-- End Google Tag Manager -->
+        
+        {{-- GTM DataLayer 초기화 (GTM 로드 전에 실행) --}}
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            // GTM Preview Helper
+            (function() {
+                var gtmPreviewCookie = document.cookie.match(/gtm_preview=([^;]+)/);
+                var gtmDebugCookie = document.cookie.match(/gtm_debug=([^;]+)/);
+                if (gtmPreviewCookie || gtmDebugCookie || window.location.search.includes('gtm_')) {
+                    console.log('GTM Preview/Debug Mode Active');
+                    window.dataLayer.push({
+                        'event': 'gtm.dom',
+                        'gtm.element': document,
+                        'gtm.elementClasses': '',
+                        'gtm.elementId': '',
+                        'gtm.elementTarget': '',
+                        'gtm.elementUrl': window.location.href
+                    });
+                }
+            })();
+        </script>
+
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->

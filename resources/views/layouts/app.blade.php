@@ -8,8 +8,6 @@
         {{-- Additional Meta Tags --}}
         @stack('meta')
 
-        {{-- Google Analytics 4 --}}
-        @if(config('app.env') === 'production' && parse_url(config('app.url'), PHP_URL_HOST) === request()->getHost())
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-2YV3S6V60E"></script>
         <script>
@@ -21,7 +19,35 @@
                 'cookie_flags': 'SameSite=None;Secure'
             });
         </script>
-        @endif
+
+        <!-- Google Tag Manager -->
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-N8GJF2QW');</script>
+        <!-- End Google Tag Manager -->
+        
+        {{-- GTM DataLayer 초기화 (GTM 로드 전에 실행) --}}
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            // GTM Preview Helper
+            (function() {
+                var gtmPreviewCookie = document.cookie.match(/gtm_preview=([^;]+)/);
+                var gtmDebugCookie = document.cookie.match(/gtm_debug=([^;]+)/);
+                if (gtmPreviewCookie || gtmDebugCookie || window.location.search.includes('gtm_')) {
+                    console.log('GTM Preview/Debug Mode Active');
+                    window.dataLayer.push({
+                        'event': 'gtm.dom',
+                        'gtm.element': document,
+                        'gtm.elementClasses': '',
+                        'gtm.elementId': '',
+                        'gtm.elementTarget': '',
+                        'gtm.elementUrl': window.location.href
+                    });
+                }
+            })();
+        </script>
 
         {{-- PWA Meta Tags --}}
         <meta name="theme-color" content="#1e40af">
@@ -132,6 +158,9 @@
         @stack('styles')
     </head>
     <body class="font-sans antialiased">
+        <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8GJF2QW" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- End Google Tag Manager (noscript) -->
         <x-banner />
 
         <div class="min-h-screen flex flex-col">
@@ -165,6 +194,95 @@
         
         {{-- PWA Registration Script --}}
         <script src="{{ asset('js/pwa/register.js') }}?v=2025-01-12-v2" defer></script>
+        
+        {{-- GTM Menu Click Tracking --}}
+        @if(config('app.env') === 'production')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // GTM 메뉴 클릭 추적 초기화
+                function initMenuTracking() {
+                    // 데이터 속성이 있는 모든 메뉴 항목 선택
+                    const menuItems = document.querySelectorAll('[data-gtm-menu-type]');
+                    
+                    menuItems.forEach(function(item) {
+                        item.addEventListener('click', function(e) {
+                            // GTM dataLayer가 존재하는지 확인
+                            if (typeof window.dataLayer === 'undefined') {
+                                window.dataLayer = [];
+                            }
+                            
+                            // 클릭된 요소의 데이터 속성 읽기
+                            const menuData = {
+                                'event': 'menu_click',
+                                'menuType': this.getAttribute('data-gtm-menu-type'),
+                                'menuCategory': this.getAttribute('data-gtm-menu-category'),
+                                'menuLabel': this.getAttribute('data-gtm-menu-label'),
+                                'menuPosition': this.getAttribute('data-gtm-menu-position'),
+                                'menuParent': this.getAttribute('data-gtm-menu-parent') || null,
+                                'menuURL': this.href || this.getAttribute('data-gtm-menu-url'),
+                                'pageURL': window.location.href,
+                                'pageTitle': document.title,
+                                'timestamp': new Date().toISOString(),
+                                'userAgent': navigator.userAgent,
+                                'screenResolution': window.screen.width + 'x' + window.screen.height,
+                                'viewportSize': window.innerWidth + 'x' + window.innerHeight
+                            };
+                            
+                            // dataLayer에 이벤트 푸시
+                            window.dataLayer.push(menuData);
+                            
+                            // 디버그 모드 (URL에 ?debug=gtm 포함 시)
+                            if (window.location.search.includes('debug=gtm')) {
+                                console.log('GTM Menu Click Event:', menuData);
+                            }
+                        });
+                    });
+                    
+                    // 동적으로 추가되는 메뉴를 위한 이벤트 위임
+                    document.addEventListener('click', function(e) {
+                        const menuItem = e.target.closest('[data-gtm-menu-type]');
+                        
+                        if (menuItem && !menuItem.hasAttribute('data-gtm-initialized')) {
+                            // 이미 초기화된 항목은 제외
+                            menuItem.setAttribute('data-gtm-initialized', 'true');
+                            
+                            const menuData = {
+                                'event': 'menu_click_dynamic',
+                                'menuType': menuItem.getAttribute('data-gtm-menu-type'),
+                                'menuCategory': menuItem.getAttribute('data-gtm-menu-category'),
+                                'menuLabel': menuItem.getAttribute('data-gtm-menu-label'),
+                                'menuPosition': menuItem.getAttribute('data-gtm-menu-position'),
+                                'menuParent': menuItem.getAttribute('data-gtm-menu-parent') || null,
+                                'menuURL': menuItem.href || menuItem.getAttribute('data-gtm-menu-url'),
+                                'isDynamic': true
+                            };
+                            
+                            window.dataLayer = window.dataLayer || [];
+                            window.dataLayer.push(menuData);
+                        }
+                    });
+                }
+                
+                // 초기화 실행
+                initMenuTracking();
+                
+                // Alpine.js와의 통합을 위한 전역 함수
+                window.trackGTMMenuClick = function(menuType, category, label, position, url, parent) {
+                    window.dataLayer = window.dataLayer || [];
+                    window.dataLayer.push({
+                        'event': 'menu_click_alpine',
+                        'menuType': menuType,
+                        'menuCategory': category,
+                        'menuLabel': label,
+                        'menuPosition': position,
+                        'menuParent': parent || null,
+                        'menuURL': url,
+                        'source': 'alpine'
+                    });
+                };
+            });
+        </script>
+        @endif
         
         @stack('scripts')
     </body>

@@ -1,4 +1,47 @@
 <x-app-layout>
+    @push('scripts')
+    <script>
+        // GTM Preview Mode Helper for Main Page
+        (function() {
+            // Force GTM initialization
+            window.dataLayer = window.dataLayer || [];
+            
+            // Check for GTM preview parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const gtmPreview = urlParams.get('gtm_preview');
+            const gtmCookies = urlParams.get('gtm_cookies_win');
+            
+            if (gtmPreview || gtmCookies) {
+                console.log('GTM Preview Mode Detected');
+                // Set preview cookie
+                document.cookie = 'gtm_preview=' + (gtmPreview || 'GTM-N8GJF2QW') + '; path=/; secure; samesite=none';
+                document.cookie = 'gtm_debug=x; path=/; secure; samesite=none';
+            }
+            
+            // Push initial event
+            window.dataLayer.push({
+                'event': 'gtm.init',
+                'gtm.uniqueEventId': Date.now(),
+                'page_type': 'homepage',
+                'page_language': '{{ app()->getLocale() }}'
+            });
+            
+            // Debug GTM status
+            window.addEventListener('load', function() {
+                if (typeof google_tag_manager !== 'undefined') {
+                    console.log('✅ GTM Loaded on Homepage');
+                    console.log('Container: GTM-N8GJF2QW');
+                    if (google_tag_manager['GTM-N8GJF2QW']) {
+                        console.log('✅ Container Active');
+                    }
+                } else {
+                    console.log('❌ GTM Not Loaded');
+                }
+            });
+        })();
+    </script>
+    @endpush
+    
         <div class="relative min-h-screen">
             <!-- Hero Slider Section -->
             <x-hero-slider :heroes="$heroes" />

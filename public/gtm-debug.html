@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTM Debug - Preview Connection Fix</title>
+    
+    <!-- Google Tag Manager - 프로덕션 환경 강제 적용 -->
+    <script>
+        // GTM Preview 모드를 위한 쿠키 및 파라미터 체크
+        console.log('🔍 GTM Debug Mode Active');
+        
+        // DataLayer 초기화 (GTM 로드 전에 실행)
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            'event': 'gtm.init',
+            'gtm.start': new Date().getTime()
+        });
+    </script>
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-N8GJF2QW');</script>
+    <!-- End Google Tag Manager -->
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .status-card {
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s;
+        }
+        
+        .status-card.success {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        
+        .status-card.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .status-card.warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        
+        .status-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+        
+        .btn.success {
+            background: #28a745;
+        }
+        
+        .btn.warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .console-line {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid transparent;
+        }
+        
+        .console-line.info {
+            border-color: #007bff;
+        }
+        
+        .console-line.success {
+            border-color: #28a745;
+            color: #72d572;
+        }
+        
+        .console-line.error {
+            border-color: #dc3545;
+            color: #ff6b6b;
+        }
+        
+        .console-line.warning {
+            border-color: #ffc107;
+            color: #ffd93d;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .instructions h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 10px 0;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #d63384;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8GJF2QW"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    
+    <div class="container">
+        <h1>🔧 GTM Preview Connection Debugger</h1>
+        <p class="subtitle">GTM-N8GJF2QW 컨테이너 연결 문제 해결</p>
+        
+        <div class="status-grid">
+            <div class="status-card" id="status-gtm">
+                <div class="icon">📦</div>
+                <h3>GTM 스크립트</h3>
+                <p>확인 중...</p>
+            </div>
+            
+            <div class="status-card" id="status-container">
+                <div class="icon">🏷️</div>
+                <h3>컨테이너 ID</h3>
+                <p>GTM-N8GJF2QW</p>
+            </div>
+            
+            <div class="status-card" id="status-datalayer">
+                <div class="icon">📊</div>
+                <h3>DataLayer</h3>
+                <p>확인 중...</p>
+            </div>
+            
+            <div class="status-card" id="status-preview">
+                <div class="icon">👁️</div>
+                <h3>Preview Mode</h3>
+                <p>확인 중...</p>
+            </div>
+            
+            <div class="status-card" id="status-cookies">
+                <div class="icon">🍪</div>
+                <h3>쿠키 상태</h3>
+                <p>확인 중...</p>
+            </div>
+            
+            <div class="status-card" id="status-network">
+                <div class="icon">🌐</div>
+                <h3>네트워크</h3>
+                <p>확인 중...</p>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 GTM Preview 연결 방법</h3>
+            <ol>
+                <li><strong>이 페이지를 먼저 열어두세요</strong> (https://ai-med.co.kr/gtm-debug.html)</li>
+                <li>GTM 관리 화면에서 <strong>"미리보기"</strong> 버튼 클릭</li>
+                <li>연결할 URL에 <code>https://ai-med.co.kr/gtm-debug.html</code> 입력</li>
+                <li>새 탭이 열리면 <strong>"연결"</strong> 버튼 클릭</li>
+                <li>아래 <strong>"Preview 모드 활성화"</strong> 버튼을 클릭</li>
+            </ol>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn" onclick="checkAllSystems()">🔍 전체 시스템 점검</button>
+            <button class="btn success" onclick="activatePreviewMode()">👁️ Preview 모드 활성화</button>
+            <button class="btn warning" onclick="clearGTMCache()">🗑️ GTM 캐시 정리</button>
+            <button class="btn" onclick="sendTestEvent()">📤 테스트 이벤트 발송</button>
+            <button class="btn" onclick="window.location.reload()">🔄 페이지 새로고침</button>
+        </div>
+        
+        <h2>📊 실시간 로그</h2>
+        <div class="console" id="console">
+            <div class="console-line info">🚀 GTM Debug Console 시작...</div>
+        </div>
+        
+        <h2>🔧 문제 해결</h2>
+        <div class="button-group">
+            <button class="btn" onclick="fixSSLIssue()">🔒 SSL/HTTPS 문제 해결</button>
+            <button class="btn" onclick="fixCORSIssue()">🌐 CORS 문제 해결</button>
+            <button class="btn" onclick="fixTimeoutIssue()">⏱️ 타임아웃 문제 해결</button>
+            <button class="btn" onclick="showDetailedInfo()">📋 상세 정보 보기</button>
+        </div>
+    </div>
+    
+    <script>
+        // 콘솔 로깅 함수
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.innerHTML = `[${timestamp}] ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+            
+            // 실제 콘솔에도 출력
+            window.console.log(`[GTM Debug] ${message}`);
+        }
+        
+        // 시스템 체크
+        function checkAllSystems() {
+            log('🔍 전체 시스템 점검 시작...', 'info');
+            
+            // GTM 스크립트 체크
+            const gtmLoaded = typeof google_tag_manager !== 'undefined';
+            const statusGtm = document.getElementById('status-gtm');
+            if (gtmLoaded) {
+                statusGtm.className = 'status-card success';
+                statusGtm.querySelector('p').textContent = '✅ 로드됨';
+                log('✅ GTM 스크립트 정상 로드', 'success');
+            } else {
+                statusGtm.className = 'status-card error';
+                statusGtm.querySelector('p').textContent = '❌ 로드 실패';
+                log('❌ GTM 스크립트 로드 실패', 'error');
+            }
+            
+            // 컨테이너 체크
+            const containerExists = gtmLoaded && google_tag_manager['GTM-N8GJF2QW'];
+            const statusContainer = document.getElementById('status-container');
+            if (containerExists) {
+                statusContainer.className = 'status-card success';
+                log('✅ GTM-N8GJF2QW 컨테이너 활성', 'success');
+            } else {
+                statusContainer.className = 'status-card warning';
+                log('⚠️ GTM-N8GJF2QW 컨테이너 확인 필요', 'warning');
+            }
+            
+            // DataLayer 체크
+            const dataLayerExists = window.dataLayer && Array.isArray(window.dataLayer);
+            const statusDataLayer = document.getElementById('status-datalayer');
+            if (dataLayerExists) {
+                statusDataLayer.className = 'status-card success';
+                statusDataLayer.querySelector('p').textContent = `✅ ${window.dataLayer.length}개 이벤트`;
+                log(`✅ DataLayer 활성 (${window.dataLayer.length}개 이벤트)`, 'success');
+            } else {
+                statusDataLayer.className = 'status-card error';
+                statusDataLayer.querySelector('p').textContent = '❌ 초기화 실패';
+                log('❌ DataLayer 초기화 실패', 'error');
+            }
+            
+            // Preview 모드 체크
+            const previewCookie = document.cookie.includes('gtm_preview');
+            const previewParam = window.location.search.includes('gtm_preview');
+            const statusPreview = document.getElementById('status-preview');
+            if (previewCookie || previewParam) {
+                statusPreview.className = 'status-card success';
+                statusPreview.querySelector('p').textContent = '✅ 활성';
+                log('✅ Preview 모드 활성', 'success');
+            } else {
+                statusPreview.className = 'status-card warning';
+                statusPreview.querySelector('p').textContent = '⚠️ 비활성';
+                log('⚠️ Preview 모드 비활성', 'warning');
+            }
+            
+            // 쿠키 체크
+            const cookiesEnabled = navigator.cookieEnabled;
+            const statusCookies = document.getElementById('status-cookies');
+            if (cookiesEnabled) {
+                statusCookies.className = 'status-card success';
+                statusCookies.querySelector('p').textContent = '✅ 활성';
+                log('✅ 쿠키 활성화됨', 'success');
+            } else {
+                statusCookies.className = 'status-card error';
+                statusCookies.querySelector('p').textContent = '❌ 비활성';
+                log('❌ 쿠키 비활성화됨', 'error');
+            }
+            
+            // 네트워크 체크
+            const isHTTPS = window.location.protocol === 'https:';
+            const statusNetwork = document.getElementById('status-network');
+            if (isHTTPS) {
+                statusNetwork.className = 'status-card success';
+                statusNetwork.querySelector('p').textContent = '✅ HTTPS';
+                log('✅ HTTPS 연결', 'success');
+            } else {
+                statusNetwork.className = 'status-card warning';
+                statusNetwork.querySelector('p').textContent = '⚠️ HTTP';
+                log('⚠️ HTTP 연결 (HTTPS 권장)', 'warning');
+            }
+            
+            log('🏁 시스템 점검 완료', 'info');
+        }
+        
+        // Preview 모드 활성화
+        function activatePreviewMode() {
+            log('👁️ Preview 모드 활성화 시도...', 'info');
+            
+            // GTM Preview 쿠키 설정
+            document.cookie = 'gtm_preview=true; path=/; secure; samesite=none';
+            document.cookie = 'gtm_debug=x; path=/; secure; samesite=none';
+            
+            // DataLayer에 디버그 이벤트 추가
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                'event': 'gtm.dom',
+                'gtm.debug': true,
+                'gtm.preview': 'GTM-N8GJF2QW'
+            });
+            
+            log('✅ Preview 모드 쿠키 설정 완료', 'success');
+            log('✅ 디버그 이벤트 발송 완료', 'success');
+            
+            // URL 파라미터 추가
+            if (!window.location.search.includes('gtm_preview')) {
+                const newUrl = window.location.href + (window.location.search ? '&' : '?') + 
+                              'gtm_preview=GTM-N8GJF2QW&gtm_cookies_win=x';
+                log(`🔄 URL 파라미터 추가: ${newUrl}`, 'info');
+                
+                setTimeout(() => {
+                    window.location.href = newUrl;
+                }, 1000);
+            }
+        }
+        
+        // GTM 캐시 정리
+        function clearGTMCache() {
+            log('🗑️ GTM 캐시 정리 시작...', 'info');
+            
+            // 쿠키 정리
+            document.cookie.split(";").forEach(function(c) { 
+                if(c.includes('gtm') || c.includes('_ga')) {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + 
+                                     new Date().toUTCString() + ";path=/");
+                }
+            });
+            
+            // SessionStorage 정리
+            Object.keys(sessionStorage).forEach(key => {
+                if(key.includes('gtm') || key.includes('ga')) {
+                    sessionStorage.removeItem(key);
+                }
+            });
+            
+            // LocalStorage 정리
+            Object.keys(localStorage).forEach(key => {
+                if(key.includes('gtm') || key.includes('ga')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            
+            log('✅ 캐시 정리 완료', 'success');
+            log('🔄 페이지를 새로고침하세요', 'warning');
+        }
+        
+        // 테스트 이벤트 발송
+        function sendTestEvent() {
+            log('📤 테스트 이벤트 발송...', 'info');
+            
+            const testEvent = {
+                'event': 'gtm_debug_test',
+                'test_id': Date.now(),
+                'test_type': 'debug_connection',
+                'container_id': 'GTM-N8GJF2QW',
+                'timestamp': new Date().toISOString(),
+                'url': window.location.href,
+                'user_agent': navigator.userAgent
+            };
+            
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push(testEvent);
+            
+            log('✅ 테스트 이벤트 발송 완료: ' + JSON.stringify(testEvent), 'success');
+        }
+        
+        // SSL 문제 해결
+        function fixSSLIssue() {
+            log('🔒 SSL/HTTPS 문제 확인...', 'info');
+            
+            if (window.location.protocol !== 'https:') {
+                log('⚠️ HTTP로 접속 중. HTTPS로 리다이렉트합니다...', 'warning');
+                window.location.protocol = 'https:';
+            } else {
+                log('✅ HTTPS 연결 확인됨', 'success');
+            }
+        }
+        
+        // CORS 문제 해결
+        function fixCORSIssue() {
+            log('🌐 CORS 설정 확인...', 'info');
+            
+            // Test GTM endpoint
+            fetch('https://www.googletagmanager.com/gtm.js?id=GTM-N8GJF2QW', {
+                mode: 'no-cors'
+            }).then(() => {
+                log('✅ GTM 엔드포인트 접근 가능', 'success');
+            }).catch(error => {
+                log('❌ GTM 엔드포인트 접근 실패: ' + error.message, 'error');
+            });
+        }
+        
+        // 타임아웃 문제 해결
+        function fixTimeoutIssue() {
+            log('⏱️ 연결 타임아웃 테스트...', 'info');
+            
+            const startTime = Date.now();
+            const img = new Image();
+            img.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-N8GJF2QW&t=' + Date.now();
+            
+            img.onload = function() {
+                const loadTime = Date.now() - startTime;
+                log(`✅ GTM 응답 시간: ${loadTime}ms`, 'success');
+            };
+            
+            img.onerror = function() {
+                log('❌ GTM 서버 응답 없음', 'error');
+            };
+            
+            setTimeout(() => {
+                if (Date.now() - startTime > 5000) {
+                    log('⚠️ 연결 타임아웃 (5초 초과)', 'warning');
+                }
+            }, 5000);
+        }
+        
+        // 상세 정보 표시
+        function showDetailedInfo() {
+            log('📋 상세 정보 수집...', 'info');
+            
+            const info = {
+                'Browser': navigator.userAgent,
+                'Cookies Enabled': navigator.cookieEnabled,
+                'Online Status': navigator.onLine,
+                'Protocol': window.location.protocol,
+                'Host': window.location.host,
+                'Pathname': window.location.pathname,
+                'GTM Status': typeof google_tag_manager !== 'undefined' ? 'Loaded' : 'Not Loaded',
+                'DataLayer Length': window.dataLayer ? window.dataLayer.length : 0,
+                'Preview Cookie': document.cookie.includes('gtm_preview'),
+                'Debug Cookie': document.cookie.includes('gtm_debug'),
+                'Container Active': typeof google_tag_manager !== 'undefined' && 
+                                  google_tag_manager['GTM-N8GJF2QW'] ? 'Yes' : 'No'
+            };
+            
+            for (let key in info) {
+                log(`${key}: ${info[key]}`, 'info');
+            }
+        }
+        
+        // DataLayer 모니터링
+        function monitorDataLayer() {
+            if (window.dataLayer && window.dataLayer.push) {
+                const originalPush = window.dataLayer.push;
+                window.dataLayer.push = function() {
+                    const result = originalPush.apply(window.dataLayer, arguments);
+                    if (arguments[0] && arguments[0].event) {
+                        log(`📊 DataLayer 이벤트: ${arguments[0].event}`, 'success');
+                    }
+                    return result;
+                };
+            }
+        }
+        
+        // 페이지 로드 시 자동 실행
+        window.addEventListener('load', function() {
+            log('🚀 페이지 로드 완료', 'info');
+            checkAllSystems();
+            monitorDataLayer();
+            
+            // GTM이 늦게 로드되는 경우를 위한 재확인
+            setTimeout(checkAllSystems, 2000);
+        });
+        
+        // GTM 로드 이벤트 감지
+        window.addEventListener('gtm.load', function() {
+            log('🎉 GTM 로드 이벤트 감지!', 'success');
+        });
+    </script>
+</body>
+</html>
