@@ -259,16 +259,30 @@
                                             'hin' => ['simple' => 'सरल विश्लेषण', 'detailed' => 'विस्तृत विश्लेषण'],
                                             'arb' => ['simple' => 'تحليل بسيط', 'detailed' => 'تحليل مفصل']
                                         ];
+                                        $loginRequiredMsg = [
+                                            'kor' => '로그인이 필요한 서비스입니다',
+                                            'eng' => 'Login required for this service',
+                                            'chn' => '此服务需要登录',
+                                            'hin' => 'इस सेवा के लिए लॉगिन आवश्यक है',
+                                            'arb' => 'تسجيل الدخول مطلوب لهذه الخدمة'
+                                        ];
                                     @endphp
                                     <button @click="showQuestions = true; analysisType = 'simple'; loadSavedData();" 
                                            class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50">
                                         {{ $buttonLabels[$currentLang]['simple'] ?? $buttonLabels['kor']['simple'] }}
                                     </button>
                                     
-                                    <button @click="showQuestions = true; analysisType = 'detailed'; loadSavedData();" 
-                                           class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
-                                        {{ $buttonLabels[$currentLang]['detailed'] ?? $buttonLabels['kor']['detailed'] }}
-                                    </button>
+                                    @guest
+                                        <button @click="alert('{{ $loginRequiredMsg[$currentLang] ?? $loginRequiredMsg['kor'] }}'); window.location.href='{{ route('login') }}';" 
+                                               class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
+                                            {{ $buttonLabels[$currentLang]['detailed'] ?? $buttonLabels['kor']['detailed'] }}
+                                        </button>
+                                    @else
+                                        <button @click="showQuestions = true; analysisType = 'detailed'; loadSavedData();" 
+                                               class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
+                                            {{ $buttonLabels[$currentLang]['detailed'] ?? $buttonLabels['kor']['detailed'] }}
+                                        </button>
+                                    @endguest
                                 </div>
                             </div>
                         </template>
