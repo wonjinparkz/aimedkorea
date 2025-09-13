@@ -16,10 +16,13 @@ Route::get('/', function () {
     $data = Cache::remember($cacheKey, 1800, function () use ($currentLang) {
         // Optimize Hero query - only select needed columns
         $heroes = Hero::active()
-            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb', 
-                    'subtitle', 'subtitle_eng', 'subtitle_chn', 'subtitle_hin', 'subtitle_arb',
-                    'image', 'link', 'button_text', 'button_text_eng', 'button_text_chn', 
-                    'button_text_hin', 'button_text_arb', 'button_post_id', 'order', 'is_active')
+            ->select('id', 'title', 'title_translations', 
+                    'subtitle', 'subtitle_translations',
+                    'description', 'description_translations',
+                    'button_text', 'button_text_translations', 
+                    'button_url', 'button_post_id', 
+                    'background_image', 'background_video', 'background_type',
+                    'hero_settings', 'order', 'is_active')
             ->with(['buttonPost' => function($query) {
                 $query->select('id', 'title', 'slug', 'type');
             }])
@@ -27,35 +30,27 @@ Route::get('/', function () {
         
         // Optimize Post queries - select only necessary columns
         $featuredPost = Post::where('type', 'featured')
-            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb',
-                    'slug', 'excerpt', 'excerpt_eng', 'excerpt_chn', 'excerpt_hin', 'excerpt_arb',
-                    'image', 'type', 'created_at')
+            ->select('id', 'title', 'slug', 'summary', 'image', 'type', 'language', 'created_at')
             ->inLanguage($currentLang)
             ->latest()
             ->first();
         
         $routinePosts = Post::where('type', 'routine')
-            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb',
-                    'slug', 'excerpt', 'excerpt_eng', 'excerpt_chn', 'excerpt_hin', 'excerpt_arb',
-                    'image', 'type', 'created_at')
+            ->select('id', 'title', 'slug', 'summary', 'image', 'type', 'language', 'created_at')
             ->inLanguage($currentLang)
             ->latest()
             ->take(3)
             ->get();
         
         $blogPosts = Post::where('type', 'blog')
-            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb',
-                    'slug', 'excerpt', 'excerpt_eng', 'excerpt_chn', 'excerpt_hin', 'excerpt_arb',
-                    'image', 'type', 'created_at')
+            ->select('id', 'title', 'slug', 'summary', 'image', 'type', 'language', 'created_at')
             ->inLanguage($currentLang)
             ->latest()
             ->take(3)
             ->get();
         
         $tabPosts = Post::where('type', 'tab')
-            ->select('id', 'title', 'title_eng', 'title_chn', 'title_hin', 'title_arb',
-                    'slug', 'excerpt', 'excerpt_eng', 'excerpt_chn', 'excerpt_hin', 'excerpt_arb',
-                    'image', 'type', 'created_at')
+            ->select('id', 'title', 'slug', 'summary', 'image', 'type', 'language', 'created_at')
             ->inLanguage($currentLang)
             ->orderBy('created_at', 'desc')
             ->limit(10)  // Limit tab posts to prevent loading too many
