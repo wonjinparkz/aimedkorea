@@ -174,7 +174,7 @@
                     @else
                         <div class="text-center py-8 text-gray-500">
                             <p>아직 완료한 설문이 없습니다.</p>
-                            <p class="text-sm mt-2">자가 진단을 시작하여 회복 점수를 확인해보세요.</p>
+                            <p class="text-sm mt-2">셀프 체크를 시작하여 웰니스 점수를 확인해보세요.</p>
                         </div>
                     @endif
                 </div>
@@ -242,7 +242,7 @@
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    새로운 진단 시작
+                    새로운 체크 시작
                 </a>
                 
                 <a href="{{ route('recovery.history') }}" 
@@ -250,7 +250,7 @@
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    진단 이력 보기
+                    체크 이력 보기
                 </a>
                 
                 <button onclick="window.print()" 

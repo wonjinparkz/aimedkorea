@@ -4,16 +4,16 @@
             <!-- 헤더 -->
             <div class="text-center mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-green-600 mb-3">
-                    진단 이력
+                    체크 이력
                 </h1>
-                <p class="text-xl text-gray-600">{{ Auth::user()->name }}님의 모든 자가 진단 기록입니다</p>
+                <p class="text-xl text-gray-600">{{ Auth::user()->name }}님의 모든 셀프 체크 기록입니다</p>
             </div>
 
             <!-- 이력 테이블 -->
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-800">진단 이력 목록</h2>
+                        <h2 class="text-xl font-bold text-gray-800">체크 이력 목록</h2>
                         <a href="{{ route('recovery.dashboard') }}" 
                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,15 +140,15 @@
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">진단 이력이 없습니다</h3>
-                            <p class="mt-1 text-sm text-gray-500">자가 진단을 시작하여 첫 기록을 만들어보세요.</p>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">체크 이력이 없습니다</h3>
+                            <p class="mt-1 text-sm text-gray-500">셀프 체크를 시작하여 첫 기록을 만들어보세요.</p>
                             <div class="mt-6">
                                 <a href="{{ route('surveys.index') }}" 
                                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                     </svg>
-                                    진단 시작하기
+                                    체크 시작하기
                                 </a>
                             </div>
                         </div>

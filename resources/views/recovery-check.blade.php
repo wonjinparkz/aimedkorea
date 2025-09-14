@@ -4,9 +4,9 @@
             <!-- 헤더 -->
             <div class="text-center mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-green-600 mb-3">
-                    12주 회복 프로그램 관리
+                    12주 웰니스 프로그램 관리
                 </h1>
-                <p class="text-xl text-gray-600">체계적인 회복 과정을 관리하고 추적하세요</p>
+                <p class="text-xl text-gray-600">체계적인 웰니스 과정을 관리하고 추적하세요</p>
                 
                 <!-- 네비게이션 버튼 -->
                 <div class="mt-4 flex justify-center space-x-4">
@@ -161,7 +161,7 @@
                     <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                     </svg>
-                    <p class="text-gray-600 mb-4">진행 중인 회복 프로그램이 없습니다.</p>
+                    <p class="text-gray-600 mb-4">진행 중인 웰니스 프로그램이 없습니다.</p>
                     <button onclick="openNewTimelineModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
                         첫 프로그램 시작하기
                     </button>
@@ -246,7 +246,7 @@
 <div id="newTimelineModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">새 회복 프로그램 시작</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">새 웰니스 프로그램 시작</h3>
             <form action="{{ route('recovery.timeline.create') }}" method="POST">
                 @csrf
                 <div class="mb-4">

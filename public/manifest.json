@@ -74,7 +74,7 @@
             "sizes": "412x915",
             "type": "image/png",
             "platform": "narrow",
-            "label": "자가진단"
+            "label": "셀프체크"
         },
         {
             "src": "/images/screenshots/desktop-home.png",
@@ -87,9 +87,9 @@
     "categories": ["medical", "health", "lifestyle", "education"],
     "shortcuts": [
         {
-            "name": "자가진단",
-            "short_name": "진단",
-            "description": "건강 자가진단 시작하기",
+            "name": "셀프체크",
+            "short_name": "체크",
+            "description": "건강 셀프체크 시작하기",
             "url": "/surveys",
             "icons": [
                 {

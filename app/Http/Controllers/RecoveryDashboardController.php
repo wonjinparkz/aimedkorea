@@ -284,7 +284,7 @@ class RecoveryDashboardController extends Controller
         $timeline->createCheckpoints();
         
         return redirect()->route('recovery.check')
-            ->with('success', '12주 회복 프로그램이 시작되었습니다!');
+            ->with('success', '12주 웰니스 프로그램이 시작되었습니다!');
     }
 
     /**

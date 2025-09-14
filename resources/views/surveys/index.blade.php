@@ -313,7 +313,7 @@
                         @php
                             $currentLang = session('locale', 'kor');
                             $disclaimerTexts = [
-                                'kor' => '본 자가 진단은 질병 진단이나 의학적 처방이 아닌, 디지털 노화에 대한 사용자의 뇌·시각·청각 등 기능 회복 루틴 설계를 위한 웰니스 기능 점검 도구입니다.',
+                                'kor' => '본 셀프 체크는 질병 진단이나 의학적 처방이 아닌, 디지털 노화에 대한 사용자의 뇌·시각·청각 등 기능 개선 루틴 설계를 위한 웰니스 기능 점검 도구입니다.',
                                 'eng' => 'This self-assessment is not a disease diagnosis or medical prescription, but a wellness function check tool for designing functional recovery routines for brain, vision, hearing, etc. related to digital aging.',
                                 'chn' => '本自我诊断不是疾病诊断或医学处方，而是为设计用户大脑、视觉、听觉等功能恢复程序而开发的数字老化健康功能检查工具。',
                                 'hin' => 'यह स्व-मूल्यांकन रोग निदान या चिकित्सा नुस्खा नहीं है, बल्कि डिजिटल बुढ़ापे से संबंधित मस्तिष्क, दृष्टि, श्रवण आदि के लिए कार्यात्मक वसूली दिनचर्या डिजाइन करने के लिए एक वेलनेस फ़ंक्शन जांच उपकरण है।',
@@ -740,7 +740,7 @@
                             </svg>
                         </div>
                         <h4 class="font-semibold text-gray-900 mb-2">건강 상태가 궁금하신 분</h4>
-                        <p class="text-sm text-gray-600">간단한 자가진단으로 현재 상태를 확인하세요</p>
+                        <p class="text-sm text-gray-600">간단한 셀프 체크로 현재 상태를 확인하세요</p>
                     </div>
                     <div class="text-center">
                         <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">

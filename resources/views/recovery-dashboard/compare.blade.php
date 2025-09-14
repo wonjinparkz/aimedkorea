@@ -4,9 +4,9 @@
             <!-- 헤더 -->
             <div class="text-center mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-green-600 mb-3">
-                    진단 결과 비교
+                    체크 결과 비교
                 </h1>
-                <p class="text-xl text-gray-600">선택한 진단 결과를 비교하여 회복 추이를 확인하세요</p>
+                <p class="text-xl text-gray-600">선택한 체크 결과를 비교하여 웰니스 추이를 확인하세요</p>
             </div>
 
             <!-- 비교 테이블 -->
@@ -29,7 +29,7 @@
                             <!-- 종합 회복 점수 -->
                             <tr class="bg-blue-50">
                                 <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
-                                    종합 회복 점수
+                                    종합 웰니스 점수
                                 </td>
                                 @foreach($comparisonData as $index => $data)
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -124,7 +124,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <!-- 라인 차트 -->
                 <div class="bg-white rounded-2xl shadow-xl p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">회복 점수 추이</h3>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">웰니스 점수 추이</h3>
                     <div style="height: 300px;">
                         <canvas id="comparisonLineChart"></canvas>
                     </div>
@@ -189,7 +189,7 @@
                     labels: labels,
                     datasets: [
                         {
-                            label: '종합 회복 점수',
+                            label: '종합 웰니스 점수',
                             data: recoveryScores,
                             borderColor: '#3b82f6',
                             backgroundColor: '#3b82f640',
