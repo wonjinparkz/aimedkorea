@@ -1,0 +1,31 @@
+{
+  "bundleId": "kr.co.aimed.mobile",
+  "appName": "AI-MED Korea",
+  "appShortName": "AI-MED",
+  "appVersion": "1.0.0",
+  "buildNumber": "1",
+  "url": "https://aimedkorea.cafe24.com",
+  "themeColor": "#1e40af",
+  "backgroundColor": "#ffffff",
+  "displayMode": "standalone",
+  "orientation": "portrait",
+  "statusBarStyle": "default",
+  "iosIcon": "/images/icons/icon-1024x1024.png",
+  "splashScreen": {
+    "backgroundColor": "#1e40af",
+    "image": "/images/splash/splash-2048x2732.png",
+    "resizeMode": "contain"
+  },
+  "permissions": [
+    "camera",
+    "photoLibrary",
+    "notification",
+    "location"
+  ],
+  "userAgent": "AI-MED-Korea-iOS-App",
+  "allowsInlineMediaPlayback": true,
+  "allowsAirPlayForMediaPlayback": true,
+  "allowsPictureInPictureMediaPlayback": true,
+  "allowsBackForwardNavigationGestures": true,
+  "ignoresViewportScaleLimits": false
+}
