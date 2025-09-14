@@ -16,7 +16,7 @@
             </div>
 
             <!-- 비교 테이블 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+            <div class="bg-white rounded-lg shadow-sm overflow-x-auto mb-6">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>

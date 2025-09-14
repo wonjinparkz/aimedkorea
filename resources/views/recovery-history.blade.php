@@ -29,7 +29,7 @@
             <div class="mb-8">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">프로그램 이력</h2>
                 @if($timelines && $timelines->count() > 0)
-                    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div class="bg-white rounded-lg shadow-sm overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>

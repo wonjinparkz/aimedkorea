@@ -231,25 +231,25 @@
 
             <!-- CTA 버튼 섹션 -->
             <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-200">
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <div class="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
                     <!-- 간편체크 시작 버튼 -->
                     <a href="{{ route('surveys.index') }}?survey_id={{ $survey->parent_id ?? $survey->id }}&analysis_type=simple#survey-{{ $survey->parent_id ?? $survey->id }}" 
                        onclick="trackEvent('simple_check_start', { survey_id: {{ $survey->parent_id ?? $survey->id }} })"
-                       class="inline-flex items-center px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="flex items-center justify-center px-4 sm:px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200 text-sm sm:text-base">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                         </svg>
-                        {{ $translations['start_simple_check'][$currentLang] ?? $translations['start_simple_check']['kor'] }}
+                        <span>{{ $translations['start_simple_check'][$currentLang] ?? $translations['start_simple_check']['kor'] }}</span>
                     </a>
                     
                     <!-- 심층체크(12주) 시작 버튼 -->
                     <a href="{{ route('surveys.index') }}?survey_id={{ $survey->parent_id ?? $survey->id }}&analysis_type=detailed#survey-{{ $survey->parent_id ?? $survey->id }}" 
                        onclick="trackEvent('deep_check_start', { survey_id: {{ $survey->parent_id ?? $survey->id }}, event_name: 'deep_start' }); trackEvent('deep_offer_shown', { survey_id: {{ $survey->parent_id ?? $survey->id }} })"
-                       class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       class="flex items-center justify-center px-4 sm:px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-sm sm:text-base">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
-                        {{ $translations['start_deep_check'][$currentLang] ?? $translations['start_deep_check']['kor'] }}
+                        <span>{{ $translations['start_deep_check'][$currentLang] ?? $translations['start_deep_check']['kor'] }}</span>
                     </a>
                 </div>
             </div>
@@ -590,9 +590,9 @@
             @endif
 
             <!-- 액션 버튼 -->
-            <div class="flex justify-center space-x-4 no-print">
+            <div class="flex flex-col sm:flex-row gap-3 sm:justify-center no-print">
                 <a href="{{ route('surveys.index') }}" 
-                   class="inline-flex items-center px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200">
+                   class="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
                     </svg>
@@ -601,7 +601,7 @@
                 
                 @auth
                     <a href="{{ route('recovery.dashboard') }}" 
-                       class="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200">
+                       class="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
@@ -609,16 +609,8 @@
                     </a>
                 @endauth
                 
-                <a href="{{ route('surveys.show', $survey) }}" 
-                   class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    {{ $translations['buttons']['retry_test'][$currentLang] ?? $translations['buttons']['retry_test']['kor'] }}
-                </a>
-                
                 <button onclick="window.print()" 
-                        class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                        class="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                     </svg>

@@ -234,9 +234,41 @@
         <!-- 메인 컨텐츠 영역 -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             @if($surveys->count() > 0)
+            
+            <!-- 모바일용 상단 가로 스크롤 영역 -->
+            <div class="block md:hidden mb-6">
+                <div class="overflow-x-auto pb-2">
+                    <div class="flex space-x-3" style="min-width: max-content;">
+                        @foreach($surveys as $index => $survey)
+                        <div class="cursor-pointer group flex-shrink-0" 
+                             @click="selectedSurvey = {{ $index }}">
+                            <div class="w-20 h-16 rounded-lg overflow-hidden bg-gray-200 border-2 border-transparent group-hover:border-indigo-300 transition-all duration-200"
+                                 :class="{ 'border-indigo-500 ring-2 ring-indigo-500': selectedSurvey === {{ $index }} }">
+                                @if($survey->survey_image)
+                                    <img src="{{ asset('storage/' . $survey->survey_image) }}" 
+                                         alt="{{ $survey->title }}"
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+                            <p class="text-xs text-center mt-1 text-gray-600" 
+                               :class="{ 'text-indigo-600 font-semibold': selectedSurvey === {{ $index }} }">
+                                {{ Str::limit($survey->title, 10) }}
+                            </p>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            
             <div class="flex gap-6">
-                <!-- 좌측 사이드바 -->
-                <div class="w-24 flex-shrink-0">
+                <!-- 데스크톱용 좌측 사이드바 -->
+                <div class="hidden md:block w-24 flex-shrink-0">
                     <div class="sticky top-8 space-y-3">
                         @foreach($surveys as $index => $survey)
                         <div class="cursor-pointer group" 
@@ -260,8 +292,8 @@
                     </div>
                 </div>
 
-                <!-- 우측 메인 컨텐츠 -->
-                <div class="flex-1 min-w-0">
+                <!-- 메인 컨텐츠 (모바일에서 전체 너비) -->
+                <div class="flex-1 min-w-0 w-full md:w-auto">
                     <!-- 설문 버튼 섹션 -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         @foreach($surveys as $index => $survey)
@@ -456,8 +488,9 @@
                                     <template x-if="analysisType === 'simple' && surveys[selectedSurvey] && currentQuestions">
                                         <div class="space-y-6">
                                             <template x-for="(question, qIndex) in currentQuestions.slice(currentPage * questionsPerPage, Math.min((currentPage + 1) * questionsPerPage, currentQuestions.length))" :key="`simple-${currentQuestions.indexOf(question)}`">
-                                                <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                                                    <table class="w-full">
+                                                <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+                                                    <div class="inline-block min-w-full align-middle">
+                                                        <table class="w-full min-w-[320px] sm:min-w-[500px]">
                                                         <tbody>
                                                             <!-- 질문 행 -->
                                                             <tr class="bg-gray-50">
@@ -505,6 +538,7 @@
                                                             </tr>
                                                         </tbody>
                                                     </table>
+                                                    </div>
                                                 </div>
                                             </template>
                                         </div>
@@ -514,8 +548,9 @@
                                     <template x-if="analysisType === 'detailed' && surveys[selectedSurvey] && currentQuestions">
                                         <div class="space-y-6">
                                             <template x-for="(question, qIndex) in currentQuestions.slice(currentPage * questionsPerPage, Math.min((currentPage + 1) * questionsPerPage, currentQuestions.length))" :key="`detailed-${currentQuestions.indexOf(question)}`">
-                                                <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                                                    <table class="w-full">
+                                                <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+                                                    <div class="inline-block min-w-full align-middle">
+                                                        <table class="w-full min-w-[320px] sm:min-w-[500px]">
                                                         <tbody>
                                                             <!-- 질문 행 -->
                                                             <tr class="bg-gradient-to-r from-green-50 to-green-100">
@@ -563,6 +598,7 @@
                                                             </tr>
                                                         </tbody>
                                                     </table>
+                                                    </div>
                                                 </div>
                                             </template>
                                         </div>

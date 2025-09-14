@@ -24,16 +24,6 @@
                     </a>
                 </div>
             </div>
-            
-            <!-- 액션 버튼 -->
-            <div class="flex justify-end mb-6">
-                <button onclick="openNewTimelineModal()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    새 프로그램 시작
-                </button>
-            </div>
 
         <!-- 알림 메시지 -->
         @if(session('success'))
@@ -58,19 +48,19 @@
                         <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
                             <div class="p-6">
                                 <!-- 타임라인 헤더 -->
-                                <div class="flex justify-between items-start mb-4">
-                                    <div>
+                                <div class="mb-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                            진행중
+                                        </span>
                                         <h3 class="text-xl font-semibold text-gray-800">
                                             {{ $timeline->survey ? (string)$timeline->survey->getTitle(session('locale', 'kor')) : 'Unknown Survey' }}
                                         </h3>
-                                        <p class="text-sm text-gray-600 mt-1">
-                                            시작일: {{ $timeline->start_date->format('Y년 m월 d일') }} | 
-                                            종료 예정일: {{ $timeline->end_date->format('Y년 m월 d일') }}
-                                        </p>
                                     </div>
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                        진행중
-                                    </span>
+                                    <p class="text-sm text-gray-600">
+                                        시작일: {{ $timeline->start_date->format('Y년 m월 d일') }} | 
+                                        종료 예정일: {{ $timeline->end_date->format('Y년 m월 d일') }}
+                                    </p>
                                 </div>
 
                                 <!-- 진행률 바 -->
