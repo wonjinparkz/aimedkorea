@@ -7,7 +7,7 @@ use App\Models\Hero;
 use Illuminate\Http\Request;
 use App\Http\Controllers\SearchLogController;
 
-Route::get('/', function () {
+Route::get('/', function (Request $request) {
     // 현재 언어 가져오기
     $currentLang = session('locale', 'kor');
     
@@ -58,6 +58,27 @@ Route::get('/', function () {
         
         return compact('heroes', 'featuredPost', 'routinePosts', 'blogPosts', 'tabPosts');
     });
+    
+    // 모바일 감지 (User Agent 직접 확인)
+    $userAgent = $request->header('User-Agent');
+    $isMobile = false;
+    
+    if ($userAgent) {
+        $mobilePatterns = '/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i';
+        $tabletPatterns = '/iPad|Android.*Chrome.*Mobile|Android.*(?!Mobile)/i';
+        
+        $isMobile = preg_match($mobilePatterns, $userAgent) && !preg_match($tabletPatterns, $userAgent);
+    }
+    
+    // 강제 모바일 뷰 파라미터 체크 (테스트용)
+    if ($request->has('mobile')) {
+        $isMobile = $request->get('mobile') === 'true';
+    }
+    
+    // 모바일 기기인 경우 모바일 전용 뷰 반환
+    if ($isMobile) {
+        return view('welcome-mobile', $data);
+    }
     
     return view('welcome', $data);
 });

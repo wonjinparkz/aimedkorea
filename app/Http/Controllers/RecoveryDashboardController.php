@@ -15,7 +15,7 @@ class RecoveryDashboardController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         
@@ -149,6 +149,37 @@ class RecoveryDashboardController extends Controller
             }
         }
 
+        // 모바일 감지
+        $userAgent = $request->header('User-Agent');
+        $isMobile = false;
+        
+        if ($userAgent) {
+            $mobilePatterns = '/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i';
+            $tabletPatterns = '/iPad|Android.*Chrome.*Mobile|Android.*(?!Mobile)/i';
+            
+            $isMobile = preg_match($mobilePatterns, $userAgent) && !preg_match($tabletPatterns, $userAgent);
+        }
+        
+        // 강제 모바일 뷰 파라미터 체크 (테스트용)
+        if ($request->has('mobile')) {
+            $isMobile = $request->get('mobile') === 'true';
+        }
+        
+        // 모바일 기기인 경우 모바일 전용 뷰 반환
+        if ($isMobile) {
+            return view('mobile.recovery-dashboard', compact(
+                'timelines', 
+                'latestResponse', 
+                'previousResponse', 
+                'improvementRate',
+                'categoryAnalysis',
+                'surveyScores',
+                'recentResponses',
+                'recoveryTips',
+                'timelineData'
+            ));
+        }
+        
         return view('recovery-dashboard', compact(
             'timelines', 
             'latestResponse', 
@@ -197,7 +228,7 @@ class RecoveryDashboardController extends Controller
     /**
      * 12주 체크 페이지 - 타임라인 일정 확인 및 관리
      */
-    public function check()
+    public function check(Request $request)
     {
         $user = Auth::user();
         
@@ -226,6 +257,31 @@ class RecoveryDashboardController extends Controller
         
         // 사용 가능한 설문 목록 (새 타임라인 생성용)
         $availableSurveys = \App\Models\Survey::all();
+        
+        // 모바일 감지
+        $userAgent = $request->header('User-Agent');
+        $isMobile = false;
+        
+        if ($userAgent) {
+            $mobilePatterns = '/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i';
+            $tabletPatterns = '/iPad|Android.*Chrome.*Mobile|Android.*(?!Mobile)/i';
+            
+            $isMobile = preg_match($mobilePatterns, $userAgent) && !preg_match($tabletPatterns, $userAgent);
+        }
+        
+        // 강제 모바일 뷰 파라미터 체크 (테스트용)
+        if ($request->has('mobile')) {
+            $isMobile = $request->get('mobile') === 'true';
+        }
+        
+        // 모바일 기기인 경우 모바일 전용 뷰 반환
+        if ($isMobile) {
+            return view('mobile.recovery-check', compact(
+                'activeTimelines', 
+                'inactiveTimelines', 
+                'availableSurveys'
+            ));
+        }
         
         return view('recovery-check', compact(
             'activeTimelines', 
@@ -318,7 +374,7 @@ class RecoveryDashboardController extends Controller
     /**
      * 회복 이력 페이지
      */
-    public function history()
+    public function history(Request $request)
     {
         $user = Auth::user();
         
@@ -335,6 +391,27 @@ class RecoveryDashboardController extends Controller
             ->with('survey')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
+        
+        // 모바일 감지
+        $userAgent = $request->header('User-Agent');
+        $isMobile = false;
+        
+        if ($userAgent) {
+            $mobilePatterns = '/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i';
+            $tabletPatterns = '/iPad|Android.*Chrome.*Mobile|Android.*(?!Mobile)/i';
+            
+            $isMobile = preg_match($mobilePatterns, $userAgent) && !preg_match($tabletPatterns, $userAgent);
+        }
+        
+        // 강제 모바일 뷰 파라미터 체크 (테스트용)
+        if ($request->has('mobile')) {
+            $isMobile = $request->get('mobile') === 'true';
+        }
+        
+        // 모바일 기기인 경우 모바일 전용 뷰 반환
+        if ($isMobile) {
+            return view('mobile.recovery-history', compact('timelines', 'responses'));
+        }
         
         return view('recovery-history', compact('timelines', 'responses'));
     }
@@ -375,6 +452,27 @@ class RecoveryDashboardController extends Controller
                 ];
             }
             
+            // 모바일 감지
+            $userAgent = $request->header('User-Agent');
+            $isMobile = false;
+            
+            if ($userAgent) {
+                $mobilePatterns = '/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i';
+                $tabletPatterns = '/iPad|Android.*Chrome.*Mobile|Android.*(?!Mobile)/i';
+                
+                $isMobile = preg_match($mobilePatterns, $userAgent) && !preg_match($tabletPatterns, $userAgent);
+            }
+            
+            // 강제 모바일 뷰 파라미터 체크 (테스트용)
+            if ($request->has('mobile')) {
+                $isMobile = $request->get('mobile') === 'true';
+            }
+            
+            // 모바일 기기인 경우 모바일 전용 뷰 반환
+            if ($isMobile) {
+                return view('mobile.recovery-compare', compact('comparisonData', 'responses'));
+            }
+            
             return view('recovery-compare', compact('comparisonData', 'responses'));
         }
         
@@ -383,6 +481,27 @@ class RecoveryDashboardController extends Controller
             ->with('survey')
             ->orderBy('created_at', 'desc')
             ->get();
+        
+        // 모바일 감지
+        $userAgent = $request->header('User-Agent');
+        $isMobile = false;
+        
+        if ($userAgent) {
+            $mobilePatterns = '/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i';
+            $tabletPatterns = '/iPad|Android.*Chrome.*Mobile|Android.*(?!Mobile)/i';
+            
+            $isMobile = preg_match($mobilePatterns, $userAgent) && !preg_match($tabletPatterns, $userAgent);
+        }
+        
+        // 강제 모바일 뷰 파라미터 체크 (테스트용)
+        if ($request->has('mobile')) {
+            $isMobile = $request->get('mobile') === 'true';
+        }
+        
+        // 모바일 기기인 경우 모바일 전용 뷰 반환
+        if ($isMobile) {
+            return view('mobile.recovery-compare-select', compact('responses'));
+        }
         
         return view('recovery-compare-select', compact('responses'));
     }

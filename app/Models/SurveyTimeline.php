@@ -237,4 +237,38 @@ class SurveyTimeline extends Model
             }
         }
     }
+
+    /**
+     * 진행률 백분율 가져오기
+     */
+    public function getProgressPercentage(): int
+    {
+        $total = $this->checkpoints()->count();
+        $completed = $this->checkpoints()->where('status', 'completed')->count();
+        
+        return $total > 0 ? round(($completed / $total) * 100) : 0;
+    }
+
+    /**
+     * 완료된 체크포인트 개수 가져오기
+     */
+    public function getCompletedCheckpointsCount(): int
+    {
+        return $this->checkpoints()->where('status', 'completed')->count();
+    }
+
+    /**
+     * 남은 일수 계산
+     */
+    public function getRemainingDays(): int
+    {
+        $endDate = $this->end_date instanceof Carbon ? $this->end_date : Carbon::parse($this->end_date);
+        $today = Carbon::today();
+        
+        if ($endDate->lt($today)) {
+            return 0;
+        }
+        
+        return $today->diffInDays($endDate);
+    }
 }

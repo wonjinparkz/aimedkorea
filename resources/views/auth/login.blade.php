@@ -26,7 +26,7 @@
                        type="text" 
                        name="username" 
                        value="{{ old('username') }}" 
-                       placeholder="이메일을 입력해주세요" 
+                       placeholder="이메일 또는 사용자명을 입력해주세요" 
                        required 
                        autofocus 
                        autocomplete="username" />

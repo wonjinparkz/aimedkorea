@@ -33,9 +33,14 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
-        // Use username for authentication instead of email
+        // Allow authentication with either email or username
         Fortify::authenticateUsing(function (Request $request) {
-            $user = \App\Models\User::where('username', $request->username)->first();
+            $login = $request->input('username') ?? $request->input('email');
+            
+            // Check if input is email or username
+            $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+            
+            $user = \App\Models\User::where($field, $login)->first();
 
             if ($user &&
                 \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {

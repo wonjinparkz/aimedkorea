@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class SurveyController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $currentLang = session('locale', 'kor');
         
@@ -41,6 +41,27 @@ class SurveyController extends Controller
             
             return $survey;
         });
+        
+        // 모바일 감지
+        $userAgent = $request->header('User-Agent');
+        $isMobile = false;
+        
+        if ($userAgent) {
+            $mobilePatterns = '/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i';
+            $tabletPatterns = '/iPad|Android.*Chrome.*Mobile|Android.*(?!Mobile)/i';
+            
+            $isMobile = preg_match($mobilePatterns, $userAgent) && !preg_match($tabletPatterns, $userAgent);
+        }
+        
+        // 강제 모바일 뷰 파라미터 체크 (테스트용)
+        if ($request->has('mobile')) {
+            $isMobile = $request->get('mobile') === 'true';
+        }
+        
+        // 모바일 기기인 경우 모바일 전용 뷰 반환
+        if ($isMobile) {
+            return view('mobile.surveys-index', compact('surveys'));
+        }
                         
         return view('surveys.index', compact('surveys'));
     }
@@ -61,6 +82,30 @@ class SurveyController extends Controller
         $survey->questions = $survey->getQuestions($currentLang);
         $survey->checklist_items = $survey->getChecklistItems($currentLang);
         $survey->frequency_items = $survey->getFrequencyItems($currentLang);
+        
+        // 심층 버전 존재 여부 확인
+        $survey->has_detailed_version = $survey->detailedVersion()->exists();
+        
+        // 모바일 감지
+        $userAgent = $request->header('User-Agent');
+        $isMobile = false;
+        
+        if ($userAgent) {
+            $mobilePatterns = '/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i';
+            $tabletPatterns = '/iPad|Android.*Chrome.*Mobile|Android.*(?!Mobile)/i';
+            
+            $isMobile = preg_match($mobilePatterns, $userAgent) && !preg_match($tabletPatterns, $userAgent);
+        }
+        
+        // 강제 모바일 뷰 파라미터 체크 (테스트용)
+        if ($request->has('mobile')) {
+            $isMobile = $request->get('mobile') === 'true';
+        }
+        
+        // 모바일 기기인 경우 모바일 전용 뷰 반환
+        if ($isMobile) {
+            return view('mobile.surveys-show', compact('survey'));
+        }
         
         return view('surveys.show', compact('survey'));
     }
@@ -142,10 +187,31 @@ class SurveyController extends Controller
         ]);
     }
     
-    public function results(Survey $survey, SurveyResponse $response)
+    public function results(Survey $survey, SurveyResponse $response, Request $request)
     {
         // 실제 카테고리별 분석 데이터 사용
         $categoryAnalysis = $this->analyzeCategoriesForSurvey($survey, $response);
+        
+        // 모바일 감지
+        $userAgent = $request->header('User-Agent');
+        $isMobile = false;
+        
+        if ($userAgent) {
+            $mobilePatterns = '/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i';
+            $tabletPatterns = '/iPad|Android.*Chrome.*Mobile|Android.*(?!Mobile)/i';
+            
+            $isMobile = preg_match($mobilePatterns, $userAgent) && !preg_match($tabletPatterns, $userAgent);
+        }
+        
+        // 강제 모바일 뷰 파라미터 체크 (테스트용)
+        if ($request->has('mobile')) {
+            $isMobile = $request->get('mobile') === 'true';
+        }
+        
+        // 모바일 기기인 경우 모바일 전용 뷰 반환
+        if ($isMobile) {
+            return view('mobile.surveys-results', compact('survey', 'response', 'categoryAnalysis'));
+        }
         
         // 뷰로 전달 (percentage는 뷰에서 직접 계산)
         return view('surveys.results', compact('survey', 'response', 'categoryAnalysis'));

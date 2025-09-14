@@ -331,8 +331,21 @@ class Survey extends Model
     {
         $language = $language ?: app()->getLocale();
         
+        // For Korean (kor), always return the original questions
+        // as they are already in Korean
+        if ($language === 'kor') {
+            return $this->questions;
+        }
+        
+        // For other languages, check if translations exist
         if ($this->questions_translations && isset($this->questions_translations[$language])) {
-            return $this->questions_translations[$language];
+            // If translation exists but has fewer questions than original,
+            // use original questions as fallback
+            $translatedQuestions = $this->questions_translations[$language];
+            if (count($translatedQuestions) < count($this->questions)) {
+                return $this->questions;
+            }
+            return $translatedQuestions;
         }
         
         return $this->questions;

@@ -1,7 +1,21 @@
+@php
+    $currentLang = session('locale', 'kor');
+    
+    $translations = [
+        'profile' => [
+            'kor' => '프로필',
+            'eng' => 'Profile',
+            'chn' => '个人资料',
+            'hin' => 'प्रोफ़ाइल',
+            'arb' => 'الملف الشخصي'
+        ]
+    ];
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
+            {{ $translations['profile'][$currentLang] ?? $translations['profile']['kor'] }}
         </h2>
     </x-slot>
 

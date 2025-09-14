@@ -12,6 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -60,6 +61,18 @@ class User extends Authenticatable implements FilamentUser
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_role');
+    }
+
+    // 설문 응답과의 관계
+    public function survey_responses(): HasMany
+    {
+        return $this->hasMany(SurveyResponse::class);
+    }
+
+    // 설문 타임라인과의 관계
+    public function surveyTimelines(): HasMany
+    {
+        return $this->hasMany(SurveyTimeline::class);
     }
 
     // 특정 역할이 있는지 확인

@@ -1,10 +1,108 @@
+@php
+    $currentLang = session('locale', 'kor');
+    
+    $translations = [
+        'title' => [
+            'kor' => '프로필 정보',
+            'eng' => 'Profile Information',
+            'chn' => '个人信息',
+            'hin' => 'प्रोफ़ाइल जानकारी',
+            'arb' => 'معلومات الملف الشخصي'
+        ],
+        'description' => [
+            'kor' => '계정의 프로필 정보와 이메일 주소를 업데이트하세요.',
+            'eng' => 'Update your account\'s profile information and email address.',
+            'chn' => '更新您的账户资料和电子邮件地址。',
+            'hin' => 'अपने खाते की प्रोफ़ाइल जानकारी और ईमेल पता अपडेट करें।',
+            'arb' => 'قم بتحديث معلومات ملفك الشخصي وعنوان بريدك الإلكتروني.'
+        ],
+        'photo' => [
+            'kor' => '사진',
+            'eng' => 'Photo',
+            'chn' => '照片',
+            'hin' => 'फोटो',
+            'arb' => 'صورة'
+        ],
+        'select_photo' => [
+            'kor' => '새 사진 선택',
+            'eng' => 'Select A New Photo',
+            'chn' => '选择新照片',
+            'hin' => 'नई फोटो चुनें',
+            'arb' => 'اختر صورة جديدة'
+        ],
+        'remove_photo' => [
+            'kor' => '사진 제거',
+            'eng' => 'Remove Photo',
+            'chn' => '删除照片',
+            'hin' => 'फोटो हटाएं',
+            'arb' => 'إزالة الصورة'
+        ],
+        'name' => [
+            'kor' => '이름',
+            'eng' => 'Name',
+            'chn' => '姓名',
+            'hin' => 'नाम',
+            'arb' => 'الاسم'
+        ],
+        'username' => [
+            'kor' => '사용자명',
+            'eng' => 'Username',
+            'chn' => '用户名',
+            'hin' => 'उपयोगकर्ता नाम',
+            'arb' => 'اسم المستخدم'
+        ],
+        'email' => [
+            'kor' => '이메일',
+            'eng' => 'Email',
+            'chn' => '电子邮件',
+            'hin' => 'ईमेल',
+            'arb' => 'البريد الإلكتروني'
+        ],
+        'email_unverified' => [
+            'kor' => '이메일이 확인되지 않았습니다.',
+            'eng' => 'Your email address is unverified.',
+            'chn' => '您的电子邮件地址未验证。',
+            'hin' => 'आपका ईमेल पता सत्यापित नहीं है।',
+            'arb' => 'عنوان بريدك الإلكتروني غير موثق.'
+        ],
+        'resend_verification' => [
+            'kor' => '확인 이메일 재전송',
+            'eng' => 'Click here to re-send the verification email.',
+            'chn' => '点击此处重新发送验证邮件。',
+            'hin' => 'सत्यापन ईमेल पुनः भेजने के लिए यहां क्लिक करें।',
+            'arb' => 'انقر هنا لإعادة إرسال بريد التحقق.'
+        ],
+        'verification_sent' => [
+            'kor' => '새 확인 링크가 이메일로 전송되었습니다.',
+            'eng' => 'A new verification link has been sent to your email address.',
+            'chn' => '新的验证链接已发送到您的电子邮件地址。',
+            'hin' => 'आपके ईमेल पते पर एक नया सत्यापन लिंक भेजा गया है।',
+            'arb' => 'تم إرسال رابط تحقق جديد إلى عنوان بريدك الإلكتروني.'
+        ],
+        'saved' => [
+            'kor' => '저장되었습니다.',
+            'eng' => 'Saved.',
+            'chn' => '已保存。',
+            'hin' => 'सहेजा गया।',
+            'arb' => 'تم الحفظ.'
+        ],
+        'save' => [
+            'kor' => '저장',
+            'eng' => 'Save',
+            'chn' => '保存',
+            'hin' => 'सहेजें',
+            'arb' => 'حفظ'
+        ]
+    ];
+@endphp
+
 <x-form-section submit="updateProfileInformation">
     <x-slot name="title">
-        {{ __('Profile Information') }}
+        {{ $translations['title'][$currentLang] ?? $translations['title']['kor'] }}
     </x-slot>
 
     <x-slot name="description">
-        {{ __('Update your account\'s profile information and email address.') }}
+        {{ $translations['description'][$currentLang] ?? $translations['description']['kor'] }}
     </x-slot>
 
     <x-slot name="form">
@@ -24,7 +122,9 @@
                                     reader.readAsDataURL($refs.photo.files[0]);
                             " />
 
-                <x-label for="photo" value="{{ __('Photo') }}" />
+                <label for="photo" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ $translations['photo'][$currentLang] ?? $translations['photo']['kor'] }}
+                </label>
 
                 <!-- Current Profile Photo -->
                 <div class="mt-2" x-show="! photoPreview">
@@ -38,14 +138,18 @@
                     </span>
                 </div>
 
-                <x-secondary-button class="mt-2 me-2" type="button" x-on:click.prevent="$refs.photo.click()">
-                    {{ __('Select A New Photo') }}
-                </x-secondary-button>
+                <button type="button" 
+                        x-on:click.prevent="$refs.photo.click()"
+                        class="mt-2 me-2 px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                    {{ $translations['select_photo'][$currentLang] ?? $translations['select_photo']['kor'] }}
+                </button>
 
                 @if ($this->user->profile_photo_path)
-                    <x-secondary-button type="button" class="mt-2" wire:click="deleteProfilePhoto">
-                        {{ __('Remove Photo') }}
-                    </x-secondary-button>
+                    <button type="button" 
+                            wire:click="deleteProfilePhoto"
+                            class="mt-2 px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                        {{ $translations['remove_photo'][$currentLang] ?? $translations['remove_photo']['kor'] }}
+                    </button>
                 @endif
 
                 <x-input-error for="photo" class="mt-2" />
@@ -54,29 +158,59 @@
 
         <!-- Name -->
         <div class="col-span-6 sm:col-span-4">
-            <x-label for="name" value="{{ __('Name') }}" />
-            <x-input id="name" type="text" class="mt-1 block w-full" wire:model="state.name" required autocomplete="name" />
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                {{ $translations['name'][$currentLang] ?? $translations['name']['kor'] }}
+            </label>
+            <input id="name" 
+                   type="text" 
+                   wire:model="state.name" 
+                   required 
+                   autocomplete="name"
+                   class="block w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" />
             <x-input-error for="name" class="mt-2" />
+        </div>
+
+        <!-- Username -->
+        <div class="col-span-6 sm:col-span-4">
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                {{ $translations['username'][$currentLang] ?? $translations['username']['kor'] }}
+            </label>
+            <input id="username" 
+                   type="text" 
+                   wire:model="state.username" 
+                   required 
+                   autocomplete="username"
+                   class="block w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" />
+            <x-input-error for="username" class="mt-2" />
         </div>
 
         <!-- Email -->
         <div class="col-span-6 sm:col-span-4">
-            <x-label for="email" value="{{ __('Email') }}" />
-            <x-input id="email" type="email" class="mt-1 block w-full" wire:model="state.email" required autocomplete="username" />
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                {{ $translations['email'][$currentLang] ?? $translations['email']['kor'] }}
+            </label>
+            <input id="email" 
+                   type="email" 
+                   wire:model="state.email" 
+                   required 
+                   autocomplete="email"
+                   class="block w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" />
             <x-input-error for="email" class="mt-2" />
 
             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::emailVerification()) && ! $this->user->hasVerifiedEmail())
-                <p class="text-sm mt-2">
-                    {{ __('Your email address is unverified.') }}
+                <p class="text-sm mt-2 text-gray-600">
+                    {{ $translations['email_unverified'][$currentLang] ?? $translations['email_unverified']['kor'] }}
 
-                    <button type="button" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" wire:click.prevent="sendEmailVerification">
-                        {{ __('Click here to re-send the verification email.') }}
+                    <button type="button" 
+                            wire:click.prevent="sendEmailVerification"
+                            class="underline text-sm text-blue-600 hover:text-blue-900 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        {{ $translations['resend_verification'][$currentLang] ?? $translations['resend_verification']['kor'] }}
                     </button>
                 </p>
 
                 @if ($this->verificationLinkSent)
                     <p class="mt-2 font-medium text-sm text-green-600">
-                        {{ __('A new verification link has been sent to your email address.') }}
+                        {{ $translations['verification_sent'][$currentLang] ?? $translations['verification_sent']['kor'] }}
                     </p>
                 @endif
             @endif
@@ -85,11 +219,14 @@
 
     <x-slot name="actions">
         <x-action-message class="me-3" on="saved">
-            {{ __('Saved.') }}
+            {{ $translations['saved'][$currentLang] ?? $translations['saved']['kor'] }}
         </x-action-message>
 
-        <x-button wire:loading.attr="disabled" wire:target="photo">
-            {{ __('Save') }}
-        </x-button>
+        <button type="submit"
+                wire:loading.attr="disabled"
+                wire:target="photo"
+                class="px-4 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            {{ $translations['save'][$currentLang] ?? $translations['save']['kor'] }}
+        </button>
     </x-slot>
 </x-form-section>

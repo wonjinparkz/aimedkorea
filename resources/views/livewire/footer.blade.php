@@ -94,26 +94,37 @@
         </div>
     </div>
 
-    <!-- Bottom Footer -->
-    <div class="bg-gray-100 py-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row items-center justify-between">
-                <div class="flex flex-wrap justify-center md:justify-start space-x-6 text-sm mb-4 md:mb-0">
-                    @foreach($footerLinks as $link)
-                        <a href="{{ $link['url'] }}" class="text-gray-600 hover:text-gray-900 transition-colors">{{ $link['title'] }}</a>
-                    @endforeach
-                    <div class="relative group">
-                        <button class="text-gray-600 hover:text-gray-900 transition-colors flex items-center">
-                            패밀리사이트
-                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <!-- 패밀리사이트 드롭다운 (추후 구현 가능) -->
-                    </div>
+    <!-- Footer Information Box -->
+    <div class="bg-gray-100 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="space-y-4">
+                <!-- Business Information -->
+                <div class="text-sm text-gray-600 text-center">
+                    <p class="flex flex-wrap justify-center items-center">
+                        <span>에이아이메드 주식회사(Ai-Med Co., Ltd)</span>
+                        <span class="mx-2 text-gray-400">|</span>
+                        <span>대표: 유병록</span>
+                        <span class="mx-2 text-gray-400">|</span>
+                        <span>사업자등록번호: 465-81-03197</span>
+                        <span class="mx-2 text-gray-400">|</span>
+                        <span>경상남도 창원시 의창구 차상로 172-15(팔용동)</span>
+                        <span class="mx-2 text-gray-400">|</span>
+                        <span>이메일: <a href="mailto:aimedkorea@naver.com" class="text-blue-600 hover:text-blue-700">aimedkorea@naver.com</a></span>
+                    </p>
                 </div>
-                <div class="text-gray-600 text-sm">
-                    &copy; {{ date('Y') }} {{ $siteTitle }}. All rights reserved.
+                
+                <!-- Divider -->
+                <hr class="border-gray-300">
+                
+                <!-- Links and Copyright -->
+                <div class="flex flex-col md:flex-row items-center justify-between text-sm">
+                    <div class="flex items-center space-x-6 mb-2 md:mb-0">
+                        <a href="/terms" class="text-gray-600 hover:text-gray-900 transition-colors">이용약관</a>
+                        <a href="/policy" class="text-gray-600 hover:text-gray-900 transition-colors">개인정보처리방침</a>
+                    </div>
+                    <div class="text-gray-600">
+                        &copy; {{ date('Y') }} {{ $siteTitle }}. All rights reserved.
+                    </div>
                 </div>
             </div>
         </div>

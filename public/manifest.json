@@ -4,6 +4,7 @@
     "description": "건강과 의료 정보를 제공하는 다국어 플랫폼",
     "start_url": "/",
     "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
     "orientation": "portrait",
     "theme_color": "#1e40af",
     "background_color": "#ffffff",
@@ -11,77 +12,124 @@
     "dir": "ltr",
     "scope": "/",
     "id": "kr.co.aimed.mobile",
+    "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
     "icons": [
         {
-            "src": "/images/icons/icon-72x72.png",
+            "src": "/images/icons/android/android-launchericon-48-48.png",
+            "sizes": "48x48",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/images/icons/android/android-launchericon-72-72.png",
             "sizes": "72x72",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/images/icons/icon-96x96.png",
+            "src": "/images/icons/android/android-launchericon-96-96.png",
             "sizes": "96x96",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/images/icons/icon-128x128.png",
+            "src": "/images/icons/ios/128.png",
             "sizes": "128x128",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/images/icons/icon-144x144.png",
+            "src": "/images/icons/android/android-launchericon-144-144.png",
             "sizes": "144x144",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/images/icons/icon-152x152.png",
+            "src": "/images/icons/ios/152.png",
             "sizes": "152x152",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/images/icons/icon-192x192.png",
+            "src": "/images/icons/ios/180.png",
+            "sizes": "180x180",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/images/icons/android/android-launchericon-192-192.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/images/icons/icon-384x384.png",
-            "sizes": "384x384",
+            "src": "/images/icons/ios/256.png",
+            "sizes": "256x256",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/images/icons/icon-512x512.png",
+            "src": "/images/icons/android/android-launchericon-512-512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
+        },
+        {
+            "src": "/images/icons/ios/1024.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "purpose": "any"
         }
     ],
     "screenshots": [
         {
             "src": "/images/screenshots/mobile-home.png",
-            "sizes": "412x915",
+            "sizes": "1080x1920",
             "type": "image/png",
-            "platform": "narrow",
+            "form_factor": "narrow",
             "label": "홈 화면"
         },
         {
             "src": "/images/screenshots/mobile-survey.png",
-            "sizes": "412x915",
+            "sizes": "1080x1920",
             "type": "image/png",
-            "platform": "narrow",
+            "form_factor": "narrow",
             "label": "셀프체크"
+        },
+        {
+            "src": "/images/screenshots/mobile-results.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "결과 화면"
+        },
+        {
+            "src": "/images/screenshots/mobile-dashboard.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "대시보드"
         },
         {
             "src": "/images/screenshots/desktop-home.png",
             "sizes": "1920x1080",
             "type": "image/png",
-            "platform": "wide",
+            "form_factor": "wide",
             "label": "데스크톱 홈"
+        },
+        {
+            "src": "/images/screenshots/desktop-survey.png",
+            "sizes": "1920x1080",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "데스크톱 설문"
+        },
+        {
+            "src": "/images/screenshots/desktop-dashboard.png",
+            "sizes": "1920x1080",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "데스크톱 대시보드"
         }
     ],
     "categories": ["medical", "health", "lifestyle", "education"],
@@ -93,7 +141,7 @@
             "url": "/surveys",
             "icons": [
                 {
-                    "src": "/images/icons/shortcut-survey.png",
+                    "src": "/images/icons/android/android-launchericon-96-96.png",
                     "sizes": "96x96",
                     "type": "image/png"
                 }
@@ -106,7 +154,7 @@
             "url": "/news",
             "icons": [
                 {
-                    "src": "/images/icons/shortcut-news.png",
+                    "src": "/images/icons/android/android-launchericon-96-96.png",
                     "sizes": "96x96",
                     "type": "image/png"
                 }
@@ -119,14 +167,20 @@
             "url": "/blog",
             "icons": [
                 {
-                    "src": "/images/icons/shortcut-blog.png",
+                    "src": "/images/icons/android/android-launchericon-96-96.png",
                     "sizes": "96x96",
                     "type": "image/png"
                 }
             ]
         }
     ],
-    "related_applications": [],
+    "related_applications": [
+        {
+            "platform": "play",
+            "url": "https://play.google.com/store/apps/details?id=kr.co.aimed.mobile",
+            "id": "kr.co.aimed.mobile"
+        }
+    ],
     "prefer_related_applications": false,
     "share_target": {
         "action": "/share",
@@ -141,7 +195,66 @@
         "Cross Platform",
         "fast",
         "simple",
-        "instalable",
+        "installable",
         "offline capable"
-    ]
+    ],
+    "scope_extensions": [
+        {
+            "origin": "https://aimedkorea.cafe24.com"
+        },
+        {
+            "origin": "https://ai-med.co.kr"
+        },
+        {
+            "origin": "*.aimedkorea.com"
+        }
+    ],
+    "launch_handler": {
+        "client_mode": ["navigate-existing", "auto"]
+    },
+    "edge_side_panel": {
+        "preferred_width": 480
+    },
+    "file_handlers": [
+        {
+            "action": "/open-file",
+            "accept": {
+                "text/csv": [".csv"],
+                "application/pdf": [".pdf"]
+            }
+        }
+    ],
+    "protocol_handlers": [
+        {
+            "protocol": "web+aimed",
+            "url": "/protocol?url=%s"
+        }
+    ],
+    "note_taking": {
+        "new_note_url": "/notes/new"
+    },
+    "widgets": [
+        {
+            "name": "건강 상태",
+            "short_name": "상태",
+            "description": "오늘의 건강 상태 확인",
+            "icons": [
+                {
+                    "src": "/images/icons/android/android-launchericon-512-512.png",
+                    "sizes": "512x512"
+                }
+            ],
+            "screenshots": [
+                {
+                    "src": "/images/screenshots/widget.png",
+                    "sizes": "600x400",
+                    "label": "건강 상태 위젯"
+                }
+            ],
+            "tag": "health-status",
+            "ms_ac_template": "/widgets/health-status.json"
+        }
+    ],
+    "handle_links": "preferred",
+    "capture_links": "existing-client-navigate"
 }
