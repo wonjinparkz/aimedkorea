@@ -42,25 +42,38 @@ class EditSurvey extends EditRecord
         return $data;
     }
     
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // mutateDehydratedStateUsing에서 이미 처리되므로 추가 처리 불필요
+        return $data;
+    }
+    
     protected function afterSave(): void
     {
         // 카테고리 정보 저장
         $formData = $this->form->getState();
         
         if ($this->record && $this->record->id) {
-            // 문항 카테고리 저장
+            $optionName = 'survey_categories_' . $this->record->id;
+            
+            // 문항 카테고리 저장 또는 삭제
             if (isset($formData['question_categories'])) {
                 $categoryData = $formData['question_categories'];
                 
                 if (!empty($categoryData['categories'])) {
-                    $optionName = 'survey_categories_' . $this->record->id;
+                    // 카테고리가 있으면 저장
                     update_option($optionName, [
                         'survey_id' => $this->record->id,
                         'categories' => $categoryData['categories']
                     ]);
+                } else {
+                    // 카테고리가 비어있으면 삭제
+                    delete_option($optionName);
                 }
+            } else {
+                // 카테고리 필드가 없으면 삭제
+                delete_option($optionName);
             }
-            
         }
     }
 }

@@ -13,12 +13,18 @@
     
     @foreach($categories as $category)
         <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                {{ $category['name'] }}
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                {{ is_array($category['name']) ? ($category['name']['kor'] ?? $category['name']['eng'] ?? '카테고리') : $category['name'] }}
                 <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
                     ({{ count($category['question_indices']) }}개 문항)
                 </span>
             </h3>
+            
+            @if(isset($category['description']))
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    {{ is_array($category['description']) ? ($category['description']['kor'] ?? $category['description']['eng'] ?? '') : $category['description'] }}
+                </p>
+            @endif
             
             <div class="space-y-2">
                 @foreach($category['question_indices'] as $index)

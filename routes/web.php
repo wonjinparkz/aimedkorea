@@ -76,8 +76,12 @@ Route::get('/surveys/{survey}/results/{response}', [App\Http\Controllers\SurveyC
 // 회복 점수 대시보드 라우트
 Route::middleware(['auth'])->group(function () {
     Route::get('/recovery-dashboard', [App\Http\Controllers\RecoveryDashboardController::class, 'index'])->name('recovery.dashboard');
+    Route::get('/recovery-dashboard/check', [App\Http\Controllers\RecoveryDashboardController::class, 'check'])->name('recovery.check');
+    Route::post('/recovery-dashboard/timeline/create', [App\Http\Controllers\RecoveryDashboardController::class, 'createTimeline'])->name('recovery.timeline.create');
+    Route::patch('/recovery-dashboard/timeline/{timeline}/status', [App\Http\Controllers\RecoveryDashboardController::class, 'updateTimelineStatus'])->name('recovery.timeline.status');
     Route::get('/recovery-dashboard/history', [App\Http\Controllers\RecoveryDashboardController::class, 'history'])->name('recovery.history');
     Route::match(['get', 'post'], '/recovery-dashboard/compare', [App\Http\Controllers\RecoveryDashboardController::class, 'compare'])->name('recovery.compare');
+    Route::post('/recovery/checkpoint/{checkpoint}/complete', [App\Http\Controllers\RecoveryDashboardController::class, 'completeCheckpoint'])->name('recovery.checkpoint.complete');
 });
 
 // 게시물 상세 페이지

@@ -37,6 +37,30 @@ class SurveyResource extends Resource
     {
         return $form
             ->schema([
+                // 설문 유형 표시 (수정 시에만)
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\Placeholder::make('survey_type')
+                            ->label('설문 유형')
+                            ->content(function ($record) {
+                                if (!$record) return '새 설문 (간편 분석)';
+                                if ($record->is_detailed) {
+                                    $parent = $record->parent;
+                                    return '심층 분석 문항' . ($parent ? ' (원본: ' . $parent->getTitle('kor') . ')' : '');
+                                }
+                                $detailed = $record->detailedVersion;
+                                return '간편 분석 문항' . ($detailed ? ' (심층 버전 있음)' : '');
+                            })
+                            ->helperText(function ($record) {
+                                if (!$record) return '저장 후 심층 문항을 생성할 수 있습니다.';
+                                if ($record->is_detailed) return '이 설문은 심층 분석 전용입니다.';
+                                if (!$record->detailedVersion) return '액션 메뉴에서 심층 문항을 생성할 수 있습니다.';
+                                return '이미 심층 버전이 존재합니다.';
+                            }),
+                    ])
+                    ->collapsible(false)
+                    ->visible(fn ($record) => $record !== null),
+                    
                 // 기본 정보 섹션 - 모든 언어 표시
                 Forms\Components\Section::make('기본 정보')
                     ->description('모든 언어의 설문 제목과 설명을 입력하세요.')
@@ -110,7 +134,7 @@ class SurveyResource extends Resource
                 Forms\Components\Section::make('체크리스트 항목')
                     ->description('설문 응답 선택 항목을 설정합니다. 모든 언어의 번역을 함께 입력할 수 있습니다.')
                     ->schema([
-                        Forms\Components\Repeater::make('checklist_items_unified')
+                        Forms\Components\Repeater::make('checklist_items_translations')
                             ->label('')
                             ->schema([
                                 Forms\Components\Grid::make(6)
@@ -164,6 +188,14 @@ class SurveyResource extends Resource
                                 $languages = ['kor', 'eng', 'chn', 'hin', 'arb'];
                                 $result = [];
                                 
+                                // state가 비어있으면 빈 배열 반환
+                                if (empty($state)) {
+                                    foreach ($languages as $lang) {
+                                        $result[$lang] = [];
+                                    }
+                                    return $result;
+                                }
+                                
                                 foreach ($languages as $lang) {
                                     $result[$lang] = [];
                                     foreach ($state as $item) {
@@ -211,7 +243,7 @@ class SurveyResource extends Resource
                 Forms\Components\Section::make('빈도 평가 항목')
                     ->description('설문 응답의 빈도 평가 항목을 설정합니다. 기본 5개 항목이 제공되며 수정 가능합니다.')
                     ->schema([
-                        Forms\Components\Repeater::make('frequency_items_unified')
+                        Forms\Components\Repeater::make('frequency_items_translations')
                             ->label('')
                             ->schema([
                                 Forms\Components\Grid::make(6)
@@ -270,6 +302,14 @@ class SurveyResource extends Resource
                                 $languages = ['kor', 'eng', 'chn', 'hin', 'arb'];
                                 $result = [];
                                 
+                                // state가 비어있으면 빈 배열 반환
+                                if (empty($state)) {
+                                    foreach ($languages as $lang) {
+                                        $result[$lang] = [];
+                                    }
+                                    return $result;
+                                }
+                                
                                 foreach ($languages as $lang) {
                                     $result[$lang] = [];
                                     foreach ($state as $item) {
@@ -317,7 +357,7 @@ class SurveyResource extends Resource
                 Forms\Components\Section::make('설문 문항')
                     ->description('설문 문항을 입력합니다. 각 문항에 대해 모든 언어의 번역을 함께 입력할 수 있습니다.')
                     ->schema([
-                        Forms\Components\Repeater::make('questions_unified')
+                        Forms\Components\Repeater::make('questions_translations')
                             ->label('')
                             ->schema([
                                 Forms\Components\Grid::make(1)
@@ -408,6 +448,14 @@ class SurveyResource extends Resource
                                 // 저장 시 언어별로 분리하여 저장
                                 $languages = ['kor', 'eng', 'chn', 'hin', 'arb'];
                                 $result = [];
+                                
+                                // state가 비어있으면 빈 배열 반환
+                                if (empty($state)) {
+                                    foreach ($languages as $lang) {
+                                        $result[$lang] = [];
+                                    }
+                                    return $result;
+                                }
                                 
                                 foreach ($languages as $lang) {
                                     $result[$lang] = [];
@@ -500,14 +548,8 @@ class SurveyResource extends Resource
                     ->default([]),
                 Forms\Components\Hidden::make('questions')
                     ->default([]),
-                Forms\Components\Hidden::make('checklist_items_translations')
-                    ->dehydrateStateUsing(fn ($get) => $get('checklist_items_unified')),
                 Forms\Components\Hidden::make('frequency_items')
                     ->default([]),
-                Forms\Components\Hidden::make('frequency_items_translations')
-                    ->dehydrateStateUsing(fn ($get) => $get('frequency_items_unified')),
-                Forms\Components\Hidden::make('questions_translations')
-                    ->dehydrateStateUsing(fn ($get) => $get('questions_unified')),
                     
                 // 설문 이미지 섹션
                 Forms\Components\Section::make('설문 이미지')
@@ -573,7 +615,7 @@ class SurveyResource extends Resource
                                     ->required()
                                     ->options(function (Forms\Get $get) {
                                         // 통합된 문항 데이터에서 옵션 생성 (한국어만)
-                                        $questions = $get('../../questions_unified') ?? [];
+                                        $questions = $get('../../questions_translations') ?? $get('../../questions_unified') ?? [];
                                         $options = [];
                                         
                                         foreach ($questions as $index => $question) {
@@ -664,14 +706,28 @@ class SurveyResource extends Resource
                                 // 저장된 데이터를 폼 형식으로 변환 (다국어 카테고리명과 문항)
                                 $formData = [];
                                 foreach ($savedData['categories'] as $category) {
-                                    $formCategory = [
-                                        'category_name_kor' => $category['translations']['kor']['name'] ?? $category['name'] ?? '',
-                                        'category_name_eng' => $category['translations']['eng']['name'] ?? '',
-                                        'category_name_chn' => $category['translations']['chn']['name'] ?? '',
-                                        'category_name_hin' => $category['translations']['hin']['name'] ?? '',
-                                        'category_name_arb' => $category['translations']['arb']['name'] ?? '',
-                                        'question_indices' => $category['question_indices'] ?? [],
-                                    ];
+                                    // 새로운 데이터 형식 처리 (name이 배열인 경우)
+                                    if (isset($category['name']) && is_array($category['name'])) {
+                                        $formCategory = [
+                                            'category_name_kor' => $category['name']['kor'] ?? '',
+                                            'category_name_eng' => $category['name']['eng'] ?? '',
+                                            'category_name_chn' => $category['name']['chn'] ?? '',
+                                            'category_name_hin' => $category['name']['hin'] ?? '',
+                                            'category_name_arb' => $category['name']['arb'] ?? '',
+                                            'question_indices' => $category['question_indices'] ?? [],
+                                        ];
+                                    } 
+                                    // 기존 데이터 형식 처리 (translations 구조)
+                                    else {
+                                        $formCategory = [
+                                            'category_name_kor' => $category['translations']['kor']['name'] ?? $category['name'] ?? '',
+                                            'category_name_eng' => $category['translations']['eng']['name'] ?? '',
+                                            'category_name_chn' => $category['translations']['chn']['name'] ?? '',
+                                            'category_name_hin' => $category['translations']['hin']['name'] ?? '',
+                                            'category_name_arb' => $category['translations']['arb']['name'] ?? '',
+                                            'question_indices' => $category['question_indices'] ?? [],
+                                        ];
+                                    }
                                     $formData[] = $formCategory;
                                 }
                                 
@@ -679,7 +735,7 @@ class SurveyResource extends Resource
                             })
                     ])
                     ->description('설문 문항을 먼저 생성한 후, 카테고리를 설정할 수 있습니다.')
-                    ->visible(fn (Forms\Get $get) => count($get('questions_unified') ?? []) > 0),
+                    ->visible(fn (Forms\Get $get) => count($get('questions_translations') ?? $get('questions_unified') ?? []) > 0),
                     
                 // 결과 해설 섹션
                 Forms\Components\Section::make('노화지수별 결과 해설')
@@ -847,11 +903,33 @@ class SurveyResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\BadgeColumn::make('type')
+                    ->label('유형')
+                    ->getStateUsing(function ($record) {
+                        if ($record->is_detailed) return '심층';
+                        if ($record->detailedVersion) return '간편';
+                        return '간편';
+                    })
+                    ->colors([
+                        'success' => '간편',
+                        'warning' => '심층',
+                    ])
+                    ->icons([
+                        'heroicon-o-check-circle' => '간편',
+                        'heroicon-o-academic-cap' => '심층',
+                    ]),
                 Tables\Columns\TextColumn::make('title')
                     ->label('설문 제목')
-                    ->getStateUsing(fn ($record) => $record->getTitle('kor'))
+                    ->getStateUsing(function ($record) {
+                        $title = $record->getTitle('kor');
+                        if ($record->is_detailed && $record->parent_id) {
+                            return '　└ ' . $title;  // 들여쓰기 표시
+                        }
+                        return $title;
+                    })
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->html(),
                 Tables\Columns\TextColumn::make('description')
                     ->label('설명')
                     ->getStateUsing(fn ($record) => $record->getDescription('kor'))
@@ -884,6 +962,82 @@ class SurveyResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('createDetailedVersion')
+                    ->label('심층 문항 생성')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('success')
+                    ->modalHeading('심층 분석 문항 생성')
+                    ->modalDescription('이 설문의 심층 분석 버전을 생성합니다.')
+                    ->form([
+                        Forms\Components\Radio::make('copy_content')
+                            ->label('문항 복사 옵션')
+                            ->options([
+                                'copy_all' => '모든 문항과 카테고리 정보 복사',
+                                'empty' => '빈 심층 문항으로 생성 (직접 입력)'
+                            ])
+                            ->default('copy_all')
+                            ->required()
+                            ->helperText('복사된 문항은 심층 분석 전용으로 수정할 수 있습니다.')
+                    ])
+                    ->action(function (array $data, $record) {
+                        // 이미 심층 버전이 있는지 확인
+                        if ($record->detailedVersion()->exists()) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('이미 심층 분석 버전이 존재합니다')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        $detailedSurvey = new \App\Models\Survey();
+                        
+                        if ($data['copy_content'] === 'copy_all') {
+                            // 모든 데이터 복사
+                            $detailedSurvey->fill($record->toArray());
+                            $detailedSurvey->title = $record->title . ' (심층 분석)';
+                            
+                            // 다국어 제목도 업데이트
+                            $titleTranslations = $record->title_translations ?? [];
+                            foreach ($titleTranslations as $lang => $title) {
+                                $titleTranslations[$lang] = $title . ' (Detailed)';
+                            }
+                            $detailedSurvey->title_translations = $titleTranslations;
+                        } else {
+                            // 빈 설문 생성
+                            $detailedSurvey->title = $record->title . ' (심층 분석)';
+                            $detailedSurvey->description = '심층 분석을 위한 설문입니다.';
+                            $detailedSurvey->questions = [];
+                            $detailedSurvey->checklist_items = [];
+                            $detailedSurvey->frequency_items = [];
+                        }
+                        
+                        // 부모 ID와 심층 여부 설정
+                        $detailedSurvey->parent_id = $record->id;
+                        $detailedSurvey->is_detailed = true;
+                        
+                        $detailedSurvey->save();
+                        
+                        // 카테고리 데이터도 복사
+                        if ($data['copy_content'] === 'copy_all') {
+                            $originalCategories = get_option('survey_categories_' . $record->id);
+                            if ($originalCategories) {
+                                update_option('survey_categories_' . $detailedSurvey->id, $originalCategories);
+                            }
+                        }
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('심층 분석 문항이 생성되었습니다')
+                            ->success()
+                            ->send();
+                            
+                        // 생성된 심층 문항 편집 페이지로 이동
+                        return redirect()->route('filament.admin.resources.surveys.edit', $detailedSurvey);
+                    })
+                    ->visible(function ($record) {
+                        // 간편 분석 문항이고 심층 버전이 없는 경우에만 표시
+                        return $record && !$record->is_detailed && !$record->parent_id && !$record->detailedVersion()->exists();
+                    })
+                    ->requiresConfirmation(),
                 Tables\Actions\Action::make('viewCategories')
                     ->label('카테고리 보기')
                     ->icon('heroicon-o-tag')
@@ -1251,6 +1405,13 @@ class SurveyResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['detailedVersion', 'parent'])
+            ->orderByRaw('COALESCE(parent_id, id), is_detailed');
+    }
+    
     public static function getPages(): array
     {
         return [

@@ -16,13 +16,63 @@
         showTimeWarning: false,
         minimumTimePerQuestion: 1500,
         
+        get currentQuestions() {
+            if (!this.surveys[this.selectedSurvey]) return [];
+            if (this.analysisType === 'detailed' && this.surveys[this.selectedSurvey].detailed_questions) {
+                return this.surveys[this.selectedSurvey].detailed_questions;
+            }
+            return this.surveys[this.selectedSurvey].questions || [];
+        },
+        
+        get currentChecklistItems() {
+            if (!this.surveys[this.selectedSurvey]) return [];
+            if (this.analysisType === 'detailed' && this.surveys[this.selectedSurvey].detailed_checklist_items) {
+                return this.surveys[this.selectedSurvey].detailed_checklist_items;
+            }
+            return this.surveys[this.selectedSurvey].checklist_items || [];
+        },
+        
         init() {
-            // ID가 1인 설문을 찾아서 선택
-            let surveyIndex = this.surveys.findIndex(survey => survey.id === 1);
-            this.selectedSurvey = surveyIndex !== -1 ? surveyIndex : 0;
+            // URL 파라미터 확인
+            const urlParams = new URLSearchParams(window.location.search);
+            const surveyId = urlParams.get('survey_id');
+            const analysisTypeParam = urlParams.get('analysis_type');
             
-            // showQuestions 초기값을 false로 설정
-            this.showQuestions = false;
+            // survey_id가 있으면 해당 설문 선택
+            if (surveyId) {
+                let surveyIndex = this.surveys.findIndex(survey => survey.id == surveyId);
+                if (surveyIndex !== -1) {
+                    this.selectedSurvey = surveyIndex;
+                    // analysis_type 파라미터가 있으면 설정
+                    if (analysisTypeParam) {
+                        this.analysisType = analysisTypeParam;
+                        // 자동으로 질문 표시
+                        setTimeout(() => {
+                            this.showQuestions = true;
+                            this.loadSavedData();
+                            this.startPageTimer();
+                            // 해당 설문으로 스크롤
+                            const surveyElement = document.getElementById(`survey-${surveyId}`);
+                            if (surveyElement) {
+                                surveyElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        }, 500);
+                    }
+                } else {
+                    // ID가 1인 설문을 찾아서 선택 (기본값)
+                    let defaultIndex = this.surveys.findIndex(survey => survey.id === 1);
+                    this.selectedSurvey = defaultIndex !== -1 ? defaultIndex : 0;
+                }
+            } else {
+                // ID가 1인 설문을 찾아서 선택 (기본값)
+                let surveyIndex = this.surveys.findIndex(survey => survey.id === 1);
+                this.selectedSurvey = surveyIndex !== -1 ? surveyIndex : 0;
+            }
+            
+            // showQuestions 초기값을 false로 설정 (URL 파라미터가 없는 경우)
+            if (!surveyId || !analysisTypeParam) {
+                this.showQuestions = false;
+            }
             
             // 페이지 시작 시간 기록 함수
             this.startPageTimer = () => {
@@ -36,7 +86,7 @@
                 
                 const timeSpent = Date.now() - this.pageStartTime;
                 const questionsOnPage = Math.min(this.questionsPerPage, 
-                    this.surveys[this.selectedSurvey].questions.length - (this.currentPage * this.questionsPerPage));
+                    this.currentQuestions.length - (this.currentPage * this.questionsPerPage));
                 const minimumRequired = questionsOnPage * this.minimumTimePerQuestion;
                 
                 console.log(`[Timer] Page ${this.currentPage + 1} - Time spent: ${timeSpent}ms, Minimum required: ${minimumRequired}ms`);
@@ -215,7 +265,8 @@
                     <!-- 설문 버튼 섹션 -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         @foreach($surveys as $index => $survey)
-                        <button @click="selectedSurvey = {{ $index }}" 
+                        <button id="survey-{{ $survey->id }}"
+                                @click="selectedSurvey = {{ $index }}" 
                                 :class="{ 'ring-2 ring-indigo-500 bg-indigo-600 text-white': selectedSurvey === {{ $index }}, 
                                           'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200': selectedSurvey !== {{ $index }} }"
                                 class="relative p-4 rounded-lg transition-all duration-300 focus:outline-none text-left">
@@ -278,7 +329,15 @@
                                             {{ $buttonLabels[$currentLang]['detailed'] ?? $buttonLabels['kor']['detailed'] }}
                                         </button>
                                     @else
-                                        <button @click="showQuestions = true; analysisType = 'detailed'; loadSavedData();" 
+                                        <button @click="
+                                            if (surveys[selectedSurvey].has_detailed_version) {
+                                                showQuestions = true; 
+                                                analysisType = 'detailed'; 
+                                                loadSavedData();
+                                            } else {
+                                                alert('심층 분석 문항이 아직 준비되지 않았습니다.');
+                                            }
+                                        " 
                                                class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
                                             {{ $buttonLabels[$currentLang]['detailed'] ?? $buttonLabels['kor']['detailed'] }}
                                         </button>
@@ -301,12 +360,12 @@
                                     <div class="flex items-center justify-between mb-2">
                                         <span class="text-sm font-medium text-gray-700">진행 상황</span>
                                         <span class="text-sm font-medium text-indigo-600">
-                                            F<span x-text="currentPage + 1"></span> / F<span x-text="Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage)"></span>
+                                            F<span x-text="currentPage + 1"></span> / F<span x-text="Math.ceil(currentQuestions.length / questionsPerPage)"></span>
                                         </span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                                         <div class="h-full bg-indigo-600 rounded-full transition-all duration-500" 
-                                             :style="`width: ${((maxReachedPage + 1) / Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage)) * 100}%`"></div>
+                                             :style="`width: ${((maxReachedPage + 1) / Math.ceil(currentQuestions.length / questionsPerPage)) * 100}%`"></div>
                                     </div>
                                     
                                     <!-- 시간 경고 메시지 -->
@@ -330,7 +389,7 @@
                                     
                                     <!-- 페이지 인디케이터 -->
                                     <div class="flex items-center justify-center mt-4 space-x-2">
-                                        <template x-for="pageNum in Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage)" :key="pageNum">
+                                        <template x-for="pageNum in Math.ceil(currentQuestions.length / questionsPerPage)" :key="pageNum">
                                             <button type="button" 
                                                     @click="() => {
                                                         const targetPage = pageNum - 1;
@@ -371,17 +430,17 @@
                                     @php
                                         $currentLang = session('locale', 'kor');
                                         $analysisLabels = [
-                                            'kor' => ['simple' => '간편 분석', 'detailed' => '심층 분석 (최근 1주 기준)'],
-                                            'eng' => ['simple' => 'Simple Analysis', 'detailed' => 'Detailed Analysis (Past 1 Week)'],
-                                            'chn' => ['simple' => '简单分析', 'detailed' => '详细分析（近1周）'],
-                                            'hin' => ['simple' => 'सरल विश्लेषण', 'detailed' => 'विस्तृत विश्लेषण (पिछले 1 सप्ताह)'],
-                                            'arb' => ['simple' => 'تحليل بسيط', 'detailed' => 'تحليل مفصل (الأسبوع الماضي)']
+                                            'kor' => ['simple' => '간편 분석', 'detailed' => '심층 분석'],
+                                            'eng' => ['simple' => 'Simple Analysis', 'detailed' => 'Detailed Analysis'],
+                                            'chn' => ['simple' => '简单分析', 'detailed' => '详细分析'],
+                                            'hin' => ['simple' => 'सरल विश्लेषण', 'detailed' => 'विस्तृत विश्लेषण'],
+                                            'arb' => ['simple' => 'تحليل بسيط', 'detailed' => 'تحليل مفصل']
                                         ];
                                     @endphp
                                     <span x-text="analysisType === 'simple' ? '{{ $analysisLabels[$currentLang]['simple'] ?? $analysisLabels['kor']['simple'] }}' : '{{ $analysisLabels[$currentLang]['detailed'] ?? $analysisLabels['kor']['detailed'] }}'"></span>
                                 </p>
                                 
-                                <form method="POST" :action="`/surveys/${surveys[selectedSurvey].id}/responses`">
+                                <form method="POST" :action="`/surveys/${analysisType === 'detailed' && surveys[selectedSurvey].detailed_survey_id ? surveys[selectedSurvey].detailed_survey_id : surveys[selectedSurvey].id}/responses`">
                                     @csrf
                                     <input type="hidden" name="analysis_type" :value="analysisType">
                                     
@@ -392,19 +451,11 @@
                                         </template>
                                     </template>
                                     
-                                    <!-- 심층 분석의 경우 빈도 응답도 hidden input으로 저장 -->
-                                    <template x-if="analysisType === 'detailed'">
-                                        <template x-for="(freqResponse, index) in frequencyResponses" :key="`hidden-freq-${index}`">
-                                            <template x-if="currentPage === null || index < currentPage * questionsPerPage || index >= (currentPage + 1) * questionsPerPage">
-                                                <input type="hidden" :name="`frequency_responses[${index}]`" :value="freqResponse">
-                                            </template>
-                                        </template>
-                                    </template>
                                     
                                     <!-- 간편 분석 - 페이지네이션 적용 -->
-                                    <template x-if="analysisType === 'simple' && surveys[selectedSurvey] && surveys[selectedSurvey].questions">
+                                    <template x-if="analysisType === 'simple' && surveys[selectedSurvey] && currentQuestions">
                                         <div class="space-y-6">
-                                            <template x-for="(question, qIndex) in (surveys[selectedSurvey].questions || []).slice(currentPage * questionsPerPage, Math.min((currentPage + 1) * questionsPerPage, surveys[selectedSurvey].questions.length))" :key="`simple-${surveys[selectedSurvey].questions.indexOf(question)}`">
+                                            <template x-for="(question, qIndex) in currentQuestions.slice(currentPage * questionsPerPage, Math.min((currentPage + 1) * questionsPerPage, currentQuestions.length))" :key="`simple-${currentQuestions.indexOf(question)}`">
                                                 <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
                                                     <table class="w-full">
                                                         <tbody>
@@ -412,7 +463,7 @@
                                                             <tr class="bg-gray-50">
                                                                 <td class="p-4">
                                                                     <div class="flex items-start">
-                                                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-semibold mr-3 flex-shrink-0" x-text="surveys[selectedSurvey].questions.indexOf(question) + 1"></span>
+                                                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-semibold mr-3 flex-shrink-0" x-text="currentQuestions.indexOf(question) + 1"></span>
                                                                         <span class="text-sm font-medium text-gray-700" x-text="question.label"></span>
                                                                     </div>
                                                                 </td>
@@ -425,10 +476,10 @@
                                                                             <template x-for="(option, oIndex) in question.specific_checklist_items" :key="oIndex">
                                                                                 <label class="inline-flex items-center cursor-pointer">
                                                                                     <input type="radio" 
-                                                                                           :name="`responses[${surveys[selectedSurvey].questions.indexOf(question)}]`" 
+                                                                                           :name="`responses[${currentQuestions.indexOf(question)}]`" 
                                                                                            :value="oIndex"
-                                                                                           x-model="responses[surveys[selectedSurvey].questions.indexOf(question)]"
-                                                                                           :checked="responses[surveys[selectedSurvey].questions.indexOf(question)] == oIndex"
+                                                                                           x-model="responses[currentQuestions.indexOf(question)]"
+                                                                                           :checked="responses[currentQuestions.indexOf(question)] == oIndex"
                                                                                            @change="$nextTick(() => { responses = {...responses} })"
                                                                                            class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
                                                                                     <span class="text-sm text-gray-600" x-text="option.label"></span>
@@ -436,13 +487,13 @@
                                                                             </template>
                                                                         </template>
                                                                         <template x-if="!question.has_specific_checklist">
-                                                                            <template x-for="(option, oIndex) in surveys[selectedSurvey].checklist_items" :key="oIndex">
+                                                                            <template x-for="(option, oIndex) in currentChecklistItems" :key="oIndex">
                                                                                 <label class="inline-flex items-center cursor-pointer">
                                                                                     <input type="radio" 
-                                                                                           :name="`responses[${surveys[selectedSurvey].questions.indexOf(question)}]`" 
+                                                                                           :name="`responses[${currentQuestions.indexOf(question)}]`" 
                                                                                            :value="oIndex"
-                                                                                           x-model="responses[surveys[selectedSurvey].questions.indexOf(question)]"
-                                                                                           :checked="responses[surveys[selectedSurvey].questions.indexOf(question)] == oIndex"
+                                                                                           x-model="responses[currentQuestions.indexOf(question)]"
+                                                                                           :checked="responses[currentQuestions.indexOf(question)] == oIndex"
                                                                                            @change="$nextTick(() => { responses = {...responses} })"
                                                                                            class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
                                                                                     <span class="text-sm text-gray-600" x-text="option.label"></span>
@@ -459,18 +510,18 @@
                                         </div>
                                     </template>
                                     
-                                    <!-- 심층 분석 - 페이지네이션 적용 + 빈도 평가 추가 -->
-                                    <template x-if="analysisType === 'detailed' && surveys[selectedSurvey] && surveys[selectedSurvey].questions">
+                                    <!-- 심층 분석 - 페이지네이션 적용 (빈도 평가 제거) -->
+                                    <template x-if="analysisType === 'detailed' && surveys[selectedSurvey] && currentQuestions">
                                         <div class="space-y-6">
-                                            <template x-for="(question, qIndex) in (surveys[selectedSurvey].questions || []).slice(currentPage * questionsPerPage, Math.min((currentPage + 1) * questionsPerPage, surveys[selectedSurvey].questions.length))" :key="`detailed-${surveys[selectedSurvey].questions.indexOf(question)}`">
+                                            <template x-for="(question, qIndex) in currentQuestions.slice(currentPage * questionsPerPage, Math.min((currentPage + 1) * questionsPerPage, currentQuestions.length))" :key="`detailed-${currentQuestions.indexOf(question)}`">
                                                 <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
                                                     <table class="w-full">
                                                         <tbody>
                                                             <!-- 질문 행 -->
-                                                            <tr class="bg-gray-50">
+                                                            <tr class="bg-gradient-to-r from-green-50 to-green-100">
                                                                 <td class="p-4">
                                                                     <div class="flex items-start">
-                                                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-semibold mr-3 flex-shrink-0" x-text="surveys[selectedSurvey].questions.indexOf(question) + 1"></span>
+                                                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-green-600 text-white rounded-full text-xs font-semibold mr-3 flex-shrink-0" x-text="currentQuestions.indexOf(question) + 1"></span>
                                                                         <span class="text-sm font-medium text-gray-700" x-text="question.label"></span>
                                                                     </div>
                                                                 </td>
@@ -481,69 +532,31 @@
                                                                     <div class="flex flex-wrap gap-4">
                                                                         <template x-if="question.has_specific_checklist && question.specific_checklist_items">
                                                                             <template x-for="(option, oIndex) in question.specific_checklist_items" :key="oIndex">
-                                                                                <label class="inline-flex items-center cursor-pointer">
+                                                                                <label class="inline-flex items-center cursor-pointer hover:bg-green-50 px-3 py-2 rounded-lg transition-colors">
                                                                                     <input type="radio" 
-                                                                                           :name="`responses[${surveys[selectedSurvey].questions.indexOf(question)}]`" 
+                                                                                           :name="`responses[${currentQuestions.indexOf(question)}]`" 
                                                                                            :value="oIndex"
-                                                                                           x-model="responses[surveys[selectedSurvey].questions.indexOf(question)]"
-                                                                                           :checked="responses[surveys[selectedSurvey].questions.indexOf(question)] == oIndex"
+                                                                                           x-model="responses[currentQuestions.indexOf(question)]"
+                                                                                           :checked="responses[currentQuestions.indexOf(question)] == oIndex"
                                                                                            @change="$nextTick(() => { responses = {...responses} })"
-                                                                                           class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
+                                                                                           class="w-4 h-4 text-green-600 focus:ring-green-500 mr-2">
                                                                                     <span class="text-sm text-gray-600" x-text="option.label"></span>
                                                                                 </label>
                                                                             </template>
                                                                         </template>
                                                                         <template x-if="!question.has_specific_checklist">
-                                                                            <template x-for="(option, oIndex) in surveys[selectedSurvey].checklist_items" :key="oIndex">
-                                                                                <label class="inline-flex items-center cursor-pointer">
+                                                                            <template x-for="(option, oIndex) in currentChecklistItems" :key="oIndex">
+                                                                                <label class="inline-flex items-center cursor-pointer hover:bg-green-50 px-3 py-2 rounded-lg transition-colors">
                                                                                     <input type="radio" 
-                                                                                           :name="`responses[${surveys[selectedSurvey].questions.indexOf(question)}]`" 
+                                                                                           :name="`responses[${currentQuestions.indexOf(question)}]`" 
                                                                                            :value="oIndex"
-                                                                                           x-model="responses[surveys[selectedSurvey].questions.indexOf(question)]"
-                                                                                           :checked="responses[surveys[selectedSurvey].questions.indexOf(question)] == oIndex"
+                                                                                           x-model="responses[currentQuestions.indexOf(question)]"
+                                                                                           :checked="responses[currentQuestions.indexOf(question)] == oIndex"
                                                                                            @change="$nextTick(() => { responses = {...responses} })"
-                                                                                           class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
+                                                                                           class="w-4 h-4 text-green-600 focus:ring-green-500 mr-2">
                                                                                     <span class="text-sm text-gray-600" x-text="option.label"></span>
                                                                                 </label>
                                                                             </template>
-                                                                        </template>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <!-- 빈도 평가 질문 행 -->
-                                                            <tr class="bg-gray-50 border-t border-gray-200">
-                                                                <td class="p-4">
-                                                                    <div class="flex items-start">
-                                                                        <span class="text-sm font-medium text-gray-700">
-                                                                            @php
-                                                                                $currentLang = session('locale', 'kor');
-                                                                                $frequencyLabels = [
-                                                                                    'kor' => '빈도 평가 (최근 1주 기준)',
-                                                                                    'eng' => 'Frequency Assessment (Past 1 Week)',
-                                                                                    'chn' => '频率评估（近1周）',
-                                                                                    'hin' => 'आवृत्ति मूल्यांकन (पिछले 1 सप्ताह)',
-                                                                                    'arb' => 'تقييم التكرار (الأسبوع الماضي)'
-                                                                                ];
-                                                                                echo $frequencyLabels[$currentLang] ?? $frequencyLabels['kor'];
-                                                                            @endphp
-                                                                        </span>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <!-- 빈도 평가 선택지 행 -->
-                                                            <tr>
-                                                                <td class="p-4">
-                                                                    <div class="flex flex-wrap gap-4">
-                                                                        <template x-for="(option, oIndex) in surveys[selectedSurvey].frequency_items" :key="oIndex">
-                                                                            <label class="inline-flex items-center cursor-pointer">
-                                                                                <input type="radio" 
-                                                                                       :name="`frequency_responses[${qIndex}]`" 
-                                                                                       :value="oIndex"
-                                                                                       x-model="frequencyResponses[qIndex]"
-                                                                                       :checked="frequencyResponses[qIndex] == oIndex"
-                                                                                       class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 mr-2">
-                                                                                <span class="text-sm text-gray-600" x-text="option.label"></span>
-                                                                            </label>
                                                                         </template>
                                                                     </div>
                                                                 </td>
@@ -578,18 +591,14 @@
                                             </button>
                                             
                                             <!-- 다음/제출 버튼 -->
-                                            <template x-if="currentPage < Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage) - 1">
+                                            <template x-if="currentPage < Math.ceil(currentQuestions.length / questionsPerPage) - 1">
                                                 <button type="button" 
                                                         @click="() => {
                                                             const startIdx = currentPage * questionsPerPage;
-                                                            const endIdx = Math.min((currentPage + 1) * questionsPerPage, surveys[selectedSurvey].questions.length);
+                                                            const endIdx = Math.min((currentPage + 1) * questionsPerPage, currentQuestions.length);
                                                             let allAnswered = true;
                                                             for (let i = startIdx; i < endIdx; i++) {
                                                                 if (!responses.hasOwnProperty(i)) {
-                                                                    allAnswered = false;
-                                                                    break;
-                                                                }
-                                                                if (analysisType === 'detailed' && !frequencyResponses.hasOwnProperty(i)) {
                                                                     allAnswered = false;
                                                                     break;
                                                                 }
@@ -601,7 +610,7 @@
                                                             
                                                             // 시간 검증
                                                             if (!validateResponseTime()) {
-                                                                const questionsOnPage = Math.min(questionsPerPage, surveys[selectedSurvey].questions.length - (currentPage * questionsPerPage));
+                                                                const questionsOnPage = Math.min(questionsPerPage, currentQuestions.length - (currentPage * questionsPerPage));
                                                                 const timeSpent = Date.now() - pageStartTime;
                                                                 const minimumRequired = questionsOnPage * minimumTimePerQuestion;
                                                                 const remainingTime = Math.ceil((minimumRequired - timeSpent) / 1000);
@@ -611,7 +620,7 @@
                                                                 return;
                                                             }
                                                             
-                                                            currentPage = Math.min(Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage) - 1, currentPage + 1);
+                                                            currentPage = Math.min(Math.ceil(currentQuestions.length / questionsPerPage) - 1, currentPage + 1);
                                                         }"
                                                         class="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-500">
                                                     다음
@@ -621,13 +630,12 @@
                                                 </button>
                                             </template>
                                             
-                                            <template x-if="currentPage === Math.ceil(surveys[selectedSurvey].questions.length / questionsPerPage) - 1">
+                                            <template x-if="currentPage === Math.ceil(currentQuestions.length / questionsPerPage) - 1">
                                                 <button type="submit" 
                                                         @click="(e) => {
-                                                            const allAnswered = surveys[selectedSurvey].questions.every((q, idx) => responses.hasOwnProperty(idx));
-                                                            const allFreqAnswered = analysisType === 'detailed' ? surveys[selectedSurvey].questions.every((q, idx) => frequencyResponses.hasOwnProperty(idx)) : true;
+                                                            const allAnswered = currentQuestions.every((q, idx) => responses.hasOwnProperty(idx));
                                                             
-                                                            if (!allAnswered || !allFreqAnswered) {
+                                                            if (!allAnswered) {
                                                                 e.preventDefault();
                                                                 alert('모든 문항에 답변해주세요.');
                                                                 return;
@@ -636,7 +644,7 @@
                                                             // 마지막 페이지 시간 검증
                                                             if (!validateResponseTime()) {
                                                                 e.preventDefault();
-                                                                const questionsOnPage = Math.min(questionsPerPage, surveys[selectedSurvey].questions.length - (currentPage * questionsPerPage));
+                                                                const questionsOnPage = Math.min(questionsPerPage, currentQuestions.length - (currentPage * questionsPerPage));
                                                                 const timeSpent = Date.now() - pageStartTime;
                                                                 const minimumRequired = questionsOnPage * minimumTimePerQuestion;
                                                                 const remainingTime = Math.ceil((minimumRequired - timeSpent) / 1000);

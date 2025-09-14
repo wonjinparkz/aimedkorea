@@ -9,6 +9,20 @@
                 
                 // 다국어 텍스트 정의
                 $translations = [
+                    'start_simple_check' => [
+                        'kor' => '간편체크 시작',
+                        'eng' => 'Start Simple Check',
+                        'chn' => '开始简单检查',
+                        'hin' => 'सरल जांच शुरू करें',
+                        'arb' => 'بدء الفحص البسيط'
+                    ],
+                    'start_deep_check' => [
+                        'kor' => '심층체크(12주) 시작',
+                        'eng' => 'Start Deep Check (12 weeks)',
+                        'chn' => '开始深度检查（12周）',
+                        'hin' => 'गहन जांच शुरू करें (12 सप्ताह)',
+                        'arb' => 'بدء الفحص العميق (12 أسبوع)'
+                    ],
                     'aging_index_desc' => [
                         'kor' => '귀하의 디지털 노화 상태를 나타내는 노화지수입니다.',
                         'eng' => 'This is your aging index indicating your digital aging status.',
@@ -213,6 +227,31 @@
                         </div>
                     </div>
                 @endif
+            </div>
+
+            <!-- CTA 버튼 섹션 -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-200">
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <!-- 간편체크 시작 버튼 -->
+                    <a href="{{ route('surveys.index') }}?survey_id={{ $survey->parent_id ?? $survey->id }}&analysis_type=simple#survey-{{ $survey->parent_id ?? $survey->id }}" 
+                       onclick="trackEvent('simple_check_start', { survey_id: {{ $survey->parent_id ?? $survey->id }} })"
+                       class="inline-flex items-center px-6 py-3 bg-white border-2 border-blue-500 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        {{ $translations['start_simple_check'][$currentLang] ?? $translations['start_simple_check']['kor'] }}
+                    </a>
+                    
+                    <!-- 심층체크(12주) 시작 버튼 -->
+                    <a href="{{ route('surveys.index') }}?survey_id={{ $survey->parent_id ?? $survey->id }}&analysis_type=detailed#survey-{{ $survey->parent_id ?? $survey->id }}" 
+                       onclick="trackEvent('deep_check_start', { survey_id: {{ $survey->parent_id ?? $survey->id }}, event_name: 'deep_start' }); trackEvent('deep_offer_shown', { survey_id: {{ $survey->parent_id ?? $survey->id }} })"
+                       class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        {{ $translations['start_deep_check'][$currentLang] ?? $translations['start_deep_check']['kor'] }}
+                    </a>
+                </div>
             </div>
 
             <!-- 면책 고지 (상단) -->
@@ -708,6 +747,31 @@
         if (mainContainer) {
             mainContainer.appendChild(versionStamp);
         }
+    });
+    
+    // 이벤트 추적 함수
+    function trackEvent(eventName, eventParams) {
+        // Google Analytics 이벤트 추적
+        if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, eventParams);
+        }
+        
+        // 콘솔 로그 (디버깅용)
+        console.log('Event tracked:', eventName, eventParams);
+        
+        // 페이지 로드 시 deep_offer_shown 이벤트 자동 발생
+        if (eventName === 'deep_check_start') {
+            // deep_start 이벤트는 클릭 시에만 발생
+            return true;
+        }
+    }
+    
+    // 페이지 로드 시 deep_offer_shown 이벤트 발생
+    document.addEventListener('DOMContentLoaded', function() {
+        trackEvent('deep_offer_shown', { 
+            survey_id: {{ $survey->parent_id ?? $survey->id }},
+            page: 'results'
+        });
     });
     </script>
 </x-app-layout>

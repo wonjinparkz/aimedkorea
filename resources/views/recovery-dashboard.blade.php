@@ -7,6 +7,22 @@
                     회복 점수 대시보드
                 </h1>
                 <p class="text-xl text-gray-600">{{ Auth::user()->name }}님의 건강 회복 상태를 한눈에 확인하세요</p>
+                
+                <!-- 네비게이션 버튼 -->
+                <div class="mt-4 flex justify-center space-x-4">
+                    <a href="{{ route('recovery.dashboard') }}" 
+                       class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold">
+                        대시보드
+                    </a>
+                    <a href="{{ route('recovery.check') }}" 
+                       class="px-4 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition duration-200">
+                        12주 프로그램 관리
+                    </a>
+                    <a href="{{ route('recovery.history') }}" 
+                       class="px-4 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition duration-200">
+                        이력 보기
+                    </a>
+                </div>
             </div>
 
             <!-- 개선율 알림 -->

@@ -24,6 +24,8 @@ class Survey extends Model
         'survey_image',
         'result_commentary',
         'category_analysis_description',
+        'parent_id',
+        'is_detailed',
     ];
 
     protected $casts = [
@@ -37,11 +39,44 @@ class Survey extends Model
         'questions_translations' => 'array',
         'result_commentary' => 'array',
         'category_analysis_description' => 'array',
+        'is_detailed' => 'boolean',
     ];
 
     public function responses()
     {
         return $this->hasMany(SurveyResponse::class);
+    }
+
+    /**
+     * 부모 설문 (간편 분석)
+     */
+    public function parent()
+    {
+        return $this->belongsTo(Survey::class, 'parent_id');
+    }
+
+    /**
+     * 자식 설문 (심층 분석)
+     */
+    public function detailedVersion()
+    {
+        return $this->hasOne(Survey::class, 'parent_id')->where('is_detailed', true);
+    }
+
+    /**
+     * 간편 분석 버전인지 확인
+     */
+    public function isSimple()
+    {
+        return !$this->is_detailed && !$this->parent_id;
+    }
+
+    /**
+     * 심층 분석 버전인지 확인
+     */
+    public function isDetailed()
+    {
+        return $this->is_detailed && $this->parent_id;
     }
     
     /**
@@ -64,10 +99,34 @@ class Survey extends Model
         
         // 문항 카테고리 처리
         foreach ($categories as $category) {
+            // Check if category has translations structure or direct language keys
+            if (isset($category['translations'])) {
+                // Old structure with translations key
+                $name = $category['translations'][$language]['name'] ?? $category['name'] ?? '';
+                $description = $category['translations'][$language]['description'] ?? '';
+                $resultDescription = $category['translations'][$language]['result_description'] ?? '';
+            } else {
+                // New structure with direct language keys in name, description, etc.
+                $name = isset($category['name'][$language]) ? $category['name'][$language] : (isset($category['name']) && is_string($category['name']) ? $category['name'] : '');
+                $description = isset($category['description'][$language]) ? $category['description'][$language] : (isset($category['description']) && is_string($category['description']) ? $category['description'] : '');
+                $resultDescription = isset($category['result_description'][$language]) ? $category['result_description'][$language] : (isset($category['result_description']) && is_string($category['result_description']) ? $category['result_description'] : '');
+            }
+            
+            // Ensure all values are strings
+            if (is_array($name)) {
+                $name = isset($name[$language]) ? $name[$language] : (isset($name['text']) ? $name['text'] : (isset($name[0]) ? $name[0] : ''));
+            }
+            if (is_array($description)) {
+                $description = isset($description[$language]) ? $description[$language] : (isset($description['text']) ? $description['text'] : (isset($description[0]) ? $description[0] : ''));
+            }
+            if (is_array($resultDescription)) {
+                $resultDescription = isset($resultDescription[$language]) ? $resultDescription[$language] : (isset($resultDescription['text']) ? $resultDescription['text'] : (isset($resultDescription[0]) ? $resultDescription[0] : ''));
+            }
+            
             $translatedCategory = [
-                'name' => $category['translations'][$language]['name'] ?? $category['name'] ?? '',
-                'description' => $category['translations'][$language]['description'] ?? '',
-                'result_description' => $category['translations'][$language]['result_description'] ?? '',
+                'name' => (string)$name,
+                'description' => (string)$description,
+                'result_description' => (string)$resultDescription,
                 'question_indices' => $category['question_indices'] ?? []
             ];
             $result[] = $translatedCategory;
@@ -75,24 +134,64 @@ class Survey extends Model
         
         // 설명만 있는 카테고리 추가
         foreach ($descriptions as $desc) {
+            // Check if desc has translations structure or direct language keys
+            if (isset($desc['translations'])) {
+                // Old structure with translations key
+                $descName = $desc['translations'][$language]['name'] ?? $desc['name'] ?? '';
+                $descDescription = $desc['translations'][$language]['description'] ?? '';
+                $descResultDescription = $desc['translations'][$language]['result_description'] ?? '';
+            } else {
+                // New structure with direct language keys
+                $descName = isset($desc['name'][$language]) ? $desc['name'][$language] : (isset($desc['name']) && is_string($desc['name']) ? $desc['name'] : '');
+                $descDescription = isset($desc['description'][$language]) ? $desc['description'][$language] : (isset($desc['description']) && is_string($desc['description']) ? $desc['description'] : '');
+                $descResultDescription = isset($desc['result_description'][$language]) ? $desc['result_description'][$language] : (isset($desc['result_description']) && is_string($desc['result_description']) ? $desc['result_description'] : '');
+            }
+            
+            // Ensure name is a string
+            if (is_array($descName)) {
+                $descName = isset($descName[$language]) ? $descName[$language] : (isset($descName['text']) ? $descName['text'] : (isset($descName[0]) ? $descName[0] : ''));
+            }
+            $descName = (string)$descName;
+            
             // 중복 확인
             $found = false;
             foreach ($result as &$cat) {
-                if ($cat['name'] === ($desc['translations'][$language]['name'] ?? $desc['name'] ?? '')) {
-                    // 설명 업데이트
-                    $cat['description'] = $desc['translations'][$language]['description'] ?? $cat['description'];
-                    $cat['result_description'] = $desc['translations'][$language]['result_description'] ?? $cat['result_description'];
+                if ($cat['name'] === $descName) {
+                    // Update description if provided
+                    if (!empty($descDescription)) {
+                        if (is_array($descDescription)) {
+                            $descDescription = isset($descDescription[$language]) ? $descDescription[$language] : (isset($descDescription['text']) ? $descDescription['text'] : (isset($descDescription[0]) ? $descDescription[0] : ''));
+                        }
+                        $cat['description'] = (string)$descDescription;
+                    }
+                    
+                    // Update result_description if provided
+                    if (!empty($descResultDescription)) {
+                        if (is_array($descResultDescription)) {
+                            $descResultDescription = isset($descResultDescription[$language]) ? $descResultDescription[$language] : (isset($descResultDescription['text']) ? $descResultDescription['text'] : (isset($descResultDescription[0]) ? $descResultDescription[0] : ''));
+                        }
+                        $cat['result_description'] = (string)$descResultDescription;
+                    }
+                    
                     $found = true;
                     break;
                 }
             }
             
             if (!$found) {
+                // Ensure all values are strings
+                if (is_array($descDescription)) {
+                    $descDescription = isset($descDescription[$language]) ? $descDescription[$language] : (isset($descDescription['text']) ? $descDescription['text'] : (isset($descDescription[0]) ? $descDescription[0] : ''));
+                }
+                if (is_array($descResultDescription)) {
+                    $descResultDescription = isset($descResultDescription[$language]) ? $descResultDescription[$language] : (isset($descResultDescription['text']) ? $descResultDescription['text'] : (isset($descResultDescription[0]) ? $descResultDescription[0] : ''));
+                }
+                
                 // 새 카테고리 추가
                 $translatedCategory = [
-                    'name' => $desc['translations'][$language]['name'] ?? $desc['name'] ?? '',
-                    'description' => $desc['translations'][$language]['description'] ?? '',
-                    'result_description' => $desc['translations'][$language]['result_description'] ?? '',
+                    'name' => (string)$descName,
+                    'description' => (string)$descDescription,
+                    'result_description' => (string)$descResultDescription,
                     'question_indices' => []
                 ];
                 $result[] = $translatedCategory;
@@ -148,11 +247,25 @@ class Survey extends Model
         $language = $language ?: app()->getLocale();
         
         if ($this->title_translations && isset($this->title_translations[$language])) {
-            return $this->title_translations[$language];
+            $title = $this->title_translations[$language];
+            // Ensure we return a string, not an array
+            if (is_array($title)) {
+                // Check various possible array structures
+                if (isset($title['text'])) {
+                    return (string)$title['text'];
+                } elseif (isset($title[0])) {
+                    return (string)$title[0];
+                } else {
+                    // If it's an unexpected array structure, return the first value
+                    $firstValue = reset($title);
+                    return is_string($firstValue) ? $firstValue : (string)$this->title;
+                }
+            }
+            return (string)$title;
         }
         
         // 번역이 없으면 기본값 반환
-        return $this->title;
+        return (string)$this->title;
     }
     
     /**
@@ -163,10 +276,24 @@ class Survey extends Model
         $language = $language ?: app()->getLocale();
         
         if ($this->description_translations && isset($this->description_translations[$language])) {
-            return $this->description_translations[$language];
+            $description = $this->description_translations[$language];
+            // Ensure we return a string, not an array
+            if (is_array($description)) {
+                // Check various possible array structures
+                if (isset($description['text'])) {
+                    return (string)$description['text'];
+                } elseif (isset($description[0])) {
+                    return (string)$description[0];
+                } else {
+                    // If it's an unexpected array structure, return the first value
+                    $firstValue = reset($description);
+                    return is_string($firstValue) ? $firstValue : (string)$this->description;
+                }
+            }
+            return (string)$description;
         }
         
-        return $this->description;
+        return (string)$this->description;
     }
     
     /**

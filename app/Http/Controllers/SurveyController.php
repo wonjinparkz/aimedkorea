@@ -12,8 +12,10 @@ class SurveyController extends Controller
     {
         $currentLang = session('locale', 'kor');
         
-        // 설문들을 가져오기
-        $surveys = Survey::all();
+        // 간편 분석 설문들만 가져오기 (부모가 없고 심층이 아닌 것)
+        $surveys = Survey::where('is_detailed', false)
+                         ->whereNull('parent_id')
+                         ->get();
         
         // 각 설문의 데이터를 현재 언어에 맞게 변환
         $surveys = $surveys->map(function($survey) use ($currentLang) {
@@ -25,15 +27,33 @@ class SurveyController extends Controller
             $survey->frequency_items = $survey->getFrequencyItems($currentLang);
             // survey_image는 그대로 유지 (언어별 변환 불필요)
             
+            // 심층 버전 존재 여부 추가
+            $survey->has_detailed_version = $survey->detailedVersion()->exists();
+            
+            // 심층 버전이 있으면 심층 버전의 질문도 가져오기
+            if ($survey->has_detailed_version) {
+                $detailedSurvey = $survey->detailedVersion;
+                $survey->detailed_questions = $detailedSurvey->getQuestions($currentLang);
+                $survey->detailed_checklist_items = $detailedSurvey->getChecklistItems($currentLang);
+                $survey->detailed_frequency_items = $detailedSurvey->getFrequencyItems($currentLang);
+                $survey->detailed_survey_id = $detailedSurvey->id;
+            }
+            
             return $survey;
         });
                         
         return view('surveys.index', compact('surveys'));
     }
 
-    public function show(Survey $survey)
+    public function show(Survey $survey, Request $request)
     {
         $currentLang = session('locale', 'kor');
+        $analysisType = $request->get('analysis_type', 'simple');
+        
+        // 심층 분석이 요청되고 심층 버전이 있는 경우
+        if ($analysisType === 'detailed' && $survey->detailedVersion) {
+            $survey = $survey->detailedVersion;
+        }
         
         // 설문 데이터를 현재 언어에 맞게 변환
         $survey->title = $survey->getTitle($currentLang);
@@ -106,6 +126,15 @@ class SurveyController extends Controller
             'user_agent' => $request->userAgent(),
             'analysis_type' => $analysisType,
         ]);
+        
+        // 심층 분석인 경우 12주 타임라인 생성
+        if ($analysisType === 'detailed' && $survey->is_detailed && auth()->check()) {
+            try {
+                \App\Models\SurveyTimeline::createForResponse($surveyResponse);
+            } catch (\Exception $e) {
+                \Log::error('타임라인 생성 실패: ' . $e->getMessage());
+            }
+        }
         
         return redirect()->route('surveys.results', [
             'survey' => $survey->id,
@@ -224,7 +253,13 @@ class SurveyController extends Controller
             'name' => $defaultCategoryNames['early'][$currentLang] ?? $defaultCategoryNames['early']['kor'],
             'percentage' => $category1Count > 0 
                 ? 100 - round(($category1Score / ($category1Count * 4)) * 100) 
-                : 100
+                : 100,
+            'score' => $category1Score,
+            'max_score' => $category1Count * 4,
+            'question_count' => min($questionsPerCategory, $totalQuestions),
+            'answered_count' => $category1Count,
+            'description' => '',
+            'result_description' => ''
         ];
         
         // 두 번째 카테고리: 중간 문항들
@@ -240,7 +275,13 @@ class SurveyController extends Controller
             'name' => $defaultCategoryNames['main'][$currentLang] ?? $defaultCategoryNames['main']['kor'],
             'percentage' => $category2Count > 0 
                 ? 100 - round(($category2Score / ($category2Count * 4)) * 100) 
-                : 100
+                : 100,
+            'score' => $category2Score,
+            'max_score' => $category2Count * 4,
+            'question_count' => min($questionsPerCategory, $totalQuestions - $questionsPerCategory),
+            'answered_count' => $category2Count,
+            'description' => '',
+            'result_description' => ''
         ];
         
         // 세 번째 카테고리: 후반 문항들
@@ -256,7 +297,13 @@ class SurveyController extends Controller
             'name' => $defaultCategoryNames['advanced'][$currentLang] ?? $defaultCategoryNames['advanced']['kor'],
             'percentage' => $category3Count > 0 
                 ? 100 - round(($category3Score / ($category3Count * 4)) * 100) 
-                : 100
+                : 100,
+            'score' => $category3Score,
+            'max_score' => $category3Count * 4,
+            'question_count' => $totalQuestions - ($questionsPerCategory * 2),
+            'answered_count' => $category3Count,
+            'description' => '',
+            'result_description' => ''
         ];
         
         return $categories;
